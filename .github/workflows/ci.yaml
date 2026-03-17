@@ -76,8 +76,6 @@ env:
   POSTGRES_TEST_DB: ${{ secrets.POSTGRES_TEST_DB }}
   POSTGRES_TEST_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5433/${{ secrets.POSTGRES_DB }}
 
-  DATABASE_URL: ${{ secrets.DATABASE_URL }}
-  SHADOW_DATABASE_URL: ${{ secrets.SHADOW_DATABASE_URL }}
 jobs:
   ci:
     name: Run Lint, Build, Test, and Typecheck
@@ -174,8 +172,17 @@ jobs:
           restore-keys: |
             pnpm-${{ runner.os }}-
 
+      - name: Setup npm registry auth
+        run: |
+          echo "@omnixys:registry=https://npm.pkg.github.com" >> .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${OMNIXYS_TOKEN}" >> .npmrc
+        env:
+          OMNIXYS_TOKEN: ${{ secrets.OMNIXYS_TOKEN }}
+
       - name: 📦 Install dependencies
         run: pnpm install --frozen-lockfile
+        env:
+          OMNIXYS_TOKEN: ${{ secrets.OMNIXYS_TOKEN }}
 
       - name: 🚀 Start Keycloak (26.4)
         run: |

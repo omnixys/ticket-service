@@ -52,7 +52,7 @@ export default {
       {
         preset: 'conventionalcommits',
         releaseRules: [
-          { breaking: true, release: 'major' },
+          { type: 'breaking', release: 'major' },
           { type: 'feat', release: 'minor' },
           { type: 'fix', release: 'patch' },
           { type: 'perf', release: 'patch' },
@@ -157,18 +157,27 @@ export default {
         ],
 
         releaseBodyTemplate: `
-Today, we are excited to share the **v{{version}}** release 🎉
+        # 🚀 Release v<%= nextRelease.version %>
+---
 
-This release includes stability improvements, bug fixes, and internal refinements for the **User Service**.
+## 📦 Changes
+
+<%= nextRelease.notes %>
 
 ---
 
-{{body}}
+## 🔎 Release Details
+
+- Git Tag: <%= nextRelease.gitTag %>
+- Branch: <%= branch.name %>
+- Previous Version: <%= lastRelease ? lastRelease.version : 'N/A' %>
+- Commit: <%= nextRelease.gitHead.substring(0, 7) %>
 
 ---
 
-📦 **Service:** Omnixys User Service  
-🔗 **Repository:** https://github.com/omnixys/omnixys-user-service  
+🏢 **Organization:** Omnixys
+📦 **Service:** Ticket
+🔗 **Repository:** Repository: <%= options.repositoryUrl %>
 🧭 **Docs:** https://omnixys.com/docs
 `,
       },

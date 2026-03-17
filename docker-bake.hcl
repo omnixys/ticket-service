@@ -17,16 +17,17 @@
 # 🧱 docker-bake.hcl – Omnixys Bake Setup
 # ---------------------------------------------------------------------------------------
 # Build orchestration for Omnixys Node-based microservices using HashiCorp Docker Bake.
-# Aufruf mit  APP_VERSION=$(node -p "require('./package.json').version") docker buildx bake
+# Aufruf mit :
+# APP_VERSION=$(node -p "require('./package.json').version") docker buildx bake
 # ---------------------------------------------------------------------------------------
 
 variable "APP_NAME" {
   default = "ticket"
 }
 
-# Automatically use today's date (YYYY-MM-DD) as version tag
+# Pass APP_VERSION via CLI:
 variable "APP_VERSION" {
-  default = "0.0.0-dev"
+  default = "dev"
 }
 
 variable "NODE_VERSION" {
@@ -53,6 +54,10 @@ target "build" {
   dockerfile = "./Dockerfile"
   context = "."
 
+  secret = [
+    "id=omnixys_token,src=.secrets/omnixys_token"
+  ]
+
   args = {
     NODE_VERSION = "${NODE_VERSION}"
     APP_NAME     = "${APP_NAME}"
@@ -73,7 +78,6 @@ target "build" {
   }
 
   tags = [
-    "omnixys/${APP_NAME}-service:latest",
     "omnixys/${APP_NAME}-service:${APP_VERSION}"
   ]
 

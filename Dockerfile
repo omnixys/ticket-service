@@ -13,7 +13,7 @@
 #
 # For more information, visit <https://www.gnu.org/licenses/>.
 # ---------------------------------------------------------------------------------------
-# Dockerfile – Omnixys Event Service
+# Dockerfile – Omnixys Authentication Service
 # Multi-stage build optimized for security, reproducibility, and minimal runtime size.
 # ---------------------------------------------------------------------------------------
 # syntax=docker/dockerfile:1.14.0
@@ -27,14 +27,7 @@ ARG NODE_VERSION=24.10.0
 # ---------------------------------------------------------------------------------------
 FROM node:${NODE_VERSION}-bookworm-slim AS base
 WORKDIR /home/node
-
-# Prisma braucht OpenSSL 3 in Bookworm
-USER root
-RUN apt-get update && apt-get install -y openssl libssl-dev && \
-    rm -rf /var/lib/apt/lists/*
-    
 RUN corepack enable pnpm
-USER node
 
 # ---------------------------------------------------------------------------------------
 # Stage 1: Build (dist)
@@ -42,23 +35,16 @@ USER node
 # - Result: ./dist folder containing compiled JS files.
 # ---------------------------------------------------------------------------------------
 FROM base AS dist
-
-ARG DATABASE_URL
-ARG SHADOW_DATABASE_URL
-
-ENV DATABASE_URL=${DATABASE_URL}
-ENV SHADOW_DATABASE_URL=${SHADOW_DATABASE_URL}
-
 COPY --chown=node:node package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --ignore-scripts
+
+RUN --mount=type=secret,id=omnixys_token \
+    TOKEN=$(cat /run/secrets/omnixys_token) && \
+    echo "@omnixys:registry=https://npm.pkg.github.com" > .npmrc && \
+    echo "//npm.pkg.github.com/:_authToken=${TOKEN}" >> .npmrc && \
+    pnpm install --frozen-lockfile --ignore-scripts
+
 COPY --chown=node:node . .
-
-# TS build
 RUN pnpm run build
-
-# Prisma Client generieren (jetzt existiert prisma/schema.prisma)
-RUN pnpm prisma generate
-
 
 # ---------------------------------------------------------------------------------------
 # Stage 2: Production dependencies
@@ -67,24 +53,18 @@ RUN pnpm prisma generate
 # ---------------------------------------------------------------------------------------
 FROM base AS dependencies
 
-ARG DATABASE_URL
-ARG SHADOW_DATABASE_URL
-
-ENV DATABASE_URL=${DATABASE_URL}
-ENV SHADOW_DATABASE_URL=${SHADOW_DATABASE_URL}
-
 COPY --chown=node:node package.json pnpm-lock.yaml ./
-RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 
-# Prisma Client auch hier generieren (prod deps)
-COPY --from=dist --chown=node:node /home/node/prisma ./prisma
-RUN pnpm prisma generate
-
+RUN --mount=type=secret,id=omnixys_token \
+    TOKEN=$(cat /run/secrets/omnixys_token) && \
+    echo "@omnixys:registry=https://npm.pkg.github.com" > .npmrc && \
+    echo "//npm.pkg.github.com/:_authToken=${TOKEN}" >> .npmrc && \
+    pnpm install --frozen-lockfile --ignore-scripts
 
 # ---------------------------------------------------------------------------------------
 # Stage 3: Final runtime image
 # - Copies only compiled code and production node_modules.
-# - Runs the app as a non-root event for security.
+# - Runs the app as a non-root user for security.
 # ---------------------------------------------------------------------------------------
 FROM node:${NODE_VERSION}-bookworm-slim AS final
 
@@ -96,18 +76,18 @@ ARG CREATED
 ARG REVISION
 
 # ----- Image metadata (OCI compliant) -----
-LABEL org.opencontainers.image.title="omnixys-${APP_NAME}-service" \
+LABEL org.opencontainers.image.title="${APP_NAME}-service" \
       org.opencontainers.image.description="Omnixys ${APP_NAME}-service – Node.js ${NODE_VERSION}, built with TypeScript, version ${APP_VERSION}, based on Debian Bookworm." \
       org.opencontainers.image.version="${APP_VERSION}" \
       org.opencontainers.image.licenses="GPL-3.0-or-later" \
       org.opencontainers.image.vendor="Omnixys Technologies" \
       org.opencontainers.image.authors="caleb.gyamfi@omnixys.com" \
       org.opencontainers.image.base.name="node:${NODE_VERSION}-bookworm-slim" \
-      org.opencontainers.image.url="https://github.com/omnixys/omnixys-${APP_NAME}-service" \
-      org.opencontainers.image.source="https://github.com/omnixys/omnixys-${APP_NAME}-service" \
+      org.opencontainers.image.url="https://github.com/omnixys/${APP_NAME}-service" \
+      org.opencontainers.image.source="https://github.com/omnixys/${APP_NAME}-service" \
       org.opencontainers.image.created="${CREATED}" \
       org.opencontainers.image.revision="${REVISION}" \
-      org.opencontainers.image.documentation="https://github.com/omnixys/omnixys-${APP_NAME}-service/blob/main/README.md"
+      org.opencontainers.image.documentation="https://github.com/omnixys/${APP_NAME}-service/blob/main/README.md"
 
 # ----- Set working directory -----
 WORKDIR /opt/app
@@ -128,7 +108,7 @@ RUN apt-get update && \
 # ----- Enable pnpm (runtime) -----
 RUN corepack enable pnpm
 
-# ----- Switch to non-root event -----
+# ----- Switch to non-root user -----
 USER node
 
 # ----- Copy built artifacts and dependencies -----
