@@ -3,6 +3,10 @@
 All notable changes in this project will be documented in this file.
 
 
+## <small>1.0.4 (2026-02-26)</small>
+
+* fix(release-ci): add @semantic-release/npm ([01af4b8b5e6d9541a69217c8fdddb918cc670028](https://github.com/omnixys/omnixys-ticket-service/commit/01af4b8b5e6d9541a69217c8fdddb918cc670028))
+
 ## <small>1.0.3 (2026-02-26)</small>
 
 * fix(release-ci): fix Release CI Job ([186641c4eb9e43e3d1c956c53f25f95842057488](https://github.com/omnixys/omnixys-ticket-service/commit/186641c4eb9e43e3d1c956c53f25f95842057488))
