@@ -12,11 +12,7 @@
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import { KafkaProducerService } from '../../kafka/kafka-producer.service.js';
-import { LoggerPlus } from '../../logger/logger-plus.js';
-import { LoggerPlusService } from '../../logger/logger-plus.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import { withSpan } from '../../trace/utils/span.utils.js';
 import { CreateTicketDTO } from '../models/dto/create-ticket.dto.js';
 import { ShareGuard } from '../models/entities/share-guard.entity.js';
 import { Ticket } from '../models/entities/ticket.entity.js';
@@ -33,7 +29,7 @@ import {
   TicketTokenPayload,
 } from '../utils/token.service.js';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { trace, Tracer } from '@opentelemetry/api';
+import { OmnixysLogger } from '@omnixys/logger';
 
 export interface UpdateTicketInput {
   id: string;
@@ -44,67 +40,37 @@ export interface UpdateTicketInput {
 
 @Injectable()
 export class TicketWriteService {
-  private readonly logger: LoggerPlus;
-  private readonly tracer: Tracer;
+  private readonly logger;
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly kafkaProducerService: KafkaProducerService,
-    private readonly loggerService: LoggerPlusService,
+    private readonly loggerService: OmnixysLogger,
   ) {
-    this.logger = this.loggerService.getLogger(TicketWriteService.name);
-    this.tracer = trace.getTracer(TicketWriteService.name);
+    this.logger = this.loggerService.log(this.constructor.name);
   }
 
   // -------------------------------------------------------------
   // 1) Create a ticket after Invitation is approved
   // -------------------------------------------------------------
   async createTicket(data: CreateTicketDTO): Promise<Ticket> {
-    return withSpan(this.tracer, this.logger, 'ticket.createTicket', async (span) => {
-      const existing = await this.prisma.ticket.findUnique({
-        where: { invitationId: data.invitationId },
-      });
-
-      if (existing) {
-        throw new BadRequestException('Ticket already exists for this invitation');
-      }
-
-      const created = await this.prisma.ticket.create({
-        data: {
-          eventId: data.eventId,
-          invitationId: data.invitationId,
-          guestProfileId: data.guestProfileId ?? null,
-          seatId: data.seatId ?? null,
-        },
-      });
-
-      const sc = span.spanContext();
-
-      void this.kafkaProducerService.addGuestID(
-        {
-          // TODO optimieren!
-          guestId: created.guestProfileId ?? '',
-          ticketId: created.id,
-        },
-        'ticket.write-service',
-        { traceId: sc.traceId, spanId: sc.spanId },
-      );
-
-      void this.kafkaProducerService.addSeatID(
-        {
-          // TODO optimieren!
-          guestId: created.guestProfileId ?? '',
-          seatId: created.seatId ?? '',
-          eventId: created.eventId,
-          note: `automatic seat assignment by ticketId: ${created.id}`,
-          actorId: data.actorId,
-        },
-        'ticket.write-service',
-        { traceId: sc.traceId, spanId: sc.spanId },
-      );
-
-      return mapTicket(created);
+    const existing = await this.prisma.ticket.findUnique({
+      where: { invitationId: data.invitationId },
     });
+
+    if (existing) {
+      throw new BadRequestException('Ticket already exists for this invitation');
+    }
+
+    const created = await this.prisma.ticket.create({
+      data: {
+        eventId: data.eventId,
+        invitationId: data.invitationId,
+        guestProfileId: data.guestProfileId ?? null,
+        seatId: data.seatId ?? null,
+      },
+    });
+
+    return mapTicket(created);
   }
 
   // -------------------------------------------------------------
@@ -118,6 +84,7 @@ export class TicketWriteService {
       ip?: string | null;
     },
   ): Promise<Ticket> {
+    this.logger.debug('');
     const ticket = await this.prisma.ticket.findUnique({ where: { id: ticketId } });
     if (!ticket) {
       throw new NotFoundException('Ticket not found');

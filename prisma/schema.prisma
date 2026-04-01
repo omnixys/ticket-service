@@ -76,7 +76,7 @@ model ScanLog {
   createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
-  ticket Ticket @relation(fields: [ticketId], references: [id])
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
   @@index([nonce], name: "idx_scanlog_nonce")
   @@index([eventId, createdAt], name: "idx_scanlog_event_ts")
@@ -96,7 +96,7 @@ model ShareGuard {
   blockedUntil DateTime? @map("blocked_until")
   reason       String?   @map("reason")
 
-  ticket Ticket @relation(fields: [ticketId], references: [id])
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
   @@index([blockedUntil], name: "idx_shareguard_blocked")
   @@index([failCount], name: "idx_shareguard_fails")

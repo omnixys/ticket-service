@@ -1,15 +1,15 @@
 // src/ticket/resolver/ticket-query.resolver.ts
 
-import {
-  CurrentUser,
-  CurrentUserData,
-} from '../../auth/decorators/current-user.decorator.js';
-import { CookieAuthGuard } from '../../auth/guards/cookie-auth.guard.js';
 import { ScanLog } from '../models/entities/scan-log.entity.js';
 import { Ticket } from '../models/entities/ticket.entity.js';
 import { TicketReadService } from '../service/ticket-read.service.js';
 import { UseGuards } from '@nestjs/common';
 import { Args, ID, Query, Resolver } from '@nestjs/graphql';
+import {
+  CookieAuthGuard,
+  CurrentUser,
+  CurrentUserData,
+} from '@omnixys/security';
 
 @Resolver(() => Ticket)
 export class TicketQueryResolver {

@@ -17,7 +17,6 @@
 
 import { AppModule } from './app.module.js';
 import { corsOptions } from './config/cors.js';
-import { startOtelSDK } from './config/otel.js';
 import compress from '@fastify/compress';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
@@ -30,6 +29,7 @@ import {
   FastifyAdapter,
   type NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import { registerFastifyTracing } from '@omnixys/observability';
 import 'reflect-metadata';
 
 /**
@@ -62,7 +62,6 @@ import 'reflect-metadata';
  * Startet den Backend-Server auf dem konfigurierten Port (Standard: `4000`).
  */
 async function bootstrap(): Promise<void> {
-  await startOtelSDK(); // 🔥 OTel aktivieren
   /**
    * @constant app
    * @description Erstellt die NestJS-Applikation auf Basis von Fastify.
@@ -84,6 +83,9 @@ async function bootstrap(): Promise<void> {
       },
     }),
   );
+
+    const fastify = app.getHttpAdapter().getInstance();
+    registerFastifyTracing(fastify);
 
   // const loggerService = app.get(LoggerPlusService);
   // logger = loggerService.getLogger('Bootstrap');
@@ -153,7 +155,7 @@ async function bootstrap(): Promise<void> {
 
   /** Port-Definition (Standard: 4000) */
   const port = Number(config.get('PORT') ?? 4000);
-  const service = Number(config.get('SERVICE') ?? 'N/A');
+  const service = config.get('SERVICE');
 
   // ======================================================
   // 🧩 VALIDATION

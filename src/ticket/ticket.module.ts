@@ -1,4 +1,3 @@
-import { AuthModule } from '../auth/auth.module.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { TicketMutationResolver } from './resolvers/ticket-mutation.resolver.js';
 import { TicketQueryResolver } from './resolvers/ticket-query.resolver.js';
@@ -7,7 +6,7 @@ import { TicketWriteService } from './service/ticket-write.service.js';
 import { Module } from '@nestjs/common';
 
 @Module({
-  imports: [PrismaModule, AuthModule],
+  imports: [PrismaModule],
   providers: [TicketReadService, TicketWriteService, TicketQueryResolver, TicketMutationResolver],
   exports: [TicketReadService, TicketWriteService],
 })

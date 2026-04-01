@@ -1,7 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import {
   Args,
-  Context,
   Field,
   ID,
   InputType,
@@ -10,19 +9,12 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 
-import { CookieAuthGuard } from '../../auth/guards/cookie-auth.guard.js';
 import { TicketWriteService } from '../service/ticket-write.service.js';
 
 import { ScanLog } from '../models/entities/scan-log.entity.js';
 import { Ticket } from '../models/entities/ticket.entity.js';
 
 // Input
-import {
-  CurrentUser,
-  CurrentUserData,
-} from '../../auth/decorators/current-user.decorator.js';
-import { GqlContext } from '../../auth/utils/gql-context.js';
-import { ActivateDeviceInput } from '../models/inputs/activate-device.input.js';
 import { AssignSeatInputTicket } from '../models/inputs/assign-seat.input.js';
 import { CreateTicketInput } from '../models/inputs/create-ticket.input.js';
 import { RotateNonceInput } from '../models/inputs/rotate-nonce.input.js';
@@ -30,6 +22,11 @@ import { SecurityScanInput } from '../models/inputs/security-scan.input.js';
 import { TogglePresenceInput } from '../models/inputs/toggle-presence.input.js';
 import { VerifyTokenInput } from '../models/inputs/verify-token.input.js';
 import { VerifyPayload } from '../models/payloads/verify.payload.js';
+import {
+  CookieAuthGuard,
+  CurrentUser,
+  CurrentUserData,
+} from '@omnixys/security';
 
 @ObjectType()
 export class TogglePresence {
@@ -68,19 +65,19 @@ export class TicketMutationResolver {
   // ---------------------------------------------------------
   // 2) Bind device (first-time activation)
   // ---------------------------------------------------------
-  @Mutation(() => Ticket, {
-    description: 'Bind a device to a ticket (first activation)',
-  })
-  async activateDevice(
-    @Args('input') input: ActivateDeviceInput,
-    @Context() ctx: GqlContext,
-  ): Promise<Ticket> {
-    return this.ticketWrite.activateDevice(input.ticketId, {
-      deviceHash: input.deviceHash,
-      devicePublicKey: input.devicePublicKey,
-      ip: ctx.req.ip ?? input.ip ?? null,
-    });
-  }
+  // @Mutation(() => Ticket, {
+  //   description: 'Bind a device to a ticket (first activation)',
+  // })
+  // async activateDevice(
+  //   @Args('input') input: ActivateDeviceInput,
+  //   @Context() ctx: GqlContext,
+  // ): Promise<Ticket> {
+  //   return this.ticketWrite.activateDevice(input.ticketId, {
+  //     deviceHash: input.deviceHash,
+  //     devicePublicKey: input.devicePublicKey,
+  //     ip: ctx.req.ip ?? input.ip ?? null,
+  //   });
+  // }
 
   // ---------------------------------------------------------
   // 3) Rotate nonce for QR token (security)
