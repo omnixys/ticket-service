@@ -1,3 +1,11 @@
+import { ScanVerdict } from '../models/enums/scan-verdict.enum.js';
+import { ActivateDeviceInput } from '../models/inputs/activate-device.input.js';
+import { mapScanLog } from '../models/mapper/scan-logs.mapper.js';
+import { mapTicket } from '../models/mapper/ticket.mapper.js';
+import { ScanLogPayload } from '../models/payloads/scan-log-list.payload.js';
+import { TicketMessagePayload, TicketPayload } from '../models/payloads/ticket-payload.js';
+import { ScanService } from '../service/scan.service.js';
+import { TicketWriteService } from '../service/ticket-write.service.js';
 import { UseGuards } from '@nestjs/common';
 import {
   Args,
@@ -8,165 +16,93 @@ import {
   ObjectType,
   Resolver,
 } from '@nestjs/graphql';
-
-import { TicketWriteService } from '../service/ticket-write.service.js';
-
-import { ScanLog } from '../models/entities/scan-log.entity.js';
-import { Ticket } from '../models/entities/ticket.entity.js';
-
-// Input
-import { AssignSeatInputTicket } from '../models/inputs/assign-seat.input.js';
-import { CreateTicketInput } from '../models/inputs/create-ticket.input.js';
-import { RotateNonceInput } from '../models/inputs/rotate-nonce.input.js';
-import { SecurityScanInput } from '../models/inputs/security-scan.input.js';
-import { TogglePresenceInput } from '../models/inputs/toggle-presence.input.js';
-import { VerifyTokenInput } from '../models/inputs/verify-token.input.js';
-import { VerifyPayload } from '../models/payloads/verify.payload.js';
+import { ClientInfo } from '@omnixys/context';
 import {
   CookieAuthGuard,
   CurrentUser,
   CurrentUserData,
 } from '@omnixys/security';
+import { ClientContext } from '@omnixys/shared';
+
 
 @ObjectType()
-export class TogglePresence {
-  @Field(() => Ticket)
-  ticket!: Ticket;
-  @Field(() => ScanLog)
-  log!: ScanLog;
+export class ScanPayload {
+  @Field(() => TicketPayload)
+  ticket!: TicketPayload;
+  @Field(() => ScanLogPayload)
+  log!: ScanLogPayload;
+  @Field(() => ScanVerdict)
+  verdict!: ScanVerdict;
+  @Field(() => String)
+  message!: string;
 }
 
 @InputType()
-export class GenerateTokenInput {
-  @Field(() => String)
-  ticketId!: string;
-  @Field(() => String)
-  deviceHash!: string;
+export class ScanInput {
+    @Field(() => String)
+    token!: string;
+  
+    @Field(() => String)
+    signature!: string;
+  
+    @Field(() => String)
+    deviceId!: string;
+  
+    @Field(() => String)
+  gate!: string;
 }
 
-@Resolver(() => Ticket)
+@Resolver(() => TicketMessagePayload)
 export class TicketMutationResolver {
-  constructor(private readonly ticketWrite: TicketWriteService) {}
+  constructor(
+    private readonly ticketWrite: TicketWriteService,
+    private readonly scan: ScanService,
+  ) {}
 
-  // ---------------------------------------------------------
-  // 1) Create a ticket after approval
-  // ---------------------------------------------------------
+  @Mutation(() => TicketPayload, {
+    description: 'Bind a device to a ticket (first activation)',
+  })
   @UseGuards(CookieAuthGuard)
-  @Mutation(() => Ticket, {
-    description: 'Create a new ticket for an approved invitation',
-  })
-  async createTicket(
-    @Args('input') input: CreateTicketInput,
-    @CurrentUser() user: CurrentUserData,
-  ): Promise<Ticket> {
-    return this.ticketWrite.createTicket({ ...input, actorId: user.id });
-  }
-
-  // ---------------------------------------------------------
-  // 2) Bind device (first-time activation)
-  // ---------------------------------------------------------
-  // @Mutation(() => Ticket, {
-  //   description: 'Bind a device to a ticket (first activation)',
-  // })
-  // async activateDevice(
-  //   @Args('input') input: ActivateDeviceInput,
-  //   @Context() ctx: GqlContext,
-  // ): Promise<Ticket> {
-  //   return this.ticketWrite.activateDevice(input.ticketId, {
-  //     deviceHash: input.deviceHash,
-  //     devicePublicKey: input.devicePublicKey,
-  //     ip: ctx.req.ip ?? input.ip ?? null,
-  //   });
-  // }
-
-  // ---------------------------------------------------------
-  // 3) Rotate nonce for QR token (security)
-  // ---------------------------------------------------------
-  @Mutation(() => Ticket, {
-    description: 'Rotate nonce for a ticket’s QR token',
-  })
-  async rotateNonce(@Args('input') input: RotateNonceInput): Promise<Ticket> {
-    return this.ticketWrite.rotateNonce(input.ticketId);
+  async activateDevice(
+    @Args('input') input: ActivateDeviceInput,
+    @ClientInfo() info: ClientContext,
+  ): Promise<TicketPayload> {
+    return this.ticketWrite.activateDevice({ ...input, ip: info.ip });
   }
 
   @Mutation(() => String, {
     description: 'Rotate nonce for a ticket’s QR token',
   })
   async generateToken(
-    @Args('input', { type: () => GenerateTokenInput })
-    input: GenerateTokenInput,
+    @Args('ticketId', { type: () => String })
+    ticketId: string,
   ): Promise<string> {
-    return this.ticketWrite.generateQrToken(input);
+    return this.ticketWrite.generateToken(ticketId);
   }
 
-  @Mutation(() => VerifyPayload, {
-    description: 'Rotate nonce for a ticket’s QR token',
-  })
-  async verifyToken(
-    @Args('input') input: VerifyTokenInput,
-  ): Promise<VerifyPayload> {
-    return this.ticketWrite.verify(input);
-  }
-
-  // ---------------------------------------------------------
-  // 4) Revoke a ticket manually
-  // ---------------------------------------------------------
+  @Mutation(() => ScanPayload)
   @UseGuards(CookieAuthGuard)
-  @Mutation(() => Ticket, {
-    description: 'Revoke a ticket (security or admin)',
-  })
-  async revokeTicket(
-    @Args('ticketId', { type: () => ID }) ticketId: string,
-    @Args('reason', { nullable: true }) reason?: string,
-  ): Promise<Ticket> {
-    return this.ticketWrite.revoke(ticketId, reason);
+  async scanToken(
+    @Args('input') input: ScanInput,
+    @CurrentUser() user: CurrentUserData,
+  ): Promise<ScanPayload> {
+    const { token, signature, deviceId, gate } = input;
+    const result = await this.scan.scan({
+      token,
+      signature,
+      deviceId,
+      gate,
+      actorId: user.id,
+    });
+
+    return {
+      ticket: mapTicket(result.ticket),
+      log: mapScanLog(result.log),
+      verdict: result.verdict as ScanVerdict,
+      message: result.message,
+    };
   }
 
-  // ---------------------------------------------------------
-  // 5) Toggle INSIDE/OUTSIDE state at gate
-  // ---------------------------------------------------------
-  @UseGuards(CookieAuthGuard)
-  @Mutation(() => TogglePresence, {
-    description: 'Toggle INSIDE/OUTSIDE state of a ticket',
-  })
-  async togglePresence(
-    @Args('input', { type: () => TogglePresenceInput })
-    input: TogglePresenceInput,
-  ): Promise<TogglePresence> {
-    const { ticketId, userId, gate } = input;
-    return this.ticketWrite.togglePresence(ticketId, userId, gate);
-  }
-
-  // ---------------------------------------------------------
-  // 6) Full security scan (nonce/device checks)
-  // ---------------------------------------------------------
-  @UseGuards(CookieAuthGuard)
-  @Mutation(() => ScanLog, {
-    description: 'Perform a full scan with nonce and device checks',
-  })
-  async securityScan(
-    @Args('input') input: SecurityScanInput,
-  ): Promise<{ ticket: Ticket; log: ScanLog }> {
-    return this.ticketWrite.securityScan(input);
-  }
-
-  // ---------------------------------------------------------
-  // 7) Assign seat to ticket (once)
-  // ---------------------------------------------------------
-  @UseGuards(CookieAuthGuard)
-  @Mutation(() => Ticket, {
-    description: 'Assign a seat to a ticket (can only be done once)',
-    name: 'assignSeatToTicket',
-  })
-  async assignSeat(
-    @Args('input') input: AssignSeatInputTicket,
-  ): Promise<Ticket> {
-    return this.ticketWrite.assignSeat(input.ticketId, input.seatId);
-  }
-
-  // ---------------------------------------------------------
-  // 8) Permanently delete a ticket (admin)
-  // ---------------------------------------------------------
   @UseGuards(CookieAuthGuard)
   @Mutation(() => Boolean, {
     description: 'Delete ticket and all its logs (admin only)',
@@ -176,5 +112,20 @@ export class TicketMutationResolver {
   ): Promise<boolean> {
     await this.ticketWrite.delete(ticketId);
     return true;
+  }
+
+  // ---------------------------------------------------------
+  // 4) Revoke a ticket manually
+  // ---------------------------------------------------------
+  @UseGuards(CookieAuthGuard)
+  @Mutation(() => TicketPayload, {
+    description: 'Revoke a ticket (security or admin)',
+  })
+  async revokeTicket(
+    @CurrentUser() user: CurrentUserData,
+    @Args('ticketId', { type: () => ID }) ticketId: string,
+    @Args('reason', { nullable: true }) reason?: string,
+  ): Promise<TicketPayload> {
+    return this.ticketWrite.revoke({ticketId, reason, actorId: user.id});
   }
 }

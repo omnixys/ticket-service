@@ -31,13 +31,11 @@ export type AggregateTicket = {
 export type TicketAvgAggregateOutputType = {
   lastNonce: number | null
   nextNonce: number | null
-  rotationSeconds: number | null
 }
 
 export type TicketSumAggregateOutputType = {
   lastNonce: number | null
   nextNonce: number | null
-  rotationSeconds: number | null
 }
 
 export type TicketMinAggregateOutputType = {
@@ -46,17 +44,18 @@ export type TicketMinAggregateOutputType = {
   invitationId: string | null
   seatId: string | null
   guestProfileId: string | null
-  deviceHash: string | null
   devicePublicKey: string | null
   deviceActivationAt: Date | null
   deviceActivationIP: string | null
+  deviceId: string | null
   lastNonce: number | null
   nextNonce: number | null
-  rotationSeconds: number | null
-  lastRotatedAt: Date | null
   checkedInAt: Date | null
   currentState: $Enums.PresenceState | null
   revoked: boolean | null
+  revokedAt: Date | null
+  revokedBy: string | null
+  revokedReason: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -67,17 +66,18 @@ export type TicketMaxAggregateOutputType = {
   invitationId: string | null
   seatId: string | null
   guestProfileId: string | null
-  deviceHash: string | null
   devicePublicKey: string | null
   deviceActivationAt: Date | null
   deviceActivationIP: string | null
+  deviceId: string | null
   lastNonce: number | null
   nextNonce: number | null
-  rotationSeconds: number | null
-  lastRotatedAt: Date | null
   checkedInAt: Date | null
   currentState: $Enums.PresenceState | null
   revoked: boolean | null
+  revokedAt: Date | null
+  revokedBy: string | null
+  revokedReason: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -88,17 +88,18 @@ export type TicketCountAggregateOutputType = {
   invitationId: number
   seatId: number
   guestProfileId: number
-  deviceHash: number
   devicePublicKey: number
   deviceActivationAt: number
   deviceActivationIP: number
+  deviceId: number
   lastNonce: number
   nextNonce: number
-  rotationSeconds: number
-  lastRotatedAt: number
   checkedInAt: number
   currentState: number
   revoked: number
+  revokedAt: number
+  revokedBy: number
+  revokedReason: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -108,13 +109,11 @@ export type TicketCountAggregateOutputType = {
 export type TicketAvgAggregateInputType = {
   lastNonce?: true
   nextNonce?: true
-  rotationSeconds?: true
 }
 
 export type TicketSumAggregateInputType = {
   lastNonce?: true
   nextNonce?: true
-  rotationSeconds?: true
 }
 
 export type TicketMinAggregateInputType = {
@@ -123,17 +122,18 @@ export type TicketMinAggregateInputType = {
   invitationId?: true
   seatId?: true
   guestProfileId?: true
-  deviceHash?: true
   devicePublicKey?: true
   deviceActivationAt?: true
   deviceActivationIP?: true
+  deviceId?: true
   lastNonce?: true
   nextNonce?: true
-  rotationSeconds?: true
-  lastRotatedAt?: true
   checkedInAt?: true
   currentState?: true
   revoked?: true
+  revokedAt?: true
+  revokedBy?: true
+  revokedReason?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -144,17 +144,18 @@ export type TicketMaxAggregateInputType = {
   invitationId?: true
   seatId?: true
   guestProfileId?: true
-  deviceHash?: true
   devicePublicKey?: true
   deviceActivationAt?: true
   deviceActivationIP?: true
+  deviceId?: true
   lastNonce?: true
   nextNonce?: true
-  rotationSeconds?: true
-  lastRotatedAt?: true
   checkedInAt?: true
   currentState?: true
   revoked?: true
+  revokedAt?: true
+  revokedBy?: true
+  revokedReason?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -165,17 +166,18 @@ export type TicketCountAggregateInputType = {
   invitationId?: true
   seatId?: true
   guestProfileId?: true
-  deviceHash?: true
   devicePublicKey?: true
   deviceActivationAt?: true
   deviceActivationIP?: true
+  deviceId?: true
   lastNonce?: true
   nextNonce?: true
-  rotationSeconds?: true
-  lastRotatedAt?: true
   checkedInAt?: true
   currentState?: true
   revoked?: true
+  revokedAt?: true
+  revokedBy?: true
+  revokedReason?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -271,19 +273,20 @@ export type TicketGroupByOutputType = {
   id: string
   eventId: string
   invitationId: string
-  seatId: string | null
-  guestProfileId: string | null
-  deviceHash: string | null
+  seatId: string
+  guestProfileId: string
   devicePublicKey: string | null
   deviceActivationAt: Date | null
   deviceActivationIP: string | null
+  deviceId: string | null
   lastNonce: number | null
   nextNonce: number | null
-  rotationSeconds: number
-  lastRotatedAt: Date | null
   checkedInAt: Date | null
   currentState: $Enums.PresenceState
   revoked: boolean
+  revokedAt: Date | null
+  revokedBy: string | null
+  revokedReason: string | null
   createdAt: Date
   updatedAt: Date
   _count: TicketCountAggregateOutputType | null
@@ -315,19 +318,20 @@ export type TicketWhereInput = {
   id?: Prisma.StringFilter<"Ticket"> | string
   eventId?: Prisma.StringFilter<"Ticket"> | string
   invitationId?: Prisma.StringFilter<"Ticket"> | string
-  seatId?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  guestProfileId?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  deviceHash?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  seatId?: Prisma.StringFilter<"Ticket"> | string
+  guestProfileId?: Prisma.StringFilter<"Ticket"> | string
   devicePublicKey?: Prisma.StringNullableFilter<"Ticket"> | string | null
   deviceActivationAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
   deviceActivationIP?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  deviceId?: Prisma.StringNullableFilter<"Ticket"> | string | null
   lastNonce?: Prisma.IntNullableFilter<"Ticket"> | number | null
   nextNonce?: Prisma.IntNullableFilter<"Ticket"> | number | null
-  rotationSeconds?: Prisma.IntFilter<"Ticket"> | number
-  lastRotatedAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
   checkedInAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
   currentState?: Prisma.EnumPresenceStateFilter<"Ticket"> | $Enums.PresenceState
   revoked?: Prisma.BoolFilter<"Ticket"> | boolean
+  revokedAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
+  revokedBy?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  revokedReason?: Prisma.StringNullableFilter<"Ticket"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Ticket"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Ticket"> | Date | string
   scanLogs?: Prisma.ScanLogListRelationFilter
@@ -338,19 +342,20 @@ export type TicketOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
   invitationId?: Prisma.SortOrder
-  seatId?: Prisma.SortOrderInput | Prisma.SortOrder
-  guestProfileId?: Prisma.SortOrderInput | Prisma.SortOrder
-  deviceHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  seatId?: Prisma.SortOrder
+  guestProfileId?: Prisma.SortOrder
   devicePublicKey?: Prisma.SortOrderInput | Prisma.SortOrder
   deviceActivationAt?: Prisma.SortOrderInput | Prisma.SortOrder
   deviceActivationIP?: Prisma.SortOrderInput | Prisma.SortOrder
+  deviceId?: Prisma.SortOrderInput | Prisma.SortOrder
   lastNonce?: Prisma.SortOrderInput | Prisma.SortOrder
   nextNonce?: Prisma.SortOrderInput | Prisma.SortOrder
-  rotationSeconds?: Prisma.SortOrder
-  lastRotatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   checkedInAt?: Prisma.SortOrderInput | Prisma.SortOrder
   currentState?: Prisma.SortOrder
   revoked?: Prisma.SortOrder
+  revokedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  revokedBy?: Prisma.SortOrderInput | Prisma.SortOrder
+  revokedReason?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   scanLogs?: Prisma.ScanLogOrderByRelationAggregateInput
@@ -361,46 +366,48 @@ export type TicketWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   invitationId?: string
   seatId?: string
-  guestProfileId?: string
-  devicePublicKey?: string
   uq_guest_one_ticket_per_event?: Prisma.TicketUq_guest_one_ticket_per_eventCompoundUniqueInput
   AND?: Prisma.TicketWhereInput | Prisma.TicketWhereInput[]
   OR?: Prisma.TicketWhereInput[]
   NOT?: Prisma.TicketWhereInput | Prisma.TicketWhereInput[]
   eventId?: Prisma.StringFilter<"Ticket"> | string
-  deviceHash?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  guestProfileId?: Prisma.StringFilter<"Ticket"> | string
+  devicePublicKey?: Prisma.StringNullableFilter<"Ticket"> | string | null
   deviceActivationAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
   deviceActivationIP?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  deviceId?: Prisma.StringNullableFilter<"Ticket"> | string | null
   lastNonce?: Prisma.IntNullableFilter<"Ticket"> | number | null
   nextNonce?: Prisma.IntNullableFilter<"Ticket"> | number | null
-  rotationSeconds?: Prisma.IntFilter<"Ticket"> | number
-  lastRotatedAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
   checkedInAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
   currentState?: Prisma.EnumPresenceStateFilter<"Ticket"> | $Enums.PresenceState
   revoked?: Prisma.BoolFilter<"Ticket"> | boolean
+  revokedAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
+  revokedBy?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  revokedReason?: Prisma.StringNullableFilter<"Ticket"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Ticket"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Ticket"> | Date | string
   scanLogs?: Prisma.ScanLogListRelationFilter
   shareGuard?: Prisma.XOR<Prisma.ShareGuardNullableScalarRelationFilter, Prisma.ShareGuardWhereInput> | null
-}, "id" | "invitationId" | "seatId" | "guestProfileId" | "devicePublicKey" | "uq_guest_one_ticket_per_event">
+}, "id" | "invitationId" | "seatId" | "uq_guest_one_ticket_per_event">
 
 export type TicketOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
   invitationId?: Prisma.SortOrder
-  seatId?: Prisma.SortOrderInput | Prisma.SortOrder
-  guestProfileId?: Prisma.SortOrderInput | Prisma.SortOrder
-  deviceHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  seatId?: Prisma.SortOrder
+  guestProfileId?: Prisma.SortOrder
   devicePublicKey?: Prisma.SortOrderInput | Prisma.SortOrder
   deviceActivationAt?: Prisma.SortOrderInput | Prisma.SortOrder
   deviceActivationIP?: Prisma.SortOrderInput | Prisma.SortOrder
+  deviceId?: Prisma.SortOrderInput | Prisma.SortOrder
   lastNonce?: Prisma.SortOrderInput | Prisma.SortOrder
   nextNonce?: Prisma.SortOrderInput | Prisma.SortOrder
-  rotationSeconds?: Prisma.SortOrder
-  lastRotatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   checkedInAt?: Prisma.SortOrderInput | Prisma.SortOrder
   currentState?: Prisma.SortOrder
   revoked?: Prisma.SortOrder
+  revokedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  revokedBy?: Prisma.SortOrderInput | Prisma.SortOrder
+  revokedReason?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.TicketCountOrderByAggregateInput
@@ -417,19 +424,20 @@ export type TicketScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Ticket"> | string
   eventId?: Prisma.StringWithAggregatesFilter<"Ticket"> | string
   invitationId?: Prisma.StringWithAggregatesFilter<"Ticket"> | string
-  seatId?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
-  guestProfileId?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
-  deviceHash?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
+  seatId?: Prisma.StringWithAggregatesFilter<"Ticket"> | string
+  guestProfileId?: Prisma.StringWithAggregatesFilter<"Ticket"> | string
   devicePublicKey?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
   deviceActivationAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
   deviceActivationIP?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
+  deviceId?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
   lastNonce?: Prisma.IntNullableWithAggregatesFilter<"Ticket"> | number | null
   nextNonce?: Prisma.IntNullableWithAggregatesFilter<"Ticket"> | number | null
-  rotationSeconds?: Prisma.IntWithAggregatesFilter<"Ticket"> | number
-  lastRotatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
   checkedInAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
   currentState?: Prisma.EnumPresenceStateWithAggregatesFilter<"Ticket"> | $Enums.PresenceState
   revoked?: Prisma.BoolWithAggregatesFilter<"Ticket"> | boolean
+  revokedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
+  revokedBy?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
+  revokedReason?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Ticket"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Ticket"> | Date | string
 }
@@ -438,19 +446,20 @@ export type TicketCreateInput = {
   id?: string
   eventId: string
   invitationId: string
-  seatId?: string | null
-  guestProfileId?: string | null
-  deviceHash?: string | null
+  seatId: string
+  guestProfileId: string
   devicePublicKey?: string | null
   deviceActivationAt?: Date | string | null
   deviceActivationIP?: string | null
+  deviceId?: string | null
   lastNonce?: number | null
   nextNonce?: number | null
-  rotationSeconds?: number
-  lastRotatedAt?: Date | string | null
   checkedInAt?: Date | string | null
   currentState?: $Enums.PresenceState
   revoked?: boolean
+  revokedAt?: Date | string | null
+  revokedBy?: string | null
+  revokedReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   scanLogs?: Prisma.ScanLogCreateNestedManyWithoutTicketInput
@@ -461,19 +470,20 @@ export type TicketUncheckedCreateInput = {
   id?: string
   eventId: string
   invitationId: string
-  seatId?: string | null
-  guestProfileId?: string | null
-  deviceHash?: string | null
+  seatId: string
+  guestProfileId: string
   devicePublicKey?: string | null
   deviceActivationAt?: Date | string | null
   deviceActivationIP?: string | null
+  deviceId?: string | null
   lastNonce?: number | null
   nextNonce?: number | null
-  rotationSeconds?: number
-  lastRotatedAt?: Date | string | null
   checkedInAt?: Date | string | null
   currentState?: $Enums.PresenceState
   revoked?: boolean
+  revokedAt?: Date | string | null
+  revokedBy?: string | null
+  revokedReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   scanLogs?: Prisma.ScanLogUncheckedCreateNestedManyWithoutTicketInput
@@ -484,19 +494,20 @@ export type TicketUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.StringFieldUpdateOperationsInput | string
-  seatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  guestProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  deviceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seatId?: Prisma.StringFieldUpdateOperationsInput | string
+  guestProfileId?: Prisma.StringFieldUpdateOperationsInput | string
   devicePublicKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deviceActivationAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deviceActivationIP?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastNonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextNonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rotationSeconds?: Prisma.IntFieldUpdateOperationsInput | number
-  lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedInAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentState?: Prisma.EnumPresenceStateFieldUpdateOperationsInput | $Enums.PresenceState
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revokedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   scanLogs?: Prisma.ScanLogUpdateManyWithoutTicketNestedInput
@@ -507,19 +518,20 @@ export type TicketUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.StringFieldUpdateOperationsInput | string
-  seatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  guestProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  deviceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seatId?: Prisma.StringFieldUpdateOperationsInput | string
+  guestProfileId?: Prisma.StringFieldUpdateOperationsInput | string
   devicePublicKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deviceActivationAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deviceActivationIP?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastNonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextNonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rotationSeconds?: Prisma.IntFieldUpdateOperationsInput | number
-  lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedInAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentState?: Prisma.EnumPresenceStateFieldUpdateOperationsInput | $Enums.PresenceState
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revokedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   scanLogs?: Prisma.ScanLogUncheckedUpdateManyWithoutTicketNestedInput
@@ -530,19 +542,20 @@ export type TicketCreateManyInput = {
   id?: string
   eventId: string
   invitationId: string
-  seatId?: string | null
-  guestProfileId?: string | null
-  deviceHash?: string | null
+  seatId: string
+  guestProfileId: string
   devicePublicKey?: string | null
   deviceActivationAt?: Date | string | null
   deviceActivationIP?: string | null
+  deviceId?: string | null
   lastNonce?: number | null
   nextNonce?: number | null
-  rotationSeconds?: number
-  lastRotatedAt?: Date | string | null
   checkedInAt?: Date | string | null
   currentState?: $Enums.PresenceState
   revoked?: boolean
+  revokedAt?: Date | string | null
+  revokedBy?: string | null
+  revokedReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -551,19 +564,20 @@ export type TicketUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.StringFieldUpdateOperationsInput | string
-  seatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  guestProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  deviceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seatId?: Prisma.StringFieldUpdateOperationsInput | string
+  guestProfileId?: Prisma.StringFieldUpdateOperationsInput | string
   devicePublicKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deviceActivationAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deviceActivationIP?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastNonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextNonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rotationSeconds?: Prisma.IntFieldUpdateOperationsInput | number
-  lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedInAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentState?: Prisma.EnumPresenceStateFieldUpdateOperationsInput | $Enums.PresenceState
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revokedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -572,19 +586,20 @@ export type TicketUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.StringFieldUpdateOperationsInput | string
-  seatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  guestProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  deviceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seatId?: Prisma.StringFieldUpdateOperationsInput | string
+  guestProfileId?: Prisma.StringFieldUpdateOperationsInput | string
   devicePublicKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deviceActivationAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deviceActivationIP?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastNonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextNonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rotationSeconds?: Prisma.IntFieldUpdateOperationsInput | number
-  lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedInAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentState?: Prisma.EnumPresenceStateFieldUpdateOperationsInput | $Enums.PresenceState
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revokedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -600,17 +615,18 @@ export type TicketCountOrderByAggregateInput = {
   invitationId?: Prisma.SortOrder
   seatId?: Prisma.SortOrder
   guestProfileId?: Prisma.SortOrder
-  deviceHash?: Prisma.SortOrder
   devicePublicKey?: Prisma.SortOrder
   deviceActivationAt?: Prisma.SortOrder
   deviceActivationIP?: Prisma.SortOrder
+  deviceId?: Prisma.SortOrder
   lastNonce?: Prisma.SortOrder
   nextNonce?: Prisma.SortOrder
-  rotationSeconds?: Prisma.SortOrder
-  lastRotatedAt?: Prisma.SortOrder
   checkedInAt?: Prisma.SortOrder
   currentState?: Prisma.SortOrder
   revoked?: Prisma.SortOrder
+  revokedAt?: Prisma.SortOrder
+  revokedBy?: Prisma.SortOrder
+  revokedReason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -618,7 +634,6 @@ export type TicketCountOrderByAggregateInput = {
 export type TicketAvgOrderByAggregateInput = {
   lastNonce?: Prisma.SortOrder
   nextNonce?: Prisma.SortOrder
-  rotationSeconds?: Prisma.SortOrder
 }
 
 export type TicketMaxOrderByAggregateInput = {
@@ -627,17 +642,18 @@ export type TicketMaxOrderByAggregateInput = {
   invitationId?: Prisma.SortOrder
   seatId?: Prisma.SortOrder
   guestProfileId?: Prisma.SortOrder
-  deviceHash?: Prisma.SortOrder
   devicePublicKey?: Prisma.SortOrder
   deviceActivationAt?: Prisma.SortOrder
   deviceActivationIP?: Prisma.SortOrder
+  deviceId?: Prisma.SortOrder
   lastNonce?: Prisma.SortOrder
   nextNonce?: Prisma.SortOrder
-  rotationSeconds?: Prisma.SortOrder
-  lastRotatedAt?: Prisma.SortOrder
   checkedInAt?: Prisma.SortOrder
   currentState?: Prisma.SortOrder
   revoked?: Prisma.SortOrder
+  revokedAt?: Prisma.SortOrder
+  revokedBy?: Prisma.SortOrder
+  revokedReason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -648,17 +664,18 @@ export type TicketMinOrderByAggregateInput = {
   invitationId?: Prisma.SortOrder
   seatId?: Prisma.SortOrder
   guestProfileId?: Prisma.SortOrder
-  deviceHash?: Prisma.SortOrder
   devicePublicKey?: Prisma.SortOrder
   deviceActivationAt?: Prisma.SortOrder
   deviceActivationIP?: Prisma.SortOrder
+  deviceId?: Prisma.SortOrder
   lastNonce?: Prisma.SortOrder
   nextNonce?: Prisma.SortOrder
-  rotationSeconds?: Prisma.SortOrder
-  lastRotatedAt?: Prisma.SortOrder
   checkedInAt?: Prisma.SortOrder
   currentState?: Prisma.SortOrder
   revoked?: Prisma.SortOrder
+  revokedAt?: Prisma.SortOrder
+  revokedBy?: Prisma.SortOrder
+  revokedReason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -666,7 +683,6 @@ export type TicketMinOrderByAggregateInput = {
 export type TicketSumOrderByAggregateInput = {
   lastNonce?: Prisma.SortOrder
   nextNonce?: Prisma.SortOrder
-  rotationSeconds?: Prisma.SortOrder
 }
 
 export type TicketScalarRelationFilter = {
@@ -688,14 +704,6 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
 
 export type NullableIntFieldUpdateOperationsInput = {
   set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
-export type IntFieldUpdateOperationsInput = {
-  set?: number
   increment?: number
   decrement?: number
   multiply?: number
@@ -746,19 +754,20 @@ export type TicketCreateWithoutScanLogsInput = {
   id?: string
   eventId: string
   invitationId: string
-  seatId?: string | null
-  guestProfileId?: string | null
-  deviceHash?: string | null
+  seatId: string
+  guestProfileId: string
   devicePublicKey?: string | null
   deviceActivationAt?: Date | string | null
   deviceActivationIP?: string | null
+  deviceId?: string | null
   lastNonce?: number | null
   nextNonce?: number | null
-  rotationSeconds?: number
-  lastRotatedAt?: Date | string | null
   checkedInAt?: Date | string | null
   currentState?: $Enums.PresenceState
   revoked?: boolean
+  revokedAt?: Date | string | null
+  revokedBy?: string | null
+  revokedReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   shareGuard?: Prisma.ShareGuardCreateNestedOneWithoutTicketInput
@@ -768,19 +777,20 @@ export type TicketUncheckedCreateWithoutScanLogsInput = {
   id?: string
   eventId: string
   invitationId: string
-  seatId?: string | null
-  guestProfileId?: string | null
-  deviceHash?: string | null
+  seatId: string
+  guestProfileId: string
   devicePublicKey?: string | null
   deviceActivationAt?: Date | string | null
   deviceActivationIP?: string | null
+  deviceId?: string | null
   lastNonce?: number | null
   nextNonce?: number | null
-  rotationSeconds?: number
-  lastRotatedAt?: Date | string | null
   checkedInAt?: Date | string | null
   currentState?: $Enums.PresenceState
   revoked?: boolean
+  revokedAt?: Date | string | null
+  revokedBy?: string | null
+  revokedReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   shareGuard?: Prisma.ShareGuardUncheckedCreateNestedOneWithoutTicketInput
@@ -806,19 +816,20 @@ export type TicketUpdateWithoutScanLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.StringFieldUpdateOperationsInput | string
-  seatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  guestProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  deviceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seatId?: Prisma.StringFieldUpdateOperationsInput | string
+  guestProfileId?: Prisma.StringFieldUpdateOperationsInput | string
   devicePublicKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deviceActivationAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deviceActivationIP?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastNonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextNonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rotationSeconds?: Prisma.IntFieldUpdateOperationsInput | number
-  lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedInAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentState?: Prisma.EnumPresenceStateFieldUpdateOperationsInput | $Enums.PresenceState
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revokedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shareGuard?: Prisma.ShareGuardUpdateOneWithoutTicketNestedInput
@@ -828,19 +839,20 @@ export type TicketUncheckedUpdateWithoutScanLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.StringFieldUpdateOperationsInput | string
-  seatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  guestProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  deviceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seatId?: Prisma.StringFieldUpdateOperationsInput | string
+  guestProfileId?: Prisma.StringFieldUpdateOperationsInput | string
   devicePublicKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deviceActivationAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deviceActivationIP?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastNonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextNonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rotationSeconds?: Prisma.IntFieldUpdateOperationsInput | number
-  lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedInAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentState?: Prisma.EnumPresenceStateFieldUpdateOperationsInput | $Enums.PresenceState
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revokedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shareGuard?: Prisma.ShareGuardUncheckedUpdateOneWithoutTicketNestedInput
@@ -850,19 +862,20 @@ export type TicketCreateWithoutShareGuardInput = {
   id?: string
   eventId: string
   invitationId: string
-  seatId?: string | null
-  guestProfileId?: string | null
-  deviceHash?: string | null
+  seatId: string
+  guestProfileId: string
   devicePublicKey?: string | null
   deviceActivationAt?: Date | string | null
   deviceActivationIP?: string | null
+  deviceId?: string | null
   lastNonce?: number | null
   nextNonce?: number | null
-  rotationSeconds?: number
-  lastRotatedAt?: Date | string | null
   checkedInAt?: Date | string | null
   currentState?: $Enums.PresenceState
   revoked?: boolean
+  revokedAt?: Date | string | null
+  revokedBy?: string | null
+  revokedReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   scanLogs?: Prisma.ScanLogCreateNestedManyWithoutTicketInput
@@ -872,19 +885,20 @@ export type TicketUncheckedCreateWithoutShareGuardInput = {
   id?: string
   eventId: string
   invitationId: string
-  seatId?: string | null
-  guestProfileId?: string | null
-  deviceHash?: string | null
+  seatId: string
+  guestProfileId: string
   devicePublicKey?: string | null
   deviceActivationAt?: Date | string | null
   deviceActivationIP?: string | null
+  deviceId?: string | null
   lastNonce?: number | null
   nextNonce?: number | null
-  rotationSeconds?: number
-  lastRotatedAt?: Date | string | null
   checkedInAt?: Date | string | null
   currentState?: $Enums.PresenceState
   revoked?: boolean
+  revokedAt?: Date | string | null
+  revokedBy?: string | null
+  revokedReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   scanLogs?: Prisma.ScanLogUncheckedCreateNestedManyWithoutTicketInput
@@ -910,19 +924,20 @@ export type TicketUpdateWithoutShareGuardInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.StringFieldUpdateOperationsInput | string
-  seatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  guestProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  deviceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seatId?: Prisma.StringFieldUpdateOperationsInput | string
+  guestProfileId?: Prisma.StringFieldUpdateOperationsInput | string
   devicePublicKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deviceActivationAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deviceActivationIP?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastNonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextNonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rotationSeconds?: Prisma.IntFieldUpdateOperationsInput | number
-  lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedInAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentState?: Prisma.EnumPresenceStateFieldUpdateOperationsInput | $Enums.PresenceState
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revokedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   scanLogs?: Prisma.ScanLogUpdateManyWithoutTicketNestedInput
@@ -932,19 +947,20 @@ export type TicketUncheckedUpdateWithoutShareGuardInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
   invitationId?: Prisma.StringFieldUpdateOperationsInput | string
-  seatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  guestProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  deviceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seatId?: Prisma.StringFieldUpdateOperationsInput | string
+  guestProfileId?: Prisma.StringFieldUpdateOperationsInput | string
   devicePublicKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deviceActivationAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deviceActivationIP?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastNonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextNonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rotationSeconds?: Prisma.IntFieldUpdateOperationsInput | number
-  lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checkedInAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentState?: Prisma.EnumPresenceStateFieldUpdateOperationsInput | $Enums.PresenceState
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revokedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   scanLogs?: Prisma.ScanLogUncheckedUpdateManyWithoutTicketNestedInput
@@ -987,17 +1003,18 @@ export type TicketSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   invitationId?: boolean
   seatId?: boolean
   guestProfileId?: boolean
-  deviceHash?: boolean
   devicePublicKey?: boolean
   deviceActivationAt?: boolean
   deviceActivationIP?: boolean
+  deviceId?: boolean
   lastNonce?: boolean
   nextNonce?: boolean
-  rotationSeconds?: boolean
-  lastRotatedAt?: boolean
   checkedInAt?: boolean
   currentState?: boolean
   revoked?: boolean
+  revokedAt?: boolean
+  revokedBy?: boolean
+  revokedReason?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   scanLogs?: boolean | Prisma.Ticket$scanLogsArgs<ExtArgs>
@@ -1011,17 +1028,18 @@ export type TicketSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   invitationId?: boolean
   seatId?: boolean
   guestProfileId?: boolean
-  deviceHash?: boolean
   devicePublicKey?: boolean
   deviceActivationAt?: boolean
   deviceActivationIP?: boolean
+  deviceId?: boolean
   lastNonce?: boolean
   nextNonce?: boolean
-  rotationSeconds?: boolean
-  lastRotatedAt?: boolean
   checkedInAt?: boolean
   currentState?: boolean
   revoked?: boolean
+  revokedAt?: boolean
+  revokedBy?: boolean
+  revokedReason?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["ticket"]>
@@ -1032,17 +1050,18 @@ export type TicketSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   invitationId?: boolean
   seatId?: boolean
   guestProfileId?: boolean
-  deviceHash?: boolean
   devicePublicKey?: boolean
   deviceActivationAt?: boolean
   deviceActivationIP?: boolean
+  deviceId?: boolean
   lastNonce?: boolean
   nextNonce?: boolean
-  rotationSeconds?: boolean
-  lastRotatedAt?: boolean
   checkedInAt?: boolean
   currentState?: boolean
   revoked?: boolean
+  revokedAt?: boolean
+  revokedBy?: boolean
+  revokedReason?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["ticket"]>
@@ -1053,22 +1072,23 @@ export type TicketSelectScalar = {
   invitationId?: boolean
   seatId?: boolean
   guestProfileId?: boolean
-  deviceHash?: boolean
   devicePublicKey?: boolean
   deviceActivationAt?: boolean
   deviceActivationIP?: boolean
+  deviceId?: boolean
   lastNonce?: boolean
   nextNonce?: boolean
-  rotationSeconds?: boolean
-  lastRotatedAt?: boolean
   checkedInAt?: boolean
   currentState?: boolean
   revoked?: boolean
+  revokedAt?: boolean
+  revokedBy?: boolean
+  revokedReason?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type TicketOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventId" | "invitationId" | "seatId" | "guestProfileId" | "deviceHash" | "devicePublicKey" | "deviceActivationAt" | "deviceActivationIP" | "lastNonce" | "nextNonce" | "rotationSeconds" | "lastRotatedAt" | "checkedInAt" | "currentState" | "revoked" | "createdAt" | "updatedAt", ExtArgs["result"]["ticket"]>
+export type TicketOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventId" | "invitationId" | "seatId" | "guestProfileId" | "devicePublicKey" | "deviceActivationAt" | "deviceActivationIP" | "deviceId" | "lastNonce" | "nextNonce" | "checkedInAt" | "currentState" | "revoked" | "revokedAt" | "revokedBy" | "revokedReason" | "createdAt" | "updatedAt", ExtArgs["result"]["ticket"]>
 export type TicketInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   scanLogs?: boolean | Prisma.Ticket$scanLogsArgs<ExtArgs>
   shareGuard?: boolean | Prisma.Ticket$shareGuardArgs<ExtArgs>
@@ -1087,19 +1107,20 @@ export type $TicketPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     id: string
     eventId: string
     invitationId: string
-    seatId: string | null
-    guestProfileId: string | null
-    deviceHash: string | null
+    seatId: string
+    guestProfileId: string
     devicePublicKey: string | null
     deviceActivationAt: Date | null
     deviceActivationIP: string | null
+    deviceId: string | null
     lastNonce: number | null
     nextNonce: number | null
-    rotationSeconds: number
-    lastRotatedAt: Date | null
     checkedInAt: Date | null
     currentState: $Enums.PresenceState
     revoked: boolean
+    revokedAt: Date | null
+    revokedBy: string | null
+    revokedReason: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["ticket"]>
@@ -1532,17 +1553,18 @@ export interface TicketFieldRefs {
   readonly invitationId: Prisma.FieldRef<"Ticket", 'String'>
   readonly seatId: Prisma.FieldRef<"Ticket", 'String'>
   readonly guestProfileId: Prisma.FieldRef<"Ticket", 'String'>
-  readonly deviceHash: Prisma.FieldRef<"Ticket", 'String'>
   readonly devicePublicKey: Prisma.FieldRef<"Ticket", 'String'>
   readonly deviceActivationAt: Prisma.FieldRef<"Ticket", 'DateTime'>
   readonly deviceActivationIP: Prisma.FieldRef<"Ticket", 'String'>
+  readonly deviceId: Prisma.FieldRef<"Ticket", 'String'>
   readonly lastNonce: Prisma.FieldRef<"Ticket", 'Int'>
   readonly nextNonce: Prisma.FieldRef<"Ticket", 'Int'>
-  readonly rotationSeconds: Prisma.FieldRef<"Ticket", 'Int'>
-  readonly lastRotatedAt: Prisma.FieldRef<"Ticket", 'DateTime'>
   readonly checkedInAt: Prisma.FieldRef<"Ticket", 'DateTime'>
   readonly currentState: Prisma.FieldRef<"Ticket", 'PresenceState'>
   readonly revoked: Prisma.FieldRef<"Ticket", 'Boolean'>
+  readonly revokedAt: Prisma.FieldRef<"Ticket", 'DateTime'>
+  readonly revokedBy: Prisma.FieldRef<"Ticket", 'String'>
+  readonly revokedReason: Prisma.FieldRef<"Ticket", 'String'>
   readonly createdAt: Prisma.FieldRef<"Ticket", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Ticket", 'DateTime'>
 }

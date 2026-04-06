@@ -1,109 +1,180 @@
-// TODO eslint
-/* eslint-disable @typescript-eslint/await-thenable */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// src/ticket/service/verify-token.service.ts
-import { PrismaService } from '../../prisma/prisma.service.js';
-import { ScanVerdict } from '../models/enums/scan-verdict.enum.js';
-import { mapTicket } from '../models/mapper/ticket.mapper.js';
-import { decodeWithoutDots, TicketTokenPayload } from '../utils/token.service.js';
 
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { PresenceState, ScanVerdict, Ticket } from '../../prisma/generated/client.js';
+import { PrismaService } from '../../prisma/prisma.service.js';
+import { ScanMessages } from '../utils/scan-messages.js';
+import { ShareGuardService } from './shareguard.service.js';
+import { TokenService } from './token.service.js';
+import { Injectable } from '@nestjs/common';
+import { ValkeyKey, ValkeyService } from '@omnixys/cache';
+import { n2u } from '@omnixys/shared';
+import { createVerify } from 'crypto';
+
+function verifySignature(
+  payload: string,
+  signatureBase64: string,
+  publicKeyBase64: string,
+): boolean {
+  try {
+    const verifier = createVerify('SHA256');
+    verifier.update(payload);
+    verifier.end();
+
+    return verifier.verify(
+      {
+        key: Buffer.from(publicKeyBase64, 'base64'),
+        format: 'der',
+        type: 'spki',
+      },
+      Buffer.from(signatureBase64, 'base64'),
+    );
+  } catch {
+    return false;
+  }
+}
 
 @Injectable()
-export class VerifyTokenService {
-  constructor(private readonly prisma: PrismaService) {}
+export class VerifyService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly token: TokenService,
+    private readonly shareGuard: ShareGuardService,
+    private readonly valkey: ValkeyService,
+  ) {}
 
-  /**
-   * Verify QR token (JWE), device hash, nonce and ticket state.
-   * This performs a full security validation without modifying state.
-   *
-   * Used by both:
-   *  - securityScan() in TicketWriteService (pre-check)
-   *  - "preview scans" or validators
-   */
-  async verify(input: { token: string; deviceHash?: string | null; gate?: string | null }) {
-    const { token, deviceHash, gate: _gate } = input;
+  async verifyToken(
+    tokenStr: string,
+    signature: string,
+    deviceId: string,
+  ): Promise<{ ticket: Ticket; payload: any; verdict: ScanVerdict, message: string }> {
+    const payload = await this.token.verify(tokenStr);
 
-    // ---------------------------------------------------------
-    // 1) Decode JWE and validate structure
-    // ---------------------------------------------------------
-    let payload: TicketTokenPayload;
-    try {
-      payload = await decodeWithoutDots(token);
-    } catch (e) {
-      throw new BadRequestException('Invalid QR token (cannot decrypt)');
-    }
+    const ticket = await this.prisma.ticket.findUniqueOrThrow({
+      where: { id: payload.tid },
+    });
 
-    const { tid, eid, gid: _gid, sid: _sid, dn, ts, dh } = payload;
-
-    if (!tid || !eid || !dn || !ts) {
-      throw new BadRequestException('Malformed QR payload');
-    }
-
-    // ---------------------------------------------------------
-    // 2) Fetch ticket
-    // ---------------------------------------------------------
-    const ticket = await this.prisma.ticket.findUnique({ where: { id: tid } });
-    if (!ticket) {
-      throw new NotFoundException('Ticket not found');
-    }
-
-    // ---------------------------------------------------------
-    // 3) Core security validations
-    // ---------------------------------------------------------
-    let verdict: ScanVerdict = ScanVerdict.OK;
-
-    // Ticket revoked?
     if (ticket.revoked) {
-      verdict = ScanVerdict.REVOKED;
+      const verdict = ScanVerdict.REVOKED;
+      return {
+        ticket,
+        payload,
+        verdict,
+        message: n2u(ticket.revokedReason) ?? ScanMessages[verdict],
+      };
     }
 
-    // Device binding mismatch
-    if (ticket.deviceHash && deviceHash && ticket.deviceHash !== deviceHash) {
-      verdict = ScanVerdict.DEVICE_MISMATCH;
+    if (await this.shareGuard.isBlocked(ticket.id))
+      return { ticket, payload, verdict: ScanVerdict.BLOCKED, message: ScanMessages.BLOCKED};
+
+    if (!ticket.devicePublicKey)
+      return { ticket, payload, verdict: ScanVerdict.DEVICE_MISMATCH, message: 'No Public Key' };
+
+    // const message = `${tokenStr}.${deviceId}.${payload.ts}`;
+    //const message = `${tokenStr}.${deviceId}.${payload.ts}.${payload.dn}`;
+    const message = `${tokenStr}.${deviceId}`;
+
+    if (!verifySignature(message, signature, ticket.devicePublicKey)) {
+      await this.shareGuard.applyDecision(
+        ticket.id,
+        this.shareGuard.calculateRisk({ invalidSignature: true }),
+      );
+      return {
+        ticket,
+        payload,
+        verdict: ScanVerdict.DEVICE_MISMATCH,
+        message: 'Signature Changed',
+      };
     }
 
-    // QR encrypted deviceHash mismatch?
-    if (dh && deviceHash && dh !== deviceHash) {
-      verdict = ScanVerdict.DEVICE_MISMATCH;
+    if (ticket.deviceId !== deviceId) {
+      await this.shareGuard.applyDecision(
+        ticket.id,
+        this.shareGuard.calculateRisk({ deviceMismatch: true }),
+      );
+      return {
+        ticket,
+        payload,
+        verdict: ScanVerdict.DEVICE_MISMATCH,
+        message: 'Device Id Changed',
+      };
     }
 
-    // Replay protection
-    if (ticket.lastNonce !== null && dn <= (ticket.lastNonce ?? 0)) {
-      verdict = ScanVerdict.REPLAY;
+    if (payload.dn !== ticket.nextNonce) {
+      await this.shareGuard.applyDecision(
+        ticket.id,
+        this.shareGuard.calculateRisk({ invalidNonce: true }),
+      );
+      return {
+        ticket,
+        payload,
+        verdict: ScanVerdict.INVALID_NONCE,
+        message: ScanMessages.INVALID_NONCE,
+      };
     }
 
-    // Nonce invalid (future mismatch)
-    if (ticket.nextNonce !== null && dn !== ticket.nextNonce) {
-      verdict = ScanVerdict.INVALID_NONCE;
+    if (ticket.lastNonce !== null && payload.dn <= ticket.lastNonce) {
+      await this.shareGuard.applyDecision(
+        ticket.id,
+        this.shareGuard.calculateRisk({ replay: true }),
+      );
+
+      return { ticket, payload, verdict: ScanVerdict.REPLAY, message: ScanMessages.REPLAY };
     }
 
-    // Token age validation (optional)
-    const TOKEN_LIFETIME_MS = Number(process.env.QR_TOKEN_MAX_AGE_MS ?? 60_000);
-    if (Date.now() - ts > TOKEN_LIFETIME_MS) {
-      verdict = ScanVerdict.REPLAY;
+    const replayKey = `qr:replay:${ticket.id}:${payload.dn}`;
+    // const ok = await this.valkey.set(replayKey, '1', { NX: true, EX: 120 });
+    // const ok = await this.valkey.set(ValkeyKey.qrReply, replayKey, 120);
+
+    // const ok = await this.valkey.setNx(ValkeyKey.qrReply, replayKey, 120);
+
+    // if (!ok) {
+    //   await this.shareGuard.applyDecision(
+    //     ticket.id,
+    //     this.shareGuard.calculateRisk({ replay: true }),
+    //   );
+
+    //   return { ticket, payload, verdict: ScanVerdict.REPLAY };
+    // }
+
+    const existing = await this.valkey.get(ValkeyKey.qrReply, replayKey);
+    if (existing) {
+      await this.shareGuard.applyDecision(
+        ticket.id,
+        this.shareGuard.calculateRisk({ replay: true }),
+      );
+
+      return { ticket, payload, verdict: ScanVerdict.REPLAY, message: ScanMessages.REPLAY };
     }
 
-    // ---------------------------------------------------------
-    // 4) Result structure (no state update here)
-    // ---------------------------------------------------------
-    return {
-      ticket: mapTicket(ticket),
-      payload,
-      verdict,
-      valid: verdict === ScanVerdict.OK,
-      expectedNonce: ticket.nextNonce,
-      receivedNonce: dn,
-      deviceMatched: !ticket.deviceHash || !deviceHash || ticket.deviceHash === deviceHash,
-    };
-  }
+    await this.valkey.set(ValkeyKey.qrReply, replayKey, 120);
 
-  /**
-   * A convenience method used for "dry-runs".
-   * Does NOT write ScanLog or update Ticket.
-   */
-  async preview(token: string, deviceHash?: string | null) {
-    return this.verify({ token, deviceHash });
+    await this.shareGuard.resetShareGuard(ticket.id);
+
+    const state =
+            ticket.currentState === PresenceState.OUTSIDE
+              ? PresenceState.INSIDE
+              : PresenceState.OUTSIDE;
+    
+    const updated = await this.prisma.ticket.updateMany({
+      where: {
+        id: ticket.id,
+        nextNonce: payload.dn, 
+      },
+      data: {
+        currentState: state,
+        lastNonce: payload.dn,
+        nextNonce: payload.dn + 1,
+      },
+    });
+
+    if (updated.count === 0) {
+      return {
+        ticket,
+        payload,
+        verdict: ScanVerdict.REPLAY,
+        message: 'Nonce race condition detected',
+      };
+    }
+
+    return { ticket, payload, verdict: ScanVerdict.OK, message: ScanMessages.OK };
   }
 }

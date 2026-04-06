@@ -673,17 +673,18 @@ export const TicketScalarFieldEnum = {
   invitationId: 'invitationId',
   seatId: 'seatId',
   guestProfileId: 'guestProfileId',
-  deviceHash: 'deviceHash',
   devicePublicKey: 'devicePublicKey',
   deviceActivationAt: 'deviceActivationAt',
   deviceActivationIP: 'deviceActivationIP',
+  deviceId: 'deviceId',
   lastNonce: 'lastNonce',
   nextNonce: 'nextNonce',
-  rotationSeconds: 'rotationSeconds',
-  lastRotatedAt: 'lastRotatedAt',
   checkedInAt: 'checkedInAt',
   currentState: 'currentState',
   revoked: 'revoked',
+  revokedAt: 'revokedAt',
+  revokedBy: 'revokedBy',
+  revokedReason: 'revokedReason',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -695,12 +696,12 @@ export const ScanLogScalarFieldEnum = {
   id: 'id',
   ticketId: 'ticketId',
   eventId: 'eventId',
-  byUserId: 'byUserId',
+  actorId: 'actorId',
   direction: 'direction',
   gate: 'gate',
   verdict: 'verdict',
   nonce: 'nonce',
-  deviceHash: 'deviceHash',
+  deviceId: 'deviceId',
   createdAt: 'createdAt'
 } as const
 

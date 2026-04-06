@@ -38,12 +38,12 @@ export type ScanLogMinAggregateOutputType = {
   id: string | null
   ticketId: string | null
   eventId: string | null
-  byUserId: string | null
+  actorId: string | null
   direction: $Enums.PresenceState | null
   gate: string | null
   verdict: $Enums.ScanVerdict | null
   nonce: number | null
-  deviceHash: string | null
+  deviceId: string | null
   createdAt: Date | null
 }
 
@@ -51,12 +51,12 @@ export type ScanLogMaxAggregateOutputType = {
   id: string | null
   ticketId: string | null
   eventId: string | null
-  byUserId: string | null
+  actorId: string | null
   direction: $Enums.PresenceState | null
   gate: string | null
   verdict: $Enums.ScanVerdict | null
   nonce: number | null
-  deviceHash: string | null
+  deviceId: string | null
   createdAt: Date | null
 }
 
@@ -64,12 +64,12 @@ export type ScanLogCountAggregateOutputType = {
   id: number
   ticketId: number
   eventId: number
-  byUserId: number
+  actorId: number
   direction: number
   gate: number
   verdict: number
   nonce: number
-  deviceHash: number
+  deviceId: number
   createdAt: number
   _all: number
 }
@@ -87,12 +87,12 @@ export type ScanLogMinAggregateInputType = {
   id?: true
   ticketId?: true
   eventId?: true
-  byUserId?: true
+  actorId?: true
   direction?: true
   gate?: true
   verdict?: true
   nonce?: true
-  deviceHash?: true
+  deviceId?: true
   createdAt?: true
 }
 
@@ -100,12 +100,12 @@ export type ScanLogMaxAggregateInputType = {
   id?: true
   ticketId?: true
   eventId?: true
-  byUserId?: true
+  actorId?: true
   direction?: true
   gate?: true
   verdict?: true
   nonce?: true
-  deviceHash?: true
+  deviceId?: true
   createdAt?: true
 }
 
@@ -113,12 +113,12 @@ export type ScanLogCountAggregateInputType = {
   id?: true
   ticketId?: true
   eventId?: true
-  byUserId?: true
+  actorId?: true
   direction?: true
   gate?: true
   verdict?: true
   nonce?: true
-  deviceHash?: true
+  deviceId?: true
   createdAt?: true
   _all?: true
 }
@@ -213,12 +213,12 @@ export type ScanLogGroupByOutputType = {
   id: string
   ticketId: string
   eventId: string
-  byUserId: string | null
+  actorId: string
   direction: $Enums.PresenceState
   gate: string | null
   verdict: $Enums.ScanVerdict
   nonce: number | null
-  deviceHash: string | null
+  deviceId: string | null
   createdAt: Date
   _count: ScanLogCountAggregateOutputType | null
   _avg: ScanLogAvgAggregateOutputType | null
@@ -249,12 +249,12 @@ export type ScanLogWhereInput = {
   id?: Prisma.StringFilter<"ScanLog"> | string
   ticketId?: Prisma.StringFilter<"ScanLog"> | string
   eventId?: Prisma.StringFilter<"ScanLog"> | string
-  byUserId?: Prisma.StringNullableFilter<"ScanLog"> | string | null
+  actorId?: Prisma.StringFilter<"ScanLog"> | string
   direction?: Prisma.EnumPresenceStateFilter<"ScanLog"> | $Enums.PresenceState
   gate?: Prisma.StringNullableFilter<"ScanLog"> | string | null
   verdict?: Prisma.EnumScanVerdictFilter<"ScanLog"> | $Enums.ScanVerdict
   nonce?: Prisma.IntNullableFilter<"ScanLog"> | number | null
-  deviceHash?: Prisma.StringNullableFilter<"ScanLog"> | string | null
+  deviceId?: Prisma.StringNullableFilter<"ScanLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ScanLog"> | Date | string
   ticket?: Prisma.XOR<Prisma.TicketScalarRelationFilter, Prisma.TicketWhereInput>
 }
@@ -263,12 +263,12 @@ export type ScanLogOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   ticketId?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
-  byUserId?: Prisma.SortOrderInput | Prisma.SortOrder
+  actorId?: Prisma.SortOrder
   direction?: Prisma.SortOrder
   gate?: Prisma.SortOrderInput | Prisma.SortOrder
   verdict?: Prisma.SortOrder
   nonce?: Prisma.SortOrderInput | Prisma.SortOrder
-  deviceHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  deviceId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   ticket?: Prisma.TicketOrderByWithRelationInput
 }
@@ -280,12 +280,12 @@ export type ScanLogWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.ScanLogWhereInput | Prisma.ScanLogWhereInput[]
   ticketId?: Prisma.StringFilter<"ScanLog"> | string
   eventId?: Prisma.StringFilter<"ScanLog"> | string
-  byUserId?: Prisma.StringNullableFilter<"ScanLog"> | string | null
+  actorId?: Prisma.StringFilter<"ScanLog"> | string
   direction?: Prisma.EnumPresenceStateFilter<"ScanLog"> | $Enums.PresenceState
   gate?: Prisma.StringNullableFilter<"ScanLog"> | string | null
   verdict?: Prisma.EnumScanVerdictFilter<"ScanLog"> | $Enums.ScanVerdict
   nonce?: Prisma.IntNullableFilter<"ScanLog"> | number | null
-  deviceHash?: Prisma.StringNullableFilter<"ScanLog"> | string | null
+  deviceId?: Prisma.StringNullableFilter<"ScanLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ScanLog"> | Date | string
   ticket?: Prisma.XOR<Prisma.TicketScalarRelationFilter, Prisma.TicketWhereInput>
 }, "id">
@@ -294,12 +294,12 @@ export type ScanLogOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   ticketId?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
-  byUserId?: Prisma.SortOrderInput | Prisma.SortOrder
+  actorId?: Prisma.SortOrder
   direction?: Prisma.SortOrder
   gate?: Prisma.SortOrderInput | Prisma.SortOrder
   verdict?: Prisma.SortOrder
   nonce?: Prisma.SortOrderInput | Prisma.SortOrder
-  deviceHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  deviceId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ScanLogCountOrderByAggregateInput
   _avg?: Prisma.ScanLogAvgOrderByAggregateInput
@@ -315,24 +315,24 @@ export type ScanLogScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"ScanLog"> | string
   ticketId?: Prisma.StringWithAggregatesFilter<"ScanLog"> | string
   eventId?: Prisma.StringWithAggregatesFilter<"ScanLog"> | string
-  byUserId?: Prisma.StringNullableWithAggregatesFilter<"ScanLog"> | string | null
+  actorId?: Prisma.StringWithAggregatesFilter<"ScanLog"> | string
   direction?: Prisma.EnumPresenceStateWithAggregatesFilter<"ScanLog"> | $Enums.PresenceState
   gate?: Prisma.StringNullableWithAggregatesFilter<"ScanLog"> | string | null
   verdict?: Prisma.EnumScanVerdictWithAggregatesFilter<"ScanLog"> | $Enums.ScanVerdict
   nonce?: Prisma.IntNullableWithAggregatesFilter<"ScanLog"> | number | null
-  deviceHash?: Prisma.StringNullableWithAggregatesFilter<"ScanLog"> | string | null
+  deviceId?: Prisma.StringNullableWithAggregatesFilter<"ScanLog"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ScanLog"> | Date | string
 }
 
 export type ScanLogCreateInput = {
   id?: string
   eventId: string
-  byUserId?: string | null
+  actorId: string
   direction: $Enums.PresenceState
   gate?: string | null
   verdict?: $Enums.ScanVerdict
   nonce?: number | null
-  deviceHash?: string | null
+  deviceId?: string | null
   createdAt?: Date | string
   ticket: Prisma.TicketCreateNestedOneWithoutScanLogsInput
 }
@@ -341,24 +341,24 @@ export type ScanLogUncheckedCreateInput = {
   id?: string
   ticketId: string
   eventId: string
-  byUserId?: string | null
+  actorId: string
   direction: $Enums.PresenceState
   gate?: string | null
   verdict?: $Enums.ScanVerdict
   nonce?: number | null
-  deviceHash?: string | null
+  deviceId?: string | null
   createdAt?: Date | string
 }
 
 export type ScanLogUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  byUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
   direction?: Prisma.EnumPresenceStateFieldUpdateOperationsInput | $Enums.PresenceState
   gate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verdict?: Prisma.EnumScanVerdictFieldUpdateOperationsInput | $Enums.ScanVerdict
   nonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  deviceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ticket?: Prisma.TicketUpdateOneRequiredWithoutScanLogsNestedInput
 }
@@ -367,12 +367,12 @@ export type ScanLogUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   ticketId?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  byUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
   direction?: Prisma.EnumPresenceStateFieldUpdateOperationsInput | $Enums.PresenceState
   gate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verdict?: Prisma.EnumScanVerdictFieldUpdateOperationsInput | $Enums.ScanVerdict
   nonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  deviceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -380,24 +380,24 @@ export type ScanLogCreateManyInput = {
   id?: string
   ticketId: string
   eventId: string
-  byUserId?: string | null
+  actorId: string
   direction: $Enums.PresenceState
   gate?: string | null
   verdict?: $Enums.ScanVerdict
   nonce?: number | null
-  deviceHash?: string | null
+  deviceId?: string | null
   createdAt?: Date | string
 }
 
 export type ScanLogUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  byUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
   direction?: Prisma.EnumPresenceStateFieldUpdateOperationsInput | $Enums.PresenceState
   gate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verdict?: Prisma.EnumScanVerdictFieldUpdateOperationsInput | $Enums.ScanVerdict
   nonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  deviceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -405,12 +405,12 @@ export type ScanLogUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   ticketId?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  byUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
   direction?: Prisma.EnumPresenceStateFieldUpdateOperationsInput | $Enums.PresenceState
   gate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verdict?: Prisma.EnumScanVerdictFieldUpdateOperationsInput | $Enums.ScanVerdict
   nonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  deviceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -428,12 +428,12 @@ export type ScanLogCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   ticketId?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
-  byUserId?: Prisma.SortOrder
+  actorId?: Prisma.SortOrder
   direction?: Prisma.SortOrder
   gate?: Prisma.SortOrder
   verdict?: Prisma.SortOrder
   nonce?: Prisma.SortOrder
-  deviceHash?: Prisma.SortOrder
+  deviceId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -445,12 +445,12 @@ export type ScanLogMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   ticketId?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
-  byUserId?: Prisma.SortOrder
+  actorId?: Prisma.SortOrder
   direction?: Prisma.SortOrder
   gate?: Prisma.SortOrder
   verdict?: Prisma.SortOrder
   nonce?: Prisma.SortOrder
-  deviceHash?: Prisma.SortOrder
+  deviceId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -458,12 +458,12 @@ export type ScanLogMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   ticketId?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
-  byUserId?: Prisma.SortOrder
+  actorId?: Prisma.SortOrder
   direction?: Prisma.SortOrder
   gate?: Prisma.SortOrder
   verdict?: Prisma.SortOrder
   nonce?: Prisma.SortOrder
-  deviceHash?: Prisma.SortOrder
+  deviceId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -520,24 +520,24 @@ export type EnumScanVerdictFieldUpdateOperationsInput = {
 export type ScanLogCreateWithoutTicketInput = {
   id?: string
   eventId: string
-  byUserId?: string | null
+  actorId: string
   direction: $Enums.PresenceState
   gate?: string | null
   verdict?: $Enums.ScanVerdict
   nonce?: number | null
-  deviceHash?: string | null
+  deviceId?: string | null
   createdAt?: Date | string
 }
 
 export type ScanLogUncheckedCreateWithoutTicketInput = {
   id?: string
   eventId: string
-  byUserId?: string | null
+  actorId: string
   direction: $Enums.PresenceState
   gate?: string | null
   verdict?: $Enums.ScanVerdict
   nonce?: number | null
-  deviceHash?: string | null
+  deviceId?: string | null
   createdAt?: Date | string
 }
 
@@ -574,60 +574,60 @@ export type ScanLogScalarWhereInput = {
   id?: Prisma.StringFilter<"ScanLog"> | string
   ticketId?: Prisma.StringFilter<"ScanLog"> | string
   eventId?: Prisma.StringFilter<"ScanLog"> | string
-  byUserId?: Prisma.StringNullableFilter<"ScanLog"> | string | null
+  actorId?: Prisma.StringFilter<"ScanLog"> | string
   direction?: Prisma.EnumPresenceStateFilter<"ScanLog"> | $Enums.PresenceState
   gate?: Prisma.StringNullableFilter<"ScanLog"> | string | null
   verdict?: Prisma.EnumScanVerdictFilter<"ScanLog"> | $Enums.ScanVerdict
   nonce?: Prisma.IntNullableFilter<"ScanLog"> | number | null
-  deviceHash?: Prisma.StringNullableFilter<"ScanLog"> | string | null
+  deviceId?: Prisma.StringNullableFilter<"ScanLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ScanLog"> | Date | string
 }
 
 export type ScanLogCreateManyTicketInput = {
   id?: string
   eventId: string
-  byUserId?: string | null
+  actorId: string
   direction: $Enums.PresenceState
   gate?: string | null
   verdict?: $Enums.ScanVerdict
   nonce?: number | null
-  deviceHash?: string | null
+  deviceId?: string | null
   createdAt?: Date | string
 }
 
 export type ScanLogUpdateWithoutTicketInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  byUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
   direction?: Prisma.EnumPresenceStateFieldUpdateOperationsInput | $Enums.PresenceState
   gate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verdict?: Prisma.EnumScanVerdictFieldUpdateOperationsInput | $Enums.ScanVerdict
   nonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  deviceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ScanLogUncheckedUpdateWithoutTicketInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  byUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
   direction?: Prisma.EnumPresenceStateFieldUpdateOperationsInput | $Enums.PresenceState
   gate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verdict?: Prisma.EnumScanVerdictFieldUpdateOperationsInput | $Enums.ScanVerdict
   nonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  deviceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ScanLogUncheckedUpdateManyWithoutTicketInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  byUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
   direction?: Prisma.EnumPresenceStateFieldUpdateOperationsInput | $Enums.PresenceState
   gate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verdict?: Prisma.EnumScanVerdictFieldUpdateOperationsInput | $Enums.ScanVerdict
   nonce?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  deviceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -637,12 +637,12 @@ export type ScanLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   id?: boolean
   ticketId?: boolean
   eventId?: boolean
-  byUserId?: boolean
+  actorId?: boolean
   direction?: boolean
   gate?: boolean
   verdict?: boolean
   nonce?: boolean
-  deviceHash?: boolean
+  deviceId?: boolean
   createdAt?: boolean
   ticket?: boolean | Prisma.TicketDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["scanLog"]>
@@ -651,12 +651,12 @@ export type ScanLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   id?: boolean
   ticketId?: boolean
   eventId?: boolean
-  byUserId?: boolean
+  actorId?: boolean
   direction?: boolean
   gate?: boolean
   verdict?: boolean
   nonce?: boolean
-  deviceHash?: boolean
+  deviceId?: boolean
   createdAt?: boolean
   ticket?: boolean | Prisma.TicketDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["scanLog"]>
@@ -665,12 +665,12 @@ export type ScanLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   id?: boolean
   ticketId?: boolean
   eventId?: boolean
-  byUserId?: boolean
+  actorId?: boolean
   direction?: boolean
   gate?: boolean
   verdict?: boolean
   nonce?: boolean
-  deviceHash?: boolean
+  deviceId?: boolean
   createdAt?: boolean
   ticket?: boolean | Prisma.TicketDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["scanLog"]>
@@ -679,16 +679,16 @@ export type ScanLogSelectScalar = {
   id?: boolean
   ticketId?: boolean
   eventId?: boolean
-  byUserId?: boolean
+  actorId?: boolean
   direction?: boolean
   gate?: boolean
   verdict?: boolean
   nonce?: boolean
-  deviceHash?: boolean
+  deviceId?: boolean
   createdAt?: boolean
 }
 
-export type ScanLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ticketId" | "eventId" | "byUserId" | "direction" | "gate" | "verdict" | "nonce" | "deviceHash" | "createdAt", ExtArgs["result"]["scanLog"]>
+export type ScanLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ticketId" | "eventId" | "actorId" | "direction" | "gate" | "verdict" | "nonce" | "deviceId" | "createdAt", ExtArgs["result"]["scanLog"]>
 export type ScanLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ticket?: boolean | Prisma.TicketDefaultArgs<ExtArgs>
 }
@@ -708,12 +708,12 @@ export type $ScanLogPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     id: string
     ticketId: string
     eventId: string
-    byUserId: string | null
+    actorId: string
     direction: $Enums.PresenceState
     gate: string | null
     verdict: $Enums.ScanVerdict
     nonce: number | null
-    deviceHash: string | null
+    deviceId: string | null
     createdAt: Date
   }, ExtArgs["result"]["scanLog"]>
   composites: {}
@@ -1142,12 +1142,12 @@ export interface ScanLogFieldRefs {
   readonly id: Prisma.FieldRef<"ScanLog", 'String'>
   readonly ticketId: Prisma.FieldRef<"ScanLog", 'String'>
   readonly eventId: Prisma.FieldRef<"ScanLog", 'String'>
-  readonly byUserId: Prisma.FieldRef<"ScanLog", 'String'>
+  readonly actorId: Prisma.FieldRef<"ScanLog", 'String'>
   readonly direction: Prisma.FieldRef<"ScanLog", 'PresenceState'>
   readonly gate: Prisma.FieldRef<"ScanLog", 'String'>
   readonly verdict: Prisma.FieldRef<"ScanLog", 'ScanVerdict'>
   readonly nonce: Prisma.FieldRef<"ScanLog", 'Int'>
-  readonly deviceHash: Prisma.FieldRef<"ScanLog", 'String'>
+  readonly deviceId: Prisma.FieldRef<"ScanLog", 'String'>
   readonly createdAt: Prisma.FieldRef<"ScanLog", 'DateTime'>
 }
     

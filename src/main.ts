@@ -84,8 +84,8 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-    const fastify = app.getHttpAdapter().getInstance();
-    registerFastifyTracing(fastify);
+  const fastify = app.getHttpAdapter().getInstance();
+  registerFastifyTracing(fastify);
 
   // const loggerService = app.get(LoggerPlusService);
   // logger = loggerService.getLogger('Bootstrap');

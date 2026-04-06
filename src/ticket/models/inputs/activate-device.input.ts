@@ -7,11 +7,16 @@ export class ActivateDeviceInput {
   ticketId!: string;
 
   @Field(() => String)
-  deviceHash!: string;
+  deviceId!: string;
 
   @Field(() => String)
-  devicePublicKey!: string;
+  publicKey!: string;
+}
 
-  @Field(() => String, { nullable: true })
-  ip?: string | null;
+
+export interface ActivateDeviceDTO {
+  ticketId: string;
+  publicKey: string;
+  deviceId: string;
+  ip?: string;
 }

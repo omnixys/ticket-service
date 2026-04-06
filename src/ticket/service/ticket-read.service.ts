@@ -1,10 +1,10 @@
 // src/ticket/service/ticket-read.service.ts
 
 import { PrismaService } from '../../prisma/prisma.service.js';
-import { ScanLog } from '../models/entities/scan-log.entity.js';
-import { Ticket } from '../models/entities/ticket.entity.js';
 import { mapScanLogs } from '../models/mapper/scan-logs.mapper.js';
 import { mapTicket, mapTickets } from '../models/mapper/ticket.mapper.js';
+import { ScanLogPayload } from '../models/payloads/scan-log-list.payload.js';
+import { TicketPayload } from '../models/payloads/ticket-payload.js';
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
@@ -14,7 +14,7 @@ export class TicketReadService {
   /**
    * Find a ticket by ID.
    */
-  async findById(id: string): Promise<Ticket> {
+  async findById(id: string): Promise<TicketPayload> {
     const row = await this.prisma.ticket.findUnique({
       where: { id },
     });
@@ -29,7 +29,7 @@ export class TicketReadService {
   /**
    * Find all tickets matching arbitrary filters.
    */
-  async findMany(): Promise<Ticket[]> {
+  async findMany(): Promise<TicketPayload[]> {
     const rows = await this.prisma.ticket.findMany();
     return mapTickets(rows);
   }
@@ -37,7 +37,7 @@ export class TicketReadService {
   /**
    * Find ticket by invitationId (unique).
    */
-  async findByInvitation(invitationId: string): Promise<Ticket> {
+  async findByInvitation(invitationId: string): Promise<TicketPayload> {
     const row = await this.prisma.ticket.findUnique({
       where: { invitationId },
     });
@@ -52,7 +52,7 @@ export class TicketReadService {
   /**
    * Find all tickets belonging to an event.
    */
-  async findByEvent(eventId: string): Promise<Ticket[]> {
+  async findByEvent(eventId: string): Promise<TicketPayload[]> {
     const rows = await this.prisma.ticket.findMany({
       where: { eventId },
       orderBy: { createdAt: 'asc' },
@@ -64,7 +64,7 @@ export class TicketReadService {
   /**
    * Find ticket by guestProfileId (unique).
    */
-  async findByGuest(guestProfileId: string): Promise<Ticket[]> {
+  async findByGuest(guestProfileId: string): Promise<TicketPayload[]> {
     const row = await this.prisma.ticket.findMany({
       where: { guestProfileId },
     });
@@ -75,7 +75,7 @@ export class TicketReadService {
   /**
    * Read scan logs of a ticket.
    */
-  async scanLogs(ticketId: string): Promise<ScanLog[]> {
+  async scanLogs(ticketId: string): Promise<ScanLogPayload[]> {
     const logs = await this.prisma.scanLog.findMany({
       where: { ticketId },
       orderBy: { createdAt: 'desc' },
@@ -87,9 +87,9 @@ export class TicketReadService {
   /**
    * Find a ticket by device hash. (Fingerprint binding)
    */
-  async findByDeviceHash(deviceHash: string): Promise<Ticket> {
+  async findByDeviceHash(deviceId: string): Promise<TicketPayload> {
     const row = await this.prisma.ticket.findFirst({
-      where: { deviceHash },
+      where: { deviceId },
     });
 
     if (!row) {
@@ -98,4 +98,6 @@ export class TicketReadService {
 
     return mapTicket(row);
   }
+
+  
 }

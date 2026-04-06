@@ -1,13 +1,12 @@
-// src/ticket/models/mapper/ticket.mapper.ts
-import type { Ticket as PrismaTicket } from '../../../prisma/generated/client.js';
-import { n2u } from '../../utils/null-to-undefined.js';
-import type { Ticket as TicketEntity } from '../entities/ticket.entity.js';
+import { n2u } from '@omnixys/shared';
+import { Ticket } from '../../../prisma/generated/client.js';
 import type { PresenceState } from '../enums/presence-state.enum.js';
+import { TicketPayload } from '../payloads/ticket-payload.js';
 
 /**
  * Maps a Prisma Ticket row → GraphQL Ticket Entity
  */
-export function mapTicket(row: PrismaTicket): TicketEntity {
+export function mapTicket(row: Ticket): TicketPayload {
   return {
     id: row.id,
 
@@ -17,21 +16,23 @@ export function mapTicket(row: PrismaTicket): TicketEntity {
     guestProfileId: row.guestProfileId ?? null,
 
     // --- Device Binding ---
-    deviceHash: row.deviceHash ?? null,
-    devicePublicKey: row.devicePublicKey ?? null,
-    deviceActivationAt: row.deviceActivationAt ?? null,
-    deviceActivationIP: row.deviceActivationIP ?? null,
+    deviceId: n2u(row.deviceId),
+    devicePublicKey: n2u(row.devicePublicKey),
+    deviceActivationAt: n2u(row.deviceActivationAt),
+    deviceActivationIP: n2u(row.deviceActivationIP),
 
     // --- Token Rotation ---
-    lastNonce: row.lastNonce ?? null,
-    nextNonce: row.nextNonce ?? null,
-    rotationSeconds: row.rotationSeconds,
-    lastRotatedAt: row.lastRotatedAt ?? null,
+    lastNonce: n2u(row.lastNonce),
+    nextNonce: n2u(row.nextNonce),
 
     // --- State ---
     currentState: row.currentState as PresenceState,
-    revoked: row.revoked,
     checkedInAt: n2u(row.checkedInAt),
+
+    revoked: row.revoked,
+    revokedAt: n2u(row.revokedAt),
+    revokedBy: n2u(row.revokedBy),
+    revokedReason: n2u(row.revokedReason),
 
     // --- Timestamps ---
     createdAt: row.createdAt,
@@ -42,6 +43,6 @@ export function mapTicket(row: PrismaTicket): TicketEntity {
 /**
  * Maps an array of Prisma Ticket rows → GraphQL Ticket Entities
  */
-export function mapTickets(rows: PrismaTicket[]): TicketEntity[] {
+export function mapTickets(rows: Ticket[]): TicketPayload[] {
   return rows.map(mapTicket);
 }

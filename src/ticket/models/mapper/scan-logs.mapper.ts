@@ -1,26 +1,27 @@
 // src/ticket/models/mapper/scan-log.mapper.ts
-import type { ScanLog as PrismaScanLog } from '../../../prisma/generated/client.js';
-import type { ScanLog as ScanLogEntity } from '../entities/scan-log.entity.js';
+import { n2u } from '@omnixys/shared';
+import { ScanLog } from '../../../prisma/generated/client.js';
 import type { PresenceState } from '../enums/presence-state.enum.js';
 import type { ScanVerdict } from '../enums/scan-verdict.enum.js';
+import { ScanLogPayload } from '../payloads/scan-log-list.payload.js';
 
 /**
  * Maps a Prisma ScanLog row → GraphQL ScanLog Entity.
  */
-export function mapScanLog(row: PrismaScanLog): ScanLogEntity {
+export function mapScanLog(row: ScanLog): ScanLogPayload {
   return {
     id: row.id,
     ticketId: row.ticketId,
     eventId: row.eventId,
 
-    byUserId: row.byUserId ?? null,
+    actorId: row.actorId,
 
     direction: row.direction as PresenceState,
     verdict: row.verdict as ScanVerdict,
 
-    gate: row.gate ?? null,
-    deviceHash: row.deviceHash ?? null,
-    nonce: row.nonce ?? null,
+    gate: n2u(row.gate ?? null),
+    deviceId: n2u(row.deviceId),
+    nonce: n2u(row.nonce ?? null),
 
     createdAt: row.createdAt,
   };
@@ -29,6 +30,6 @@ export function mapScanLog(row: PrismaScanLog): ScanLogEntity {
 /**
  * Maps an array of Prisma ScanLog rows → GraphQL ScanLog Entities.
  */
-export function mapScanLogs(rows: PrismaScanLog[]): ScanLogEntity[] {
+export function mapScanLogs(rows: ScanLog[]): ScanLogPayload[] {
   return rows.map(mapScanLog);
 }

@@ -44,15 +44,13 @@ async function main(): Promise<void> {
       guestProfileId: GUEST_ID,
       seatId: SEAT_ID,
 
-      deviceHash: 'device_hash_demo_001',
+      deviceId: 'device_hash_demo_001',
       devicePublicKey: 'device_public_key_demo_001',
       deviceActivationAt: new Date(),
       deviceActivationIP: '88.130.219.21',
 
       lastNonce: 10,
       nextNonce: 11,
-      rotationSeconds: 30,
-      lastRotatedAt: new Date(),
 
       currentState: PresenceState.OUTSIDE,
       revoked: false,
@@ -87,8 +85,9 @@ async function main(): Promise<void> {
         direction: PresenceState.INSIDE,
         verdict: ScanVerdict.OK,
         nonce: 10,
-        deviceHash: 'device_hash_demo_001',
+        deviceId: 'device_hash_demo_001',
         gate: 'Main Gate',
+        actorId: '234',
       },
       {
         ticketId: ticket.id,
@@ -96,8 +95,9 @@ async function main(): Promise<void> {
         direction: PresenceState.OUTSIDE,
         verdict: ScanVerdict.OK,
         nonce: 11,
-        deviceHash: 'device_hash_demo_001',
+        deviceId: 'device_hash_demo_001',
         gate: 'Main Gate',
+        actorId: '234',
       },
     ],
   });

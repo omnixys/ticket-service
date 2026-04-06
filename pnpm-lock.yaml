@@ -61,13 +61,13 @@ importers:
         version: 11.1.1(@grpc/grpc-js@1.14.3)(@grpc/proto-loader@0.8.0)(@nestjs/axios@4.0.1(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.13.2)(rxjs@7.8.2))(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(@prisma/client@7.6.0(prisma@7.6.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3))(typescript@5.9.3))(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@omnixys/cache':
         specifier: file:../../packages/ts/cache
-        version: file:../../packages/ts/cache(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@omnixys/observability@file:../../packages/ts/observability(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(@nestjs/graphql@13.2.4(@apollo/subgraph@2.13.3(graphql@16.12.0))(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(class-validator@0.14.4)(graphql@16.12.0)(reflect-metadata@0.2.2)(ts-morph@27.0.2))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(fastify@5.8.2))
+        version: file:../../packages/ts/cache(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@omnixys/observability@file:../../packages/ts/observability(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(@nestjs/graphql@13.2.4(@apollo/subgraph@2.13.3(graphql@16.12.0))(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(class-validator@0.14.4)(graphql@16.12.0)(reflect-metadata@0.2.2)(ts-morph@27.0.2))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(fastify@5.8.2))(@omnixys/shared@file:../../packages/ts/shared(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)))
       '@omnixys/context':
         specifier: file:../../packages/ts/context
-        version: file:../../packages/ts/context(@fastify/cookie@11.0.2)(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.2.4(@apollo/subgraph@2.13.3(graphql@16.12.0))(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(class-validator@0.14.4)(graphql@16.12.0)(reflect-metadata@0.2.2)(ts-morph@27.0.2))(@omnixys/contracts@1.9.0(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)))(fastify@5.8.2)(graphql@16.12.0)
+        version: file:../../packages/ts/context(@fastify/cookie@11.0.2)(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.2.4(@apollo/subgraph@2.13.3(graphql@16.12.0))(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(class-validator@0.14.4)(graphql@16.12.0)(reflect-metadata@0.2.2)(ts-morph@27.0.2))(@omnixys/shared@file:../../packages/ts/shared(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)))(fastify@5.8.2)(graphql@16.12.0)(rxjs@7.8.2)
       '@omnixys/graphql':
         specifier: file:../../packages/ts/graphql
-        version: file:../../packages/ts/graphql(d5ca5031f7f0fd69d5916adb0785056b)
+        version: file:../../packages/ts/graphql(f11f41b0c2d14438e96a83e073653f4c)
       '@omnixys/kafka':
         specifier: file:../../packages/ts/kafka
         version: file:../../packages/ts/kafka(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(@omnixys/observability@file:../../packages/ts/observability(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(@nestjs/graphql@13.2.4(@apollo/subgraph@2.13.3(graphql@16.12.0))(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(class-validator@0.14.4)(graphql@16.12.0)(reflect-metadata@0.2.2)(ts-morph@27.0.2))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(fastify@5.8.2))(@omnixys/shared@file:../../packages/ts/shared(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)))
@@ -104,6 +104,9 @@ importers:
       fastify:
         specifier: 5.8.2
         version: 5.8.2
+      graphql-subscriptions:
+        specifier: ^3.0.0
+        version: 3.0.0(graphql@16.12.0)
       jose:
         specifier: ^6.2.2
         version: 6.2.2
@@ -1541,6 +1544,7 @@ packages:
     peerDependencies:
       '@nestjs/common': ^11.1.17
       '@omnixys/observability': file:../observability
+      '@omnixys/shared': file:../shared
 
   '@omnixys/context@file:../../packages/ts/context':
     resolution: {directory: ../../packages/ts/context, type: directory}
@@ -1549,14 +1553,10 @@ packages:
       '@fastify/cookie': ^11.0.0
       '@nestjs/common': ^10.0.0 || ^11.0.0
       '@nestjs/graphql': ^13.2.4
-      '@omnixys/contracts': ^1.5.1
+      '@omnixys/shared': file:../shared
       fastify: ^5.8.4
       graphql: ^16.13.2
-
-  '@omnixys/contracts@1.9.0':
-    resolution: {integrity: sha512-KMjBGfddIHfXS0Fw9W6FRnZg5RU6bUHNqKX5UW166UyfdxoobRJRrtYHksdt4Gr+iQvupY/KB67lFWC7h+/l4w==, tarball: https://npm.pkg.github.com/download/@omnixys/contracts/1.9.0/ca7f09c0360cd2b8f42859cce28a4aa836087900}
-    peerDependencies:
-      '@nestjs/common': ^11.0.0
+      rxjs: ^7.8.2
 
   '@omnixys/graphql@file:../../packages/ts/graphql':
     resolution: {directory: ../../packages/ts/graphql, type: directory}
@@ -4291,6 +4291,11 @@ packages:
 
   graphmatch@1.1.1:
     resolution: {integrity: sha512-5ykVn/EXM1hF0XCaWh05VbYvEiOL2lY1kBxZtaYsyvjp7cmWOU1XsAdfQBwClraEofXDT197lFbXOEVMHpvQOg==}
+
+  graphql-subscriptions@3.0.0:
+    resolution: {integrity: sha512-kZCdevgmzDjGAOqH7GlDmQXYAkuHoKpMlJrqF40HMPhUhM5ZWSFSxCwD/nSi6AkaijmMfsFhoJRGJ27UseCvRA==}
+    peerDependencies:
+      graphql: ^15.7.2 || ^16.0.0
 
   graphql-tag@2.12.6:
     resolution: {integrity: sha512-FdSNcu2QQcWnM2VNvSCCDCVS5PpPqpzgFT8+GXzqJuoDd0CBncxCY278u4mhRO7tMgo2JjgJA5aZ+nWSQ/Z+xg==}
@@ -8254,34 +8259,31 @@ snapshots:
     dependencies:
       '@octokit/openapi-types': 27.0.0
 
-  '@omnixys/cache@file:../../packages/ts/cache(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@omnixys/observability@file:../../packages/ts/observability(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(@nestjs/graphql@13.2.4(@apollo/subgraph@2.13.3(graphql@16.12.0))(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(class-validator@0.14.4)(graphql@16.12.0)(reflect-metadata@0.2.2)(ts-morph@27.0.2))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(fastify@5.8.2))':
+  '@omnixys/cache@file:../../packages/ts/cache(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@omnixys/observability@file:../../packages/ts/observability(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(@nestjs/graphql@13.2.4(@apollo/subgraph@2.13.3(graphql@16.12.0))(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(class-validator@0.14.4)(graphql@16.12.0)(reflect-metadata@0.2.2)(ts-morph@27.0.2))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(fastify@5.8.2))(@omnixys/shared@file:../../packages/ts/shared(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)))':
     dependencies:
       '@nestjs/common': 11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@omnixys/observability': file:../../packages/ts/observability(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(@nestjs/graphql@13.2.4(@apollo/subgraph@2.13.3(graphql@16.12.0))(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(class-validator@0.14.4)(graphql@16.12.0)(reflect-metadata@0.2.2)(ts-morph@27.0.2))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(fastify@5.8.2)
+      '@omnixys/shared': file:../../packages/ts/shared(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))
       '@valkey/client': 1.0.0
 
-  '@omnixys/context@file:../../packages/ts/context(@fastify/cookie@11.0.2)(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.2.4(@apollo/subgraph@2.13.3(graphql@16.12.0))(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(class-validator@0.14.4)(graphql@16.12.0)(reflect-metadata@0.2.2)(ts-morph@27.0.2))(@omnixys/contracts@1.9.0(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)))(fastify@5.8.2)(graphql@16.12.0)':
+  '@omnixys/context@file:../../packages/ts/context(@fastify/cookie@11.0.2)(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.2.4(@apollo/subgraph@2.13.3(graphql@16.12.0))(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(class-validator@0.14.4)(graphql@16.12.0)(reflect-metadata@0.2.2)(ts-morph@27.0.2))(@omnixys/shared@file:../../packages/ts/shared(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)))(fastify@5.8.2)(graphql@16.12.0)(rxjs@7.8.2)':
     dependencies:
       '@fastify/cookie': 11.0.2
       '@nestjs/common': 11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/graphql': 13.2.4(@apollo/subgraph@2.13.3(graphql@16.12.0))(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(class-validator@0.14.4)(graphql@16.12.0)(reflect-metadata@0.2.2)(ts-morph@27.0.2)
-      '@omnixys/contracts': 1.9.0(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))
+      '@omnixys/shared': file:../../packages/ts/shared(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))
       fastify: 5.8.2
       geoip-lite: 1.4.10
       graphql: 16.12.0
+      rxjs: 7.8.2
       ua-parser-js: 1.0.41
 
-  '@omnixys/contracts@1.9.0(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))':
-    dependencies:
-      '@nestjs/common': 11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      jose: 6.2.2
-
-  '@omnixys/graphql@file:../../packages/ts/graphql(d5ca5031f7f0fd69d5916adb0785056b)':
+  '@omnixys/graphql@file:../../packages/ts/graphql(f11f41b0c2d14438e96a83e073653f4c)':
     dependencies:
       '@nestjs/apollo': 13.2.4(@apollo/server@5.5.0(graphql@16.12.0))(@apollo/subgraph@2.13.3(graphql@16.12.0))(@as-integrations/fastify@3.1.0(@apollo/server@5.5.0(graphql@16.12.0))(fastify@5.8.2))(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(@nestjs/graphql@13.2.4(@apollo/subgraph@2.13.3(graphql@16.12.0))(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(class-validator@0.14.4)(graphql@16.12.0)(reflect-metadata@0.2.2)(ts-morph@27.0.2))(graphql@16.12.0)
       '@nestjs/common': 11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/graphql': 13.2.4(@apollo/subgraph@2.13.3(graphql@16.12.0))(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(class-validator@0.14.4)(graphql@16.12.0)(reflect-metadata@0.2.2)(ts-morph@27.0.2)
-      '@omnixys/context': file:../../packages/ts/context(@fastify/cookie@11.0.2)(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.2.4(@apollo/subgraph@2.13.3(graphql@16.12.0))(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(class-validator@0.14.4)(graphql@16.12.0)(reflect-metadata@0.2.2)(ts-morph@27.0.2))(@omnixys/contracts@1.9.0(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)))(fastify@5.8.2)(graphql@16.12.0)
+      '@omnixys/context': file:../../packages/ts/context(@fastify/cookie@11.0.2)(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.2.4(@apollo/subgraph@2.13.3(graphql@16.12.0))(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(class-validator@0.14.4)(graphql@16.12.0)(reflect-metadata@0.2.2)(ts-morph@27.0.2))(@omnixys/shared@file:../../packages/ts/shared(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)))(fastify@5.8.2)(graphql@16.12.0)(rxjs@7.8.2)
       '@omnixys/shared': file:../../packages/ts/shared(@nestjs/common@11.1.17(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))
       class-validator: 0.14.4
 
@@ -11587,6 +11589,10 @@ snapshots:
   grammex@3.1.12: {}
 
   graphmatch@1.1.1: {}
+
+  graphql-subscriptions@3.0.0(graphql@16.12.0):
+    dependencies:
+      graphql: 16.12.0
 
   graphql-tag@2.12.6(graphql@16.12.0):
     dependencies:

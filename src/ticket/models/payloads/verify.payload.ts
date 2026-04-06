@@ -1,6 +1,6 @@
-import { Ticket } from '../entities/ticket.entity.js';
 import { ScanVerdict } from '../enums/scan-verdict.enum.js';
 import { Field, ObjectType, Int, Float } from '@nestjs/graphql';
+import { TicketPayload } from './ticket-payload.js';
 
 @ObjectType()
 export class TicketTokenPayload {
@@ -11,10 +11,10 @@ export class TicketTokenPayload {
   eid!: string; // EventId
 
   @Field(() => String, { nullable: true })
-  gid?: string | null; // GuestProfileId
+  gid?: string; // GuestProfileId
 
   @Field(() => String, { nullable: true })
-  sid?: string | null; // SeatId
+  sid?: string; // SeatId
 
   @Field(() => Int)
   dn!: number; // next nonce
@@ -23,13 +23,13 @@ export class TicketTokenPayload {
   ts!: number; // timestamp (epoch ms)
 
   @Field(() => String, { nullable: true })
-  dh?: string | null; // deviceHash (optional)
+  dh?: string; // deviceHash (optional)
 }
 
 @ObjectType()
 export class VerifyPayload {
-  @Field(() => Ticket)
-  ticket!: Ticket;
+  @Field(() => TicketPayload)
+  ticket!: TicketPayload;
 
   @Field(() => TicketTokenPayload)
   payload!: TicketTokenPayload;
@@ -41,7 +41,7 @@ export class VerifyPayload {
   valid!: boolean;
 
   @Field(() => Int, { nullable: true })
-  expectedNonce!: number | null;
+  expectedNonce?: number;
 
   @Field(() => Int)
   receivedNonce!: number;

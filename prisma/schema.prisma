@@ -21,25 +21,27 @@ model Ticket {
 
   eventId        String  @map("event_id")
   invitationId   String  @unique @map("invitation_id")
-  seatId         String? @unique @map("seat_id")
-  guestProfileId String? @unique @map("guest_profile_id")
+  seatId         String @unique @map("seat_id")
+  guestProfileId String @map("guest_profile_id")
 
   // Security: Device Binding
-  deviceHash         String?   @map("device_hash") // Fingerprint
-  devicePublicKey    String?   @unique @map("device_public_key") // POP (Proof-of-Possession)
+  devicePublicKey    String?   @db.Text @map("device_public_key")
   deviceActivationAt DateTime? @map("device_activation_at")
   deviceActivationIP String?   @map("device_activation_ip")
+  deviceId String? @map("device_id")
 
   // Token Rotation
   lastNonce       Int?      @map("last_nonce")
   nextNonce       Int?      @map("next_nonce")
-  rotationSeconds Int       @default(30) @map("rotation_seconds")
-  lastRotatedAt   DateTime? @map("last_rotated_at")
 
   // State
   checkedInAt  DateTime?     @map("checked_in_at")
   currentState PresenceState @default(OUTSIDE) @map("current_state")
-  revoked      Boolean       @default(false) @map("revoked")
+
+  revoked             Boolean   @default(false)
+  revokedAt           DateTime?
+  revokedBy           String?
+  revokedReason       String?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -50,11 +52,12 @@ model Ticket {
 
   // Prevent multiple tickets per guest per event
   @@unique([eventId, guestProfileId], name: "uq_guest_one_ticket_per_event")
-  @@index([deviceHash, lastNonce], name: "idx_device_hash_nonce")
+
   @@index([eventId], name: "idx_ticket_event")
   @@index([guestProfileId], name: "idx_ticket_guest_profile")
   @@index([seatId], name: "idx_ticket_seat")
   @@index([currentState], name: "idx_ticket_state")
+
   @@map("ticket")
   @@schema("ticket")
 }
@@ -64,14 +67,14 @@ model ScanLog {
 
   ticketId String  @map("ticket_id")
   eventId  String  @map("event_id")
-  byUserId String? @map("by_user_id")
+  actorId String @map("actor_id")
 
   direction PresenceState @map("direction")
   gate      String?       @map("gate")
 
   verdict    ScanVerdict @default(UNKNOWN) @map("verdict") // OK / REPLAY / INVALID_NONCE / BLOCKED / DEVICE_MISMATCH
   nonce      Int?        @map("nonce")
-  deviceHash String?     @map("device_hash")
+  deviceId String? @map("device_id")
 
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -82,6 +85,8 @@ model ScanLog {
   @@index([eventId, createdAt], name: "idx_scanlog_event_ts")
   @@index([ticketId], name: "idx_scanlog_ticket")
   @@index([verdict], name: "idx_scanlog_verdict")
+  @@index([ticketId, createdAt], name: "idx_scanlog_ticket_ts")
+  
   @@map("scan_log")
   @@schema("ticket")
 }
