@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { Kafka } from 'kafkajs';
+import { ScanLog, ScanVerdict, Ticket } from '../../prisma/generated/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { VerifyService } from './verify.service.js';
-import { ScanLog, ScanVerdict, Ticket } from '../../prisma/generated/client.js';
+import { Injectable } from '@nestjs/common';
+import { Kafka } from 'kafkajs';
 
 export interface SecurityScanInput {
   token: string;
@@ -29,8 +29,18 @@ export class ScanService {
     private readonly verify: VerifyService,
   ) {}
 
-  async scan({token, signature, deviceId, gate, actorId}: SecurityScanInput): Promise<ScanPayloadDTO>  {
-    const { ticket, payload, verdict, message } = await this.verify.verifyToken(token, signature, deviceId);
+  async scan({
+    token,
+    signature,
+    deviceId,
+    gate,
+    actorId,
+  }: SecurityScanInput): Promise<ScanPayloadDTO> {
+    const { ticket, payload, verdict, message } = await this.verify.verifyToken(
+      token,
+      signature,
+      deviceId,
+    );
 
     const log = await this.prisma.scanLog.create({
       data: {

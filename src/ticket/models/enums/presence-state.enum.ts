@@ -2,14 +2,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
+import { PresenceState } from '../../../prisma/generated/client.js';
 import { registerEnumType } from '@nestjs/graphql';
 
-export enum PresenceState {
-  INSIDE = 'INSIDE',
-  OUTSIDE = 'OUTSIDE',
-}
+export const PresenceStateGraphQL = PresenceState;
 
-registerEnumType(PresenceState, {
+registerEnumType(PresenceStateGraphQL, {
   name: 'PresenceState',
   description:
     'Whether the ticket holder is currently INSIDE or OUTSIDE the venue.',

@@ -13,6 +13,15 @@ export interface QrPayload {
   kid?: string;
 }
 
+function isStringRecord(value: unknown): value is Record<string, string> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.values(value).every((entry) => typeof entry === 'string')
+  );
+}
+
 @Injectable()
 export class TokenService {
   private readonly encKey: Uint8Array;
@@ -44,7 +53,11 @@ export class TokenService {
 
     let parsed: Record<string, string>;
     try {
-      parsed = JSON.parse(rawKeys);
+      const parsedJson: unknown = JSON.parse(rawKeys);
+      if (!isStringRecord(parsedJson)) {
+        throw new Error('Invalid key map');
+      }
+      parsed = parsedJson;
     } catch {
       throw new InternalServerErrorException('QR_JWS_KEYS must be valid JSON');
     }
@@ -59,7 +72,7 @@ export class TokenService {
       this.signKeys.set(kid, key);
     }
 
-    this.activeKid = process.env.QR_ACTIVE_KID || 'v1';
+    this.activeKid = process.env.QR_ACTIVE_KID ?? 'v1';
 
     if (!this.signKeys.has(this.activeKid)) {
       throw new InternalServerErrorException(`Active KID ${this.activeKid} not found`);
@@ -85,12 +98,16 @@ export class TokenService {
   }
 
   verifyDeviceHash(deviceId: string, dh?: string): boolean {
-    if (!dh) return true;
+    if (!dh) {
+      return true;
+    }
 
     const expected = Buffer.from(this.hashDevice(deviceId));
     const actual = Buffer.from(dh);
 
-    if (expected.length !== actual.length) return false;
+    if (expected.length !== actual.length) {
+      return false;
+    }
 
     return timingSafeEqual(expected, actual);
   }
@@ -108,13 +125,13 @@ export class TokenService {
       throw new InternalServerErrorException('Signing key missing');
     }
 
-    const enriched: QrPayload = {
+    const enriched: jose.JWTPayload & QrPayload = {
       ...payload,
       ts: Date.now(),
       kid: this.activeKid,
     };
 
-    const jws = await new jose.SignJWT(enriched as any)
+    const jws = await new jose.SignJWT(enriched)
       .setProtectedHeader({
         alg: 'HS256',
         kid: this.activeKid,

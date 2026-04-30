@@ -1,4 +1,7 @@
+import type { Ticket } from '../prisma/generated/client.js';
+import type { TicketGetPayload } from '../prisma/generated/models/Ticket.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import type { QrPayload } from '../ticket/service/token.service.js';
 import { TokenService } from '../ticket/service/token.service.js';
 import { Injectable } from '@nestjs/common';
 import { ValkeyService } from '@omnixys/cache';
@@ -20,7 +23,7 @@ export class DevService {
     invitationId: string;
     guestProfileId: string;
     seatId: string;
-  }) {
+  }): Promise<Ticket> {
     return this.prisma.ticket.create({
       data: {
         eventId: input.eventId,
@@ -36,14 +39,18 @@ export class DevService {
   // ---------------------------------------------------
   // Decode token
   // ---------------------------------------------------
-  async decodeToken(token: string) {
+  async decodeToken(token: string): Promise<QrPayload> {
     return this.tokenService.verify(token);
   }
 
   // ---------------------------------------------------
   // Sign token
   // ---------------------------------------------------
-  async signToken(token: string, deviceId: string, privateKeyBase64: string) {
+  async signToken(
+    token: string,
+    deviceId: string,
+    privateKeyBase64: string,
+  ): Promise<{ message: string; signature: string }> {
     const message = `${token}.${deviceId}`;
 
     const signer = createSign('SHA256');
@@ -67,7 +74,7 @@ export class DevService {
   // ---------------------------------------------------
   // Replay debug
   // ---------------------------------------------------
-  async getReplayKeys(ticketId: string) {
+  async getReplayKeys(ticketId: string): Promise<Record<string, string>> {
     const pattern = `qr:replay:${ticketId}:*`;
     const keys = await this.valkey.client.keys(pattern);
 
@@ -81,7 +88,7 @@ export class DevService {
     return values;
   }
 
-  async resetReplay(ticketId: string) {
+  async resetReplay(ticketId: string): Promise<{ deleted: number }> {
     const pattern = `qr:replay:${ticketId}:*`;
     const keys = await this.valkey.client.keys(pattern);
 
@@ -95,7 +102,7 @@ export class DevService {
   // ---------------------------------------------------
   // Ticket reset
   // ---------------------------------------------------
-  async resetTicket(ticketId: string) {
+  async resetTicket(ticketId: string): Promise<Ticket> {
     return this.prisma.ticket.update({
       where: { id: ticketId },
       data: {
@@ -110,7 +117,15 @@ export class DevService {
   // ---------------------------------------------------
   // Debug snapshot
   // ---------------------------------------------------
-  async getTicketDebug(ticketId: string) {
+  async getTicketDebug(ticketId: string): Promise<TicketGetPayload<{
+    include: {
+      shareGuard: true;
+      scanLogs: {
+        orderBy: { createdAt: 'desc' };
+        take: 20;
+      };
+    };
+  }> | null> {
     return this.prisma.ticket.findUnique({
       where: { id: ticketId },
       include: {
@@ -123,7 +138,7 @@ export class DevService {
     });
   }
 
-  async generateKeyPair() {
+  async generateKeyPair(): Promise<{ publicKey: string; privateKey: string }> {
     const { generateKeyPairSync } = await import('crypto');
 
     const { publicKey, privateKey } = generateKeyPairSync('ec', {
@@ -140,7 +155,7 @@ export class DevService {
     };
   }
 
-  async generateSecrets() {
+  async generateSecrets(): Promise<{ jwe: string; jws: string }> {
     const { randomBytes } = await import('crypto');
 
     return {

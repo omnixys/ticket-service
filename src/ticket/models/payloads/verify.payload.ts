@@ -1,6 +1,6 @@
 import { ScanVerdict } from '../enums/scan-verdict.enum.js';
-import { Field, ObjectType, Int, Float } from '@nestjs/graphql';
 import { TicketPayload } from './ticket-payload.js';
+import { Field, ObjectType, Int, Float } from '@nestjs/graphql';
 
 @ObjectType()
 export class TicketTokenPayload {

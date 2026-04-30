@@ -17,12 +17,12 @@ datasource db {
 /// Ticket: main aggregate root for the ticket domain
 /// ----------------------------------------------------------------------
 model Ticket {
-  id String @id @default(cuid()) @map("id")
+  id String @id @default(uuid()) @map("id") @db.Uuid
 
-  eventId        String  @map("event_id")
-  invitationId   String  @unique @map("invitation_id")
-  seatId         String @unique @map("seat_id")
-  guestProfileId String @map("guest_profile_id")
+  eventId        String  @map("event_id") @db.Uuid
+  invitationId   String  @unique @map("invitation_id") @db.Uuid
+  seatId         String @unique @map("seat_id") @db.Uuid
+  guestProfileId String @map("guest_profile_id") @db.Uuid
 
   // Security: Device Binding
   devicePublicKey    String?   @db.Text @map("device_public_key")
@@ -63,11 +63,11 @@ model Ticket {
 }
 
 model ScanLog {
-  id String @id @default(cuid()) @map("id")
+  id String @id @default(uuid()) @map("id") @db.Uuid
 
-  ticketId String  @map("ticket_id")
-  eventId  String  @map("event_id")
-  actorId String @map("actor_id")
+  ticketId String  @map("ticket_id") @db.Uuid
+  eventId  String  @map("event_id") @db.Uuid
+  actorId String @map("actor_id") @db.Uuid
 
   direction PresenceState @map("direction")
   gate      String?       @map("gate")
@@ -92,9 +92,9 @@ model ScanLog {
 }
 
 model ShareGuard {
-  id String @id @default(cuid()) @map("id")
+  id String @id @default(uuid()) @map("id") @db.Uuid
 
-  ticketId String @unique @map("ticket_id")
+  ticketId String @unique @map("ticket_id") @db.Uuid
 
   failCount    Int       @default(0) @map("fail_count")
   lastFailAt   DateTime? @map("last_fail_at")

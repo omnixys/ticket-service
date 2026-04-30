@@ -1,9 +1,8 @@
 // src/ticket/models/mapper/scan-log.mapper.ts
-import { n2u } from '@omnixys/shared';
-import { ScanLog } from '../../../prisma/generated/client.js';
-import type { PresenceState } from '../enums/presence-state.enum.js';
+import type { ScanLog } from '../../../prisma/generated/client.js';
 import type { ScanVerdict } from '../enums/scan-verdict.enum.js';
-import { ScanLogPayload } from '../payloads/scan-log-list.payload.js';
+import type { ScanLogPayload } from '../payloads/scan-log-list.payload.js';
+import { n2u } from '@omnixys/shared';
 
 /**
  * Maps a Prisma ScanLog row → GraphQL ScanLog Entity.
@@ -16,7 +15,7 @@ export function mapScanLog(row: ScanLog): ScanLogPayload {
 
     actorId: row.actorId,
 
-    direction: row.direction as PresenceState,
+    direction: row.direction,
     verdict: row.verdict as ScanVerdict,
 
     gate: n2u(row.gate ?? null),

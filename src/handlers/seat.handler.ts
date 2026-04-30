@@ -28,9 +28,18 @@ import {
 } from '@omnixys/kafka';
 import { OmnixysLogger } from '@omnixys/logger';
 import { TraceRunner } from '@omnixys/observability';
-import { GuestTicketKey, CreateUserWithInvitationIdDTO} from '@omnixys/shared';
+import { GuestTicketKey, CreateUserWithInvitationIdDTO } from '@omnixys/shared';
 
 const { SERVICE } = env;
+
+interface KafkaMeta {
+  actorId: string;
+  tenantId: string;
+  service: string;
+  operation: string;
+  version: string;
+  type: EventType;
+}
 
 /**
  * Kafka event handler responsible for useristrative commands such as
@@ -61,16 +70,20 @@ export class SeatHandler {
   }
 
   @KafkaEvent(KafkaTopics.ticket.create)
-  async handleCreateTicket(payload: CreateUserWithInvitationIdDTO) {
+  async handleCreateTicket(
+    payload: CreateUserWithInvitationIdDTO,
+  ): Promise<void> {
     return TraceRunner.run('[HANDLER] createTicket', async () => {
-      this.logger.debug('create ticket Handler')
+      this.logger.debug('create ticket Handler');
       const { token, invitationId, userId } = payload;
 
       const raw = await this.cache.get(
         ValkeyKey.guestVerificationTicket,
         token,
       );
-      if (!raw) throw new Error('Invalid token');
+      if (!raw) {
+        throw new Error('Invalid token');
+      }
 
       const input = JSON.parse(raw) as GuestTicketKey;
 
@@ -106,7 +119,7 @@ export class SeatHandler {
   /**
    * Standard Kafka metadata builder.
    */
-  private meta(actorId: string, operation: string) {
+  private meta(actorId: string, operation: string): KafkaMeta {
     const type: EventType = 'EVENT';
     return {
       actorId,

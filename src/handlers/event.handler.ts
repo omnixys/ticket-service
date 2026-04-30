@@ -26,7 +26,7 @@ import {
 } from '@omnixys/kafka';
 import { OmnixysLogger } from '@omnixys/logger';
 import { TraceRunner } from '@omnixys/observability';
-import {  EventIdsDTO } from '@omnixys/shared';
+import { EventIdsDTO } from '@omnixys/shared';
 
 /**
  * Kafka event handler responsible for useristrative commands such as
@@ -55,7 +55,10 @@ export class EventHandler {
   }
 
   @KafkaEvent(KafkaTopics.ticket.deleteEventTickets)
-  async handleDeleteTicketsByEventIds(payload: EventIdsDTO, context: IKafkaEventContext) {
+  async handleDeleteTicketsByEventIds(
+    payload: EventIdsDTO,
+    context: IKafkaEventContext,
+  ): Promise<void> {
     return TraceRunner.run(
       '[HANDLER] handleDeleteTicketsByEventIds',
       async () => {
@@ -72,5 +75,4 @@ export class EventHandler {
       },
     );
   }
-
 }

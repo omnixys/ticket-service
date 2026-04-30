@@ -1,4 +1,4 @@
-import { ScanVerdict } from "../../prisma/generated/client.js";
+import type { ScanVerdict } from '../../prisma/generated/client.js';
 
 export const ScanMessages: Record<ScanVerdict, string> = {
   OK: 'Access granted',
@@ -8,12 +8,11 @@ export const ScanMessages: Record<ScanVerdict, string> = {
   INVALID_NONCE: 'Invalid scan',
   REPLAY: 'Scan already used',
   UNKNOWN: 'Unkown',
-  EXPIRED_EVENT: 'Event Expired'
-  
+  EXPIRED_EVENT: 'Event Expired',
 
-  //DEVICE_NOT_ACTIVATED: 'Device not registered',
+  // DEVICE_NOT_ACTIVATED: 'Device not registered',
 
-  //ERROR: 'Scan failed',
+  // ERROR: 'Scan failed',
 } as const satisfies Record<ScanVerdict, string>;
 
 export const ScanDebugMessages: Record<string, string> = {

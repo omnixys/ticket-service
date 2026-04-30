@@ -51,7 +51,7 @@ export class AuthenticationHandler {
    */
   constructor(
     private readonly omnixysLogger: OmnixysLogger,
-       private readonly ticketWriteService: TicketWriteService,
+    private readonly ticketWriteService: TicketWriteService,
   ) {
     this.logger = this.omnixysLogger.log(this.constructor.name);
   }
@@ -60,7 +60,7 @@ export class AuthenticationHandler {
   async handleDeleteTicketsByGuest(
     payload: UserIdDTO,
     context: IKafkaEventContext,
-  ) {
+  ): Promise<void> {
     return TraceRunner.run('[HANDLER] handleDeleteTicketsByGuest', async () => {
       const headers = context.headers;
       const actorId = headers[KAFKA_HEADERS.ACTOR_ID] ?? 'Unkown';

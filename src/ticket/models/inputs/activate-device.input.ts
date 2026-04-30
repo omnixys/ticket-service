@@ -13,7 +13,6 @@ export class ActivateDeviceInput {
   publicKey!: string;
 }
 
-
 export interface ActivateDeviceDTO {
   ticketId: string;
   publicKey: string;

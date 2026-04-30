@@ -1,7 +1,6 @@
+import type { Ticket } from '../../../prisma/generated/client.js';
+import type { TicketPayload } from '../payloads/ticket-payload.js';
 import { n2u } from '@omnixys/shared';
-import { Ticket } from '../../../prisma/generated/client.js';
-import type { PresenceState } from '../enums/presence-state.enum.js';
-import { TicketPayload } from '../payloads/ticket-payload.js';
 
 /**
  * Maps a Prisma Ticket row → GraphQL Ticket Entity
@@ -26,7 +25,7 @@ export function mapTicket(row: Ticket): TicketPayload {
     nextNonce: n2u(row.nextNonce),
 
     // --- State ---
-    currentState: row.currentState as PresenceState,
+    currentState: row.currentState,
     checkedInAt: n2u(row.checkedInAt),
 
     revoked: row.revoked,

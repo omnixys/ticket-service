@@ -1,3 +1,5 @@
+import { PresenceState } from '../../../prisma/generated/client.js';
+import { PresenceStateGraphQL } from '../enums/presence-state.enum.js';
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
@@ -28,8 +30,8 @@ export class TicketPayload {
   @Field(() => Int, { nullable: true })
   nextNonce?: number;
 
-  @Field(() => String)
-  currentState!: string;
+  @Field(() => PresenceStateGraphQL)
+  currentState!: PresenceState;
   @Field(() => Date, { nullable: true })
   checkedInAt?: Date;
 

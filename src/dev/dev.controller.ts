@@ -17,7 +17,7 @@ export class DevController {
       guestProfileId: string;
       seatId: string;
     },
-  ) {
+  ): ReturnType<DevService['createTicket']> {
     return this.dev.createTicket(body);
   }
 
@@ -25,7 +25,7 @@ export class DevController {
   // Decode token (JWE + JWS)
   // ---------------------------------------------------
   @Post('decode')
-  async decode(@Body() body: { token: string }) {
+  async decode(@Body() body: { token: string }): ReturnType<DevService['decodeToken']> {
     return this.dev.decodeToken(body.token);
   }
 
@@ -40,7 +40,7 @@ export class DevController {
       deviceId: string;
       privateKey: string;
     },
-  ) {
+  ): ReturnType<DevService['signToken']> {
     return this.dev.signToken(body.token, body.deviceId, body.privateKey);
   }
 
@@ -48,7 +48,7 @@ export class DevController {
   // Replay keys
   // ---------------------------------------------------
   @Get('replay/:ticketId')
-  async replay(@Param('ticketId') ticketId: string) {
+  async replay(@Param('ticketId') ticketId: string): ReturnType<DevService['getReplayKeys']> {
     return this.dev.getReplayKeys(ticketId);
   }
 
@@ -56,7 +56,7 @@ export class DevController {
   // Reset replay keys
   // ---------------------------------------------------
   @Post('replay/reset/:ticketId')
-  async resetReplay(@Param('ticketId') ticketId: string) {
+  async resetReplay(@Param('ticketId') ticketId: string): ReturnType<DevService['resetReplay']> {
     return this.dev.resetReplay(ticketId);
   }
 
@@ -64,7 +64,7 @@ export class DevController {
   // Reset ticket state
   // ---------------------------------------------------
   @Post('ticket/reset/:ticketId')
-  async resetTicket(@Param('ticketId') ticketId: string) {
+  async resetTicket(@Param('ticketId') ticketId: string): ReturnType<DevService['resetTicket']> {
     return this.dev.resetTicket(ticketId);
   }
 
@@ -72,17 +72,17 @@ export class DevController {
   // Full debug snapshot
   // ---------------------------------------------------
   @Get('ticket/:ticketId')
-  async debugTicket(@Param('ticketId') ticketId: string) {
+  async debugTicket(@Param('ticketId') ticketId: string): ReturnType<DevService['getTicketDebug']> {
     return this.dev.getTicketDebug(ticketId);
   }
 
   @Get('keys')
-  generateKeys() {
+  generateKeys(): ReturnType<DevService['generateKeyPair']> {
     return this.dev.generateKeyPair();
   }
 
   @Get('secrets')
-  getSecrets() {
+  getSecrets(): ReturnType<DevService['generateSecrets']> {
     return this.dev.generateSecrets();
   }
 }

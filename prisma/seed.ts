@@ -21,10 +21,10 @@
 /* ----------------------------------------------------------------------
  * Constants
  * -------------------------------------------------------------------- */
-const EVENT_ID = 'cmm52hirb00007r06xfzglibb';
+const EVENT_ID = 'cbe6b0be-8469-4fe2-a3bf-49eef3e01787';
 const GUEST_ID = 'ae489d9b-96ce-4942-bcb1-c2e2a0c92e83';
-const SEAT_ID = 'cmk93w61f001031069znui39o';
-const INVITATION_ID = 'cmm52k8m30000z206mub5qplb';
+const SEAT_ID = '44ae1850-76e0-43db-8153-78e3b0250b33';
+const INVITATION_ID = 'bb516b36-d0a3-4767-8655-7cf2030ac174';
 
 /* ----------------------------------------------------------------------
  * Seed
@@ -44,10 +44,10 @@ async function main(): Promise<void> {
       guestProfileId: GUEST_ID,
       seatId: SEAT_ID,
 
-      deviceId: 'device_hash_demo_001',
-      devicePublicKey: 'device_public_key_demo_001',
-      deviceActivationAt: new Date(),
-      deviceActivationIP: '88.130.219.21',
+      // deviceId: 'device_hash_demo_001',
+      // devicePublicKey: 'device_public_key_demo_001',
+      // deviceActivationAt: new Date(),
+      // deviceActivationIP: '88.130.219.21',
 
       lastNonce: 10,
       nextNonce: 11,
@@ -87,7 +87,7 @@ async function main(): Promise<void> {
         nonce: 10,
         deviceId: 'device_hash_demo_001',
         gate: 'Main Gate',
-        actorId: '234',
+        actorId: 'ea8b3a5b-47d0-4bf9-9bfa-bbc75adef663',
       },
       {
         ticketId: ticket.id,
@@ -97,7 +97,7 @@ async function main(): Promise<void> {
         nonce: 11,
         deviceId: 'device_hash_demo_001',
         gate: 'Main Gate',
-        actorId: '234',
+        actorId: 'ea8b3a5b-47d0-4bf9-9bfa-bbc75adef663',
       },
     ],
   });

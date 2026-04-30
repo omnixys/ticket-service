@@ -1,4 +1,5 @@
-import { PresenceState } from '../enums/presence-state.enum.js';
+import { PresenceState } from '../../../prisma/generated/enums.js';
+import { PresenceStateGraphQL } from '../enums/presence-state.enum.js';
 import { ScanVerdict } from '../enums/scan-verdict.enum.js';
 import {
   Field,
@@ -7,7 +8,6 @@ import {
   GraphQLISODateTime,
   Int,
 } from '@nestjs/graphql';
-
 
 @ObjectType()
 export class ScanLogPayload {
@@ -21,7 +21,7 @@ export class ScanLogPayload {
   @Field(() => String)
   actorId!: string;
 
-  @Field(() => PresenceState)
+  @Field(() => PresenceStateGraphQL)
   direction!: PresenceState;
   @Field(() => String, { nullable: true })
   gate?: string;

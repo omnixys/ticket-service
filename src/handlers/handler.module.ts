@@ -15,11 +15,11 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import { Module } from '@nestjs/common';
-import { SeatHandler } from './seat.handler.js';
 import { TicketModule } from '../ticket/ticket.module.js';
 import { AuthenticationHandler } from './authentication.handler.js';
 import { EventHandler } from './event.handler.js';
+import { SeatHandler } from './seat.handler.js';
+import { Module } from '@nestjs/common';
 
 @Module({
   imports: [TicketModule],

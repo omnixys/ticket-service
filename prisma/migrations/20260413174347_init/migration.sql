@@ -6,22 +6,23 @@ CREATE TYPE "ScanVerdict" AS ENUM ('OK', 'REPLAY', 'INVALID_NONCE', 'DEVICE_MISM
 
 -- CreateTable
 CREATE TABLE "ticket" (
-    "id" TEXT NOT NULL,
-    "event_id" TEXT NOT NULL,
-    "invitation_id" TEXT NOT NULL,
-    "seat_id" TEXT,
-    "guest_profile_id" TEXT,
-    "device_hash" TEXT,
+    "id" UUID NOT NULL,
+    "event_id" UUID NOT NULL,
+    "invitation_id" UUID NOT NULL,
+    "seat_id" UUID NOT NULL,
+    "guest_profile_id" UUID NOT NULL,
     "device_public_key" TEXT,
     "device_activation_at" TIMESTAMP(3),
     "device_activation_ip" TEXT,
+    "device_id" TEXT,
     "last_nonce" INTEGER,
     "next_nonce" INTEGER,
-    "rotation_seconds" INTEGER NOT NULL DEFAULT 30,
-    "last_rotated_at" TIMESTAMP(3),
     "checked_in_at" TIMESTAMP(3),
     "current_state" "PresenceState" NOT NULL DEFAULT 'OUTSIDE',
     "revoked" BOOLEAN NOT NULL DEFAULT false,
+    "revokedAt" TIMESTAMP(3),
+    "revokedBy" TEXT,
+    "revokedReason" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -30,15 +31,15 @@ CREATE TABLE "ticket" (
 
 -- CreateTable
 CREATE TABLE "scan_log" (
-    "id" TEXT NOT NULL,
-    "ticket_id" TEXT NOT NULL,
-    "event_id" TEXT NOT NULL,
-    "by_user_id" TEXT,
+    "id" UUID NOT NULL,
+    "ticket_id" UUID NOT NULL,
+    "event_id" UUID NOT NULL,
+    "actor_id" UUID NOT NULL,
     "direction" "PresenceState" NOT NULL,
     "gate" TEXT,
     "verdict" "ScanVerdict" NOT NULL DEFAULT 'UNKNOWN',
     "nonce" INTEGER,
-    "device_hash" TEXT,
+    "device_id" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "scan_log_pkey" PRIMARY KEY ("id")
@@ -46,8 +47,8 @@ CREATE TABLE "scan_log" (
 
 -- CreateTable
 CREATE TABLE "share_guard" (
-    "id" TEXT NOT NULL,
-    "ticket_id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "ticket_id" UUID NOT NULL,
     "fail_count" INTEGER NOT NULL DEFAULT 0,
     "last_fail_at" TIMESTAMP(3),
     "blocked_until" TIMESTAMP(3),
@@ -61,15 +62,6 @@ CREATE UNIQUE INDEX "ticket_invitation_id_key" ON "ticket"("invitation_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ticket_seat_id_key" ON "ticket"("seat_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "ticket_guest_profile_id_key" ON "ticket"("guest_profile_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "ticket_device_public_key_key" ON "ticket"("device_public_key");
-
--- CreateIndex
-CREATE INDEX "idx_device_hash_nonce" ON "ticket"("device_hash", "last_nonce");
 
 -- CreateIndex
 CREATE INDEX "idx_ticket_event" ON "ticket"("event_id");
@@ -97,6 +89,9 @@ CREATE INDEX "idx_scanlog_ticket" ON "scan_log"("ticket_id");
 
 -- CreateIndex
 CREATE INDEX "idx_scanlog_verdict" ON "scan_log"("verdict");
+
+-- CreateIndex
+CREATE INDEX "idx_scanlog_ticket_ts" ON "scan_log"("ticket_id", "created_at");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "share_guard_ticket_id_key" ON "share_guard"("ticket_id");

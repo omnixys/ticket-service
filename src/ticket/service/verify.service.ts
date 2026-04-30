@@ -1,13 +1,12 @@
-
 import { PresenceState, ScanVerdict, Ticket } from '../../prisma/generated/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { ScanMessages } from '../utils/scan-messages.js';
 import { ShareGuardService } from './shareguard.service.js';
-import { TokenService } from './token.service.js';
+import { QrPayload, TokenService } from './token.service.js';
 import { Injectable } from '@nestjs/common';
 import { ValkeyKey, ValkeyService } from '@omnixys/cache';
 import { n2u } from '@omnixys/shared';
-import { createVerify } from 'crypto';
+import { createPublicKey, verify } from 'crypto';
 
 function verifySignature(
   payload: string,
@@ -15,19 +14,23 @@ function verifySignature(
   publicKeyBase64: string,
 ): boolean {
   try {
-    const verifier = createVerify('SHA256');
-    verifier.update(payload);
-    verifier.end();
+    const publicKey = createPublicKey({
+      key: Buffer.from(publicKeyBase64, 'base64'),
+      format: 'der',
+      type: 'spki',
+    });
 
-    return verifier.verify(
+    return verify(
+      null, // ⚠️ wichtig für ECDSA
+      Buffer.from(payload),
       {
-        key: Buffer.from(publicKeyBase64, 'base64'),
-        format: 'der',
-        type: 'spki',
+        key: publicKey,
+        dsaEncoding: 'ieee-p1363', // 🔥 DAS IST DER FIX
       },
       Buffer.from(signatureBase64, 'base64'),
     );
-  } catch {
+  } catch (err) {
+    console.error('VERIFY ERROR', err);
     return false;
   }
 }
@@ -45,7 +48,7 @@ export class VerifyService {
     tokenStr: string,
     signature: string,
     deviceId: string,
-  ): Promise<{ ticket: Ticket; payload: any; verdict: ScanVerdict, message: string }> {
+  ): Promise<{ ticket: Ticket; payload: QrPayload; verdict: ScanVerdict; message: string }> {
     const payload = await this.token.verify(tokenStr);
 
     const ticket = await this.prisma.ticket.findUniqueOrThrow({
@@ -62,14 +65,16 @@ export class VerifyService {
       };
     }
 
-    if (await this.shareGuard.isBlocked(ticket.id))
-      return { ticket, payload, verdict: ScanVerdict.BLOCKED, message: ScanMessages.BLOCKED};
+    if (await this.shareGuard.isBlocked(ticket.id)) {
+      return { ticket, payload, verdict: ScanVerdict.BLOCKED, message: ScanMessages.BLOCKED };
+    }
 
-    if (!ticket.devicePublicKey)
+    if (!ticket.devicePublicKey) {
       return { ticket, payload, verdict: ScanVerdict.DEVICE_MISMATCH, message: 'No Public Key' };
+    }
 
     // const message = `${tokenStr}.${deviceId}.${payload.ts}`;
-    //const message = `${tokenStr}.${deviceId}.${payload.ts}.${payload.dn}`;
+    // const message = `${tokenStr}.${deviceId}.${payload.ts}.${payload.dn}`;
     const message = `${tokenStr}.${deviceId}`;
 
     if (!verifySignature(message, signature, ticket.devicePublicKey)) {
@@ -150,14 +155,12 @@ export class VerifyService {
     await this.shareGuard.resetShareGuard(ticket.id);
 
     const state =
-            ticket.currentState === PresenceState.OUTSIDE
-              ? PresenceState.INSIDE
-              : PresenceState.OUTSIDE;
-    
+      ticket.currentState === PresenceState.OUTSIDE ? PresenceState.INSIDE : PresenceState.OUTSIDE;
+
     const updated = await this.prisma.ticket.updateMany({
       where: {
         id: ticket.id,
-        nextNonce: payload.dn, 
+        nextNonce: payload.dn,
       },
       data: {
         currentState: state,

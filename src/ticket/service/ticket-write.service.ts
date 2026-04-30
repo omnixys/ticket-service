@@ -1,5 +1,6 @@
+import { PresenceState } from '../../prisma/generated/client.js';
+import type { ScanLogUncheckedCreateInput } from '../../prisma/generated/models/ScanLog.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import { PresenceState } from '../models/enums/presence-state.enum.js';
 import { ScanVerdict } from '../models/enums/scan-verdict.enum.js';
 import { ActivateDeviceDTO } from '../models/inputs/activate-device.input.js';
 import { mapTicket } from '../models/mapper/ticket.mapper.js';
@@ -8,7 +9,6 @@ import { TokenService } from './token.service.js';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { OmnixysLogger } from '@omnixys/logger';
 import { TraceRunner } from '@omnixys/observability';
-
 
 export interface UpdateTicketInput {
   id: string;
@@ -30,11 +30,11 @@ export class TicketWriteService {
   }
 
   async createTicket(data: {
-    eventId: string
-    invitationId: string
-    userId: string
-    seatId: string
-    actorId: string
+    eventId: string;
+    invitationId: string;
+    userId: string;
+    seatId: string;
+    actorId: string;
   }): Promise<TicketPayload> {
     return TraceRunner.run('[SERVICE] createTicket', async () => {
       this.logger.debug('kp');
@@ -78,7 +78,9 @@ export class TicketWriteService {
         where: { id: input.ticketId },
       });
 
-      if (!ticket) throw new NotFoundException('Ticket not found');
+      if (!ticket) {
+        throw new NotFoundException('Ticket not found');
+      }
 
       if (ticket.devicePublicKey && ticket.devicePublicKey !== input.publicKey) {
         throw new BadRequestException('Device already bound');
@@ -98,17 +100,21 @@ export class TicketWriteService {
     });
   }
 
-  async generateToken(ticketId: string) {
+  async generateToken(ticketId: string): Promise<string> {
     const ticket = await this.prisma.ticket.findUniqueOrThrow({
       where: { id: ticketId },
     });
+
+    if (ticket.nextNonce === null) {
+      throw new BadRequestException('Ticket nonce is not initialized');
+    }
 
     return this.token.generate({
       tid: ticket.id,
       eid: ticket.eventId,
       gid: ticket.guestProfileId,
       sid: ticket.seatId,
-      dn: ticket.nextNonce!,
+      dn: ticket.nextNonce,
       ts: Date.now(),
       dh: ticket.deviceId ? this.token.hashDevice(ticket.deviceId) : undefined,
     });
@@ -169,11 +175,11 @@ export class TicketWriteService {
         /**
          * 3. Delete tickets
          */
-       const count =  await tx.ticket.deleteMany({
+        const count = await tx.ticket.deleteMany({
           where: {
             id: { in: ticketIds },
           },
-       });
+        });
         return count;
       });
 
@@ -265,15 +271,15 @@ export class TicketWriteService {
     });
 
     // optional: write ScanLog "REVOKED"
-    await this.prisma.scanLog.create({
-      data: {
-        ticketId,
-        eventId: ticket.eventId,
-        direction: PresenceState.OUTSIDE,
-        verdict: ScanVerdict.REVOKED,
-        actorId,
-      } as any,
-    });
+    const scanLogData: ScanLogUncheckedCreateInput = {
+      ticketId,
+      eventId: ticket.eventId,
+      direction: PresenceState.OUTSIDE,
+      verdict: ScanVerdict.REVOKED,
+      actorId,
+    };
+
+    await this.prisma.scanLog.create({ data: scanLogData });
 
     return mapTicket(updated);
   }

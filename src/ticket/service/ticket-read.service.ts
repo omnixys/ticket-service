@@ -98,6 +98,4 @@ export class TicketReadService {
 
     return mapTicket(row);
   }
-
-  
 }

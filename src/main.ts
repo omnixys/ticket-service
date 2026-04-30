@@ -154,8 +154,8 @@ async function bootstrap(): Promise<void> {
   });
 
   /** Port-Definition (Standard: 4000) */
-  const port = Number(config.get('PORT') ?? 4000);
-  const service = config.get('SERVICE');
+  const port = Number(config.get<string>('PORT') ?? 4000);
+  const service = config.get<string>('SERVICE') ?? 'ticket';
 
   // ======================================================
   // 🧩 VALIDATION

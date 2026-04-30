@@ -3,7 +3,10 @@ import { ActivateDeviceInput } from '../models/inputs/activate-device.input.js';
 import { mapScanLog } from '../models/mapper/scan-logs.mapper.js';
 import { mapTicket } from '../models/mapper/ticket.mapper.js';
 import { ScanLogPayload } from '../models/payloads/scan-log-list.payload.js';
-import { TicketMessagePayload, TicketPayload } from '../models/payloads/ticket-payload.js';
+import {
+  TicketMessagePayload,
+  TicketPayload,
+} from '../models/payloads/ticket-payload.js';
 import { ScanService } from '../service/scan.service.js';
 import { TicketWriteService } from '../service/ticket-write.service.js';
 import { UseGuards } from '@nestjs/common';
@@ -24,6 +27,19 @@ import {
 } from '@omnixys/security';
 import { ClientContext } from '@omnixys/shared';
 
+@InputType()
+export class RevokeTicketInput implements RevokeTicketDTO {
+  @Field(() => ID)
+  ticketId!: string;
+
+  @Field(() => String, { nullable: true })
+  reason?: string;
+}
+
+export interface RevokeTicketDTO {
+  ticketId: string;
+  reason?: string;
+}
 
 @ObjectType()
 export class ScanPayload {
@@ -39,17 +55,17 @@ export class ScanPayload {
 
 @InputType()
 export class ScanInput {
-    @Field(() => String)
-    token!: string;
-  
-    @Field(() => String)
-    signature!: string;
-  
-    @Field(() => String)
-    deviceId!: string;
-  
-    @Field(() => String)
-  gate!: string;
+  @Field(() => String)
+  token!: string;
+
+  @Field(() => String)
+  signature!: string;
+
+  @Field(() => String)
+  deviceId!: string;
+
+  @Field(() => String, { nullable: true })
+  gate?: string;
 }
 
 @Resolver(() => TicketMessagePayload)
@@ -74,7 +90,7 @@ export class TicketMutationResolver {
     description: 'Rotate nonce for a ticket’s QR token',
   })
   async generateToken(
-    @Args('ticketId', { type: () => String })
+    @Args('ticketId', { type: () => ID })
     ticketId: string,
   ): Promise<string> {
     return this.ticketWrite.generateToken(ticketId);
@@ -87,6 +103,7 @@ export class TicketMutationResolver {
     @CurrentUser() user: CurrentUserData,
   ): Promise<ScanPayload> {
     const { token, signature, deviceId, gate } = input;
+
     const result = await this.scan.scan({
       token,
       signature,
@@ -123,9 +140,9 @@ export class TicketMutationResolver {
   })
   async revokeTicket(
     @CurrentUser() user: CurrentUserData,
-    @Args('ticketId', { type: () => ID }) ticketId: string,
-    @Args('reason', { nullable: true }) reason?: string,
+    @Args('input', { type: () => RevokeTicketInput }) input: RevokeTicketInput,
   ): Promise<TicketPayload> {
-    return this.ticketWrite.revoke({ticketId, reason, actorId: user.id});
+    const { ticketId, reason } = input;
+    return this.ticketWrite.revoke({ ticketId, reason, actorId: user.id });
   }
 }

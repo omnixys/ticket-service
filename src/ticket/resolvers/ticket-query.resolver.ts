@@ -1,4 +1,5 @@
 import { ScanLogPayload } from '../models/payloads/scan-log-list.payload.js';
+import { TicketPayload } from '../models/payloads/ticket-payload.js';
 import { TicketReadService } from '../service/ticket-read.service.js';
 import { UseGuards } from '@nestjs/common';
 import { Args, ID, Query, Resolver } from '@nestjs/graphql';
@@ -7,13 +8,11 @@ import {
   CurrentUser,
   CurrentUserData,
 } from '@omnixys/security';
-import { TicketPayload } from '../models/payloads/ticket-payload.js';
 
 @Resolver(() => TicketPayload)
 export class TicketQueryResolver {
   constructor(private readonly ticketRead: TicketReadService) {}
 
-  @UseGuards(CookieAuthGuard)
   @Query(() => TicketPayload, {
     description: 'Fetch a single ticket by its cuid',
   })
