@@ -31,7 +31,7 @@ model Ticket {
   deviceId String? @map("device_id")
 
   // Token Rotation
-  lastNonce       Int?      @map("last_nonce")
+  lastNonce       Int? @default(1)     @map("last_nonce")
   nextNonce       Int?      @map("next_nonce")
 
   // State

@@ -2,7 +2,6 @@ import { ScanLog, ScanVerdict, Ticket } from '../../prisma/generated/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { VerifyService } from './verify.service.js';
 import { Injectable } from '@nestjs/common';
-import { Kafka } from 'kafkajs';
 
 export interface SecurityScanInput {
   token: string;
@@ -21,12 +20,10 @@ export interface ScanPayloadDTO {
 
 @Injectable()
 export class ScanService {
-  private readonly kafka = new Kafka({ brokers: ['localhost:9092'] });
-  private readonly producer = this.kafka.producer();
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly verify: VerifyService,
+    // private readonly kafkaProducer: KafkaProducerService
   ) {}
 
   async scan({
@@ -55,21 +52,20 @@ export class ScanService {
       },
     });
 
-    await this.producer.connect();
-    await this.producer.send({
-      topic: 'ticket.scanned',
-      messages: [
-        {
-          value: JSON.stringify({
-            ticketId: ticket.id,
-            eventId: ticket.eventId,
-            verdict,
-            gate,
-            timestamp: Date.now(),
-          }),
-        },
-      ],
-    });
+    // await this.producer.send({
+    //   topic: 'ticket.scanned',
+    //   messages: [
+    //     {
+    //       value: JSON.stringify({
+    //         ticketId: ticket.id,
+    //         eventId: ticket.eventId,
+    //         verdict,
+    //         gate,
+    //         timestamp: Date.now(),
+    //       }),
+    //     },
+    //   ],
+    // });
 
     return { ticket, log, verdict, message };
   }

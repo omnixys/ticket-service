@@ -37,7 +37,6 @@ export class TicketWriteService {
     actorId: string;
   }): Promise<TicketPayload> {
     return TraceRunner.run('[SERVICE] createTicket', async () => {
-      this.logger.debug('kp');
       const existing = await this.prisma.ticket.findUnique({
         where: { invitationId: data.invitationId },
       });
@@ -52,6 +51,7 @@ export class TicketWriteService {
           invitationId: data.invitationId,
           guestProfileId: data.userId ?? null,
           seatId: data.seatId ?? null,
+          nextNonce: 1,
         },
       });
 
