@@ -9,10 +9,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/omnixys/omnixys-ticket-service.git"
+    "url": "https://github.com/omnixys/ticket-service.git"
   },
   "bugs": {
-    "url": "https://github.com/omnixys/omnixys-ticket-service/issues"
+    "url": "https://github.com/omnixys/ticket-service/issues"
   },
   "homepage": "https://omnixys.com",
   "license": "GPL-3.0-or-later",
