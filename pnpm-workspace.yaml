@@ -1,3 +1,12 @@
+allowBuilds:
+  '@apollo/protobufjs': true
+  '@nestjs/core': true
+  '@prisma/engines': true
+  '@swc/core': true
+  argon2: true
+  esbuild: true
+  prisma: true
+  protobufjs: true
 onlyBuiltDependencies:
   - '@apollo/protobufjs'
   - '@nestjs/core'

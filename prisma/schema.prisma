@@ -10,7 +10,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["ticket"]
 }
 
 /// ----------------------------------------------------------------------
@@ -39,15 +38,15 @@ model Ticket {
   currentState PresenceState @default(OUTSIDE) @map("current_state")
 
   revoked             Boolean   @default(false)
-  revokedAt           DateTime?
-  revokedBy           String?
-  revokedReason       String?
+  revokedAt           DateTime? @map("revoked_at")
+  revokedBy           String? @map("revoked_by")
+  revokedReason       String? @map("revoked_reason")
 
   createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
 
   // Relations
-  scanLogs   ScanLog[]
+  scanLogs   ScanLog[] 
   shareGuard ShareGuard?
 
   // Prevent multiple tickets per guest per event
@@ -59,7 +58,6 @@ model Ticket {
   @@index([currentState], name: "idx_ticket_state")
 
   @@map("ticket")
-  @@schema("ticket")
 }
 
 model ScanLog {
@@ -88,7 +86,6 @@ model ScanLog {
   @@index([ticketId, createdAt], name: "idx_scanlog_ticket_ts")
   
   @@map("scan_log")
-  @@schema("ticket")
 }
 
 model ShareGuard {
@@ -106,7 +103,6 @@ model ShareGuard {
   @@index([blockedUntil], name: "idx_shareguard_blocked")
   @@index([failCount], name: "idx_shareguard_fails")
   @@map("share_guard")
-  @@schema("ticket")
 }
 
 /// ----------------------------------------------------------------------
@@ -116,7 +112,7 @@ enum PresenceState {
   INSIDE
   OUTSIDE
 
-  @@schema("ticket")
+  @@map("presence_state")
 }
 
 enum ScanVerdict {
@@ -129,5 +125,5 @@ enum ScanVerdict {
   UNKNOWN // Default fallback
   EXPIRED_EVENT
 
-  @@schema("ticket")
+  @@map("scan_verdict")
 }

@@ -1,8 +1,8 @@
 -- CreateEnum
-CREATE TYPE "PresenceState" AS ENUM ('INSIDE', 'OUTSIDE');
+CREATE TYPE "presence_state" AS ENUM ('INSIDE', 'OUTSIDE');
 
 -- CreateEnum
-CREATE TYPE "ScanVerdict" AS ENUM ('OK', 'REPLAY', 'INVALID_NONCE', 'DEVICE_MISMATCH', 'BLOCKED', 'REVOKED', 'UNKNOWN', 'EXPIRED_EVENT');
+CREATE TYPE "scan_verdict" AS ENUM ('OK', 'REPLAY', 'INVALID_NONCE', 'DEVICE_MISMATCH', 'BLOCKED', 'REVOKED', 'UNKNOWN', 'EXPIRED_EVENT');
 
 -- CreateTable
 CREATE TABLE "ticket" (
@@ -15,14 +15,14 @@ CREATE TABLE "ticket" (
     "device_activation_at" TIMESTAMP(3),
     "device_activation_ip" TEXT,
     "device_id" TEXT,
-    "last_nonce" INTEGER,
+    "last_nonce" INTEGER DEFAULT 1,
     "next_nonce" INTEGER,
     "checked_in_at" TIMESTAMP(3),
-    "current_state" "PresenceState" NOT NULL DEFAULT 'OUTSIDE',
+    "current_state" "presence_state" NOT NULL DEFAULT 'OUTSIDE',
     "revoked" BOOLEAN NOT NULL DEFAULT false,
-    "revokedAt" TIMESTAMP(3),
-    "revokedBy" TEXT,
-    "revokedReason" TEXT,
+    "revoked_at" TIMESTAMP(3),
+    "revoked_by" TEXT,
+    "revoked_reason" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -35,9 +35,9 @@ CREATE TABLE "scan_log" (
     "ticket_id" UUID NOT NULL,
     "event_id" UUID NOT NULL,
     "actor_id" UUID NOT NULL,
-    "direction" "PresenceState" NOT NULL,
+    "direction" "presence_state" NOT NULL,
     "gate" TEXT,
-    "verdict" "ScanVerdict" NOT NULL DEFAULT 'UNKNOWN',
+    "verdict" "scan_verdict" NOT NULL DEFAULT 'UNKNOWN',
     "nonce" INTEGER,
     "device_id" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
