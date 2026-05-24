@@ -3,6 +3,20 @@
 All notable changes in this project will be documented in this file.
 
 
+## [1.0.1](https://github.com/omnixys/ticket-service/compare/v1.0.0...v1.0.1) (2026-05-24)
+
+### Docker
+
+* **Docker:** update pnpm, version ([](https://github.com/omnixys/ticket-service/commit/4ef25b7a3fb2a4754a360c96e517b4fef2434cda))
+
+### Pnpm
+
+* **Pnpm:** add pnpm-lock.yaml ([](https://github.com/omnixys/ticket-service/commit/3737be79402dc3c464f3ca9dcaa1d21c6f455940))
+
+### Prisma
+
+* **Prisma:** update prisma schema ([](https://github.com/omnixys/ticket-service/commit/19659f100b8c3022caf84168cc83434c17f48795))
+
 ## 1.0.0 (2026-05-01)
 
 ### 1.0.0
