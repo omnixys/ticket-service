@@ -35,7 +35,7 @@ export function mapTicket(row: Ticket): TicketPayload {
 
     // --- Timestamps ---
     createdAt: row.createdAt,
-    updatedAt: row.updatedAt,
+    updatedAt: n2u(row.updatedAt),
   };
 }
 

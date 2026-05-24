@@ -46,8 +46,8 @@ export class TicketPayload {
 
   @Field(() => Date)
   createdAt!: Date;
-  @Field(() => Date)
-  updatedAt!: Date;
+  @Field(() => Date, { nullable: true })
+  updatedAt?: Date | undefined;
 }
 
 @ObjectType()
