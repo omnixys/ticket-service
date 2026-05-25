@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [1.0.2](https://github.com/omnixys/ticket-service/compare/v1.0.1...v1.0.2) (2026-05-25)
+
+### Docker
+
+* **Docker:** Dockerfile ([](https://github.com/omnixys/ticket-service/commit/517fe3bb084216e99fa5c9ee0701522106bc44b2))
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/ticket-service ([](https://github.com/omnixys/ticket-service/commit/68b1ac227ec6cb9c4614f30c641d2cfa61a30835))
+
 ## [1.0.1](https://github.com/omnixys/ticket-service/compare/v1.0.0...v1.0.1) (2026-05-24)
 
 ### Docker
