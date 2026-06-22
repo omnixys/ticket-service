@@ -1,14 +1,26 @@
 import { PresenceState } from '../../prisma/generated/client.js';
 import type { ScanLogUncheckedCreateInput } from '../../prisma/generated/models/ScanLog.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import {
+  TicketAccessDeniedException,
+  TicketAlreadyExistsException,
+  TicketDeviceAlreadyBoundException,
+  TicketDeviceKeyInvalidException,
+  TicketNonceUninitializedException,
+  TicketNotFoundException,
+} from '../errors/ticket-domain.error.js';
 import { ScanVerdict } from '../models/enums/scan-verdict.enum.js';
 import { ActivateDeviceDTO } from '../models/inputs/activate-device.input.js';
 import { mapTicket } from '../models/mapper/ticket.mapper.js';
 import { TicketPayload } from '../models/payloads/ticket-payload.js';
 import { TokenService } from './token.service.js';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { ContextAccessor } from '@omnixys/context';
+import type { EventMilestoneRecordedDTO } from '@omnixys/contracts';
+import { KafkaProducerService, KafkaTopics } from '@omnixys/kafka';
 import { OmnixysLogger } from '@omnixys/logger';
 import { TraceRunner } from '@omnixys/observability';
+import { createPublicKey } from 'node:crypto';
 
 export interface UpdateTicketInput {
   id: string;
@@ -25,6 +37,7 @@ export class TicketWriteService {
     private readonly prisma: PrismaService,
     private readonly loggerService: OmnixysLogger,
     private readonly token: TokenService,
+    private readonly producer: KafkaProducerService,
   ) {
     this.logger = this.loggerService.log(this.constructor.name);
   }
@@ -42,7 +55,23 @@ export class TicketWriteService {
       });
 
       if (existing) {
-        throw new BadRequestException('Ticket already exists for this invitation');
+        if (
+          existing.eventId !== data.eventId ||
+          existing.guestProfileId !== data.userId ||
+          existing.seatId !== data.seatId
+        ) {
+          throw new TicketAlreadyExistsException(data.invitationId);
+        }
+
+        await this.publishMilestone({
+          eventId: existing.eventId,
+          milestoneId: `${existing.id}:generated`,
+          type: 'TICKET_GENERATED',
+          label: 'Ticket generated',
+          occurredAt: existing.createdAt.toISOString(),
+          referenceId: existing.id,
+        });
+        return mapTicket(existing);
       }
 
       const created = await this.prisma.ticket.create({
@@ -53,6 +82,15 @@ export class TicketWriteService {
           seatId: data.seatId ?? null,
           nextNonce: 1,
         },
+      });
+
+      await this.publishMilestone({
+        eventId: created.eventId,
+        milestoneId: `${created.id}:generated`,
+        type: 'TICKET_GENERATED',
+        label: 'Ticket generated',
+        occurredAt: created.createdAt.toISOString(),
+        referenceId: created.id,
       });
 
       return mapTicket(created);
@@ -72,19 +110,28 @@ export class TicketWriteService {
     });
   }
 
-  async activateDevice(input: ActivateDeviceDTO): Promise<TicketPayload> {
+  async activateDevice(input: ActivateDeviceDTO, actorId: string): Promise<TicketPayload> {
     return this.prisma.$transaction(async (tx) => {
       const ticket = await tx.ticket.findUnique({
         where: { id: input.ticketId },
       });
 
       if (!ticket) {
-        throw new NotFoundException('Ticket not found');
+        throw new TicketNotFoundException(input.ticketId);
       }
 
-      if (ticket.devicePublicKey && ticket.devicePublicKey !== input.publicKey) {
-        throw new BadRequestException('Device already bound');
+      if (ticket.guestProfileId !== actorId) {
+        throw new TicketAccessDeniedException(input.ticketId, 'device-binding-owner-mismatch');
       }
+
+      if (ticket.devicePublicKey) {
+        if (ticket.devicePublicKey !== input.publicKey || ticket.deviceId !== input.deviceId) {
+          throw new TicketDeviceAlreadyBoundException(input.ticketId);
+        }
+        return mapTicket(ticket);
+      }
+
+      this.assertValidDeviceKey(input.ticketId, input.publicKey);
 
       const updated = await tx.ticket.update({
         where: { id: ticket.id },
@@ -100,13 +147,21 @@ export class TicketWriteService {
     });
   }
 
-  async generateToken(ticketId: string): Promise<string> {
-    const ticket = await this.prisma.ticket.findUniqueOrThrow({
+  async generateToken(ticketId: string, actorId: string): Promise<string> {
+    const ticket = await this.prisma.ticket.findUnique({
       where: { id: ticketId },
     });
 
+    if (!ticket) {
+      throw new TicketNotFoundException(ticketId);
+    }
+
+    if (ticket.guestProfileId !== actorId) {
+      throw new TicketAccessDeniedException(ticketId, 'token-owner-mismatch');
+    }
+
     if (ticket.nextNonce === null) {
-      throw new BadRequestException('Ticket nonce is not initialized');
+      throw new TicketNonceUninitializedException(ticketId);
     }
 
     return this.token.generate({
@@ -238,7 +293,7 @@ export class TicketWriteService {
     const found = await this.prisma.ticket.findUnique({ where: { id } });
 
     if (!found) {
-      throw new NotFoundException('Ticket not found');
+      throw new TicketNotFoundException(id);
     }
 
     return mapTicket(found);
@@ -256,7 +311,12 @@ export class TicketWriteService {
     const now = new Date();
     const ticket = await this.prisma.ticket.findUnique({ where: { id: ticketId } });
     if (!ticket) {
-      throw new NotFoundException('Ticket not found');
+      throw new TicketNotFoundException(ticketId);
+    }
+
+    if (ticket.revoked) {
+      await this.publishRevokedMilestone(ticket);
+      return mapTicket(ticket);
     }
 
     const updated = await this.prisma.ticket.update({
@@ -281,6 +341,55 @@ export class TicketWriteService {
 
     await this.prisma.scanLog.create({ data: scanLogData });
 
+    await this.publishRevokedMilestone(updated);
+
     return mapTicket(updated);
+  }
+
+  private async publishRevokedMilestone(ticket: {
+    id: string;
+    eventId: string;
+    revokedAt: Date | null;
+    updatedAt: Date | null;
+  }): Promise<void> {
+    await this.publishMilestone({
+      eventId: ticket.eventId,
+      milestoneId: `${ticket.id}:revoked`,
+      type: 'TICKET_REVOKED',
+      label: 'Ticket revoked',
+      occurredAt: (ticket.revokedAt ?? ticket.updatedAt ?? new Date()).toISOString(),
+      referenceId: ticket.id,
+    });
+  }
+
+  private async publishMilestone(payload: EventMilestoneRecordedDTO): Promise<void> {
+    const context = ContextAccessor.get();
+    await this.producer.send({
+      topic: KafkaTopics.event.milestoneRecorded,
+      payload,
+      meta: {
+        service: 'ticket-service',
+        operation: 'Record Event Milestone',
+        version: '1',
+        type: 'EVENT',
+        actorId: context?.principal?.actorId ?? '',
+        tenantId: context?.tenant?.tenantId ?? context?.principal?.tenantId ?? 'omnixys',
+      },
+    });
+  }
+
+  private assertValidDeviceKey(ticketId: string, publicKeyBase64: string): void {
+    try {
+      const key = createPublicKey({
+        key: Buffer.from(publicKeyBase64, 'base64'),
+        format: 'der',
+        type: 'spki',
+      });
+      if (key.asymmetricKeyType !== 'ec' || key.asymmetricKeyDetails?.namedCurve !== 'prime256v1') {
+        throw new TypeError('Unexpected device key algorithm');
+      }
+    } catch {
+      throw new TicketDeviceKeyInvalidException(ticketId);
+    }
   }
 }

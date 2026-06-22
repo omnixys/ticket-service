@@ -1,6 +1,5 @@
 // src/ticket/models/mapper/scan-log.mapper.ts
 import type { ScanLog } from '../../../prisma/generated/client.js';
-import type { ScanVerdict } from '../enums/scan-verdict.enum.js';
 import type { ScanLogPayload } from '../payloads/scan-log-list.payload.js';
 import { n2u } from '@omnixys/shared';
 
@@ -16,7 +15,7 @@ export function mapScanLog(row: ScanLog): ScanLogPayload {
     actorId: row.actorId,
 
     direction: row.direction,
-    verdict: row.verdict as ScanVerdict,
+    verdict: row.verdict,
 
     gate: n2u(row.gate ?? null),
     deviceId: n2u(row.deviceId),

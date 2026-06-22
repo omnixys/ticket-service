@@ -1,5 +1,6 @@
 import { PresenceState, ScanVerdict, Ticket } from '../../prisma/generated/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { TicketNotFoundException } from '../errors/ticket-domain.error.js';
 import { ScanMessages } from '../utils/scan-messages.js';
 import { ShareGuardService } from './shareguard.service.js';
 import { QrPayload, TokenService } from './token.service.js';
@@ -21,16 +22,12 @@ function verifySignature(
     });
 
     return verify(
-      null, // ⚠️ wichtig für ECDSA
+      'SHA256',
       Buffer.from(payload),
-      {
-        key: publicKey,
-        dsaEncoding: 'ieee-p1363', // 🔥 DAS IST DER FIX
-      },
+      publicKey,
       Buffer.from(signatureBase64, 'base64'),
     );
-  } catch (err) {
-    console.error('VERIFY ERROR', err);
+  } catch {
     return false;
   }
 }
@@ -51,9 +48,12 @@ export class VerifyService {
   ): Promise<{ ticket: Ticket; payload: QrPayload; verdict: ScanVerdict; message: string }> {
     const payload = await this.token.verify(tokenStr);
 
-    const ticket = await this.prisma.ticket.findUniqueOrThrow({
+    const ticket = await this.prisma.ticket.findUnique({
       where: { id: payload.tid },
     });
+    if (!ticket) {
+      throw new TicketNotFoundException(payload.tid);
+    }
 
     if (ticket.revoked) {
       const verdict = ScanVerdict.REVOKED;
@@ -73,8 +73,6 @@ export class VerifyService {
       return { ticket, payload, verdict: ScanVerdict.DEVICE_MISMATCH, message: 'No Public Key' };
     }
 
-    // const message = `${tokenStr}.${deviceId}.${payload.ts}`;
-    // const message = `${tokenStr}.${deviceId}.${payload.ts}.${payload.dn}`;
     const message = `${tokenStr}.${deviceId}`;
 
     if (!verifySignature(message, signature, ticket.devicePublicKey)) {
@@ -103,6 +101,20 @@ export class VerifyService {
       };
     }
 
+    if (ticket.lastNonce !== null && payload.dn <= ticket.lastNonce) {
+      await this.shareGuard.applyDecision(
+        ticket.id,
+        this.shareGuard.calculateRisk({ replay: true }),
+      );
+
+      return {
+        ticket,
+        payload,
+        verdict: ScanVerdict.REPLAY,
+        message: ScanMessages.REPLAY,
+      };
+    }
+
     if (payload.dn !== ticket.nextNonce) {
       await this.shareGuard.applyDecision(
         ticket.id,
@@ -116,7 +128,9 @@ export class VerifyService {
       };
     }
 
-    if (ticket.lastNonce !== null && payload.dn <= ticket.lastNonce) {
+    const replayKey = ValkeyKey.qrReply.key(ticket.id, payload.dn);
+    const acquired = await this.valkey.rawSetIfAbsent(replayKey, '1', 120);
+    if (!acquired) {
       await this.shareGuard.applyDecision(
         ticket.id,
         this.shareGuard.calculateRisk({ replay: true }),
@@ -124,39 +138,13 @@ export class VerifyService {
 
       return { ticket, payload, verdict: ScanVerdict.REPLAY, message: ScanMessages.REPLAY };
     }
-
-    const replayKey = `qr:replay:${ticket.id}:${payload.dn}`;
-    // const ok = await this.valkey.set(replayKey, '1', { NX: true, EX: 120 });
-    // const ok = await this.valkey.set(ValkeyKey.qrReply, replayKey, 120);
-
-    // const ok = await this.valkey.setNx(ValkeyKey.qrReply, replayKey, 120);
-
-    // if (!ok) {
-    //   await this.shareGuard.applyDecision(
-    //     ticket.id,
-    //     this.shareGuard.calculateRisk({ replay: true }),
-    //   );
-
-    //   return { ticket, payload, verdict: ScanVerdict.REPLAY };
-    // }
-
-    const existing = await this.valkey.get(ValkeyKey.qrReply, replayKey);
-    if (existing) {
-      await this.shareGuard.applyDecision(
-        ticket.id,
-        this.shareGuard.calculateRisk({ replay: true }),
-      );
-
-      return { ticket, payload, verdict: ScanVerdict.REPLAY, message: ScanMessages.REPLAY };
-    }
-
-    await this.valkey.set(ValkeyKey.qrReply, replayKey, 120);
 
     await this.shareGuard.resetShareGuard(ticket.id);
 
     const state =
       ticket.currentState === PresenceState.OUTSIDE ? PresenceState.INSIDE : PresenceState.OUTSIDE;
 
+    const checkedInAt = state === PresenceState.INSIDE ? new Date() : ticket.checkedInAt;
     const updated = await this.prisma.ticket.updateMany({
       where: {
         id: ticket.id,
@@ -166,6 +154,7 @@ export class VerifyService {
         currentState: state,
         lastNonce: payload.dn,
         nextNonce: payload.dn + 1,
+        checkedInAt,
       },
     });
 
@@ -178,6 +167,18 @@ export class VerifyService {
       };
     }
 
-    return { ticket, payload, verdict: ScanVerdict.OK, message: ScanMessages.OK };
+    return {
+      ticket: {
+        ...ticket,
+        currentState: state,
+        lastNonce: payload.dn,
+        nextNonce: payload.dn + 1,
+        checkedInAt,
+        updatedAt: new Date(),
+      },
+      payload,
+      verdict: ScanVerdict.OK,
+      message: ScanMessages.OK,
+    };
   }
 }

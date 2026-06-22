@@ -1,11 +1,15 @@
 // src/ticket/service/ticket-read.service.ts
 
 import { PrismaService } from '../../prisma/prisma.service.js';
+import {
+  TicketAccessDeniedException,
+  TicketNotFoundException,
+} from '../errors/ticket-domain.error.js';
 import { mapScanLogs } from '../models/mapper/scan-logs.mapper.js';
 import { mapTicket, mapTickets } from '../models/mapper/ticket.mapper.js';
 import { ScanLogPayload } from '../models/payloads/scan-log-list.payload.js';
 import { TicketPayload } from '../models/payloads/ticket-payload.js';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class TicketReadService {
@@ -20,10 +24,18 @@ export class TicketReadService {
     });
 
     if (!row) {
-      throw new NotFoundException('Ticket not found');
+      throw new TicketNotFoundException(id);
     }
 
     return mapTicket(row);
+  }
+
+  async findByIdForActor(id: string, actorId: string, allowAny = false): Promise<TicketPayload> {
+    const ticket = await this.findById(id);
+    if (!allowAny && ticket.guestProfileId !== actorId) {
+      throw new TicketAccessDeniedException(id, 'ticket-owner-mismatch');
+    }
+    return ticket;
   }
 
   /**
@@ -43,10 +55,22 @@ export class TicketReadService {
     });
 
     if (!row) {
-      throw new NotFoundException('Ticket not found for invitation');
+      throw new TicketNotFoundException(invitationId);
     }
 
     return mapTicket(row);
+  }
+
+  async findByInvitationForActor(
+    invitationId: string,
+    actorId: string,
+    allowAny = false,
+  ): Promise<TicketPayload> {
+    const ticket = await this.findByInvitation(invitationId);
+    if (!allowAny && ticket.guestProfileId !== actorId) {
+      throw new TicketAccessDeniedException(ticket.id, 'ticket-owner-mismatch');
+    }
+    return ticket;
   }
 
   /**
@@ -72,6 +96,17 @@ export class TicketReadService {
     return mapTickets(row);
   }
 
+  findByGuestForActor(
+    guestProfileId: string,
+    actorId: string,
+    allowAny = false,
+  ): Promise<TicketPayload[]> {
+    if (!allowAny && guestProfileId !== actorId) {
+      throw new TicketAccessDeniedException(undefined, 'guest-owner-mismatch');
+    }
+    return this.findByGuest(guestProfileId);
+  }
+
   /**
    * Read scan logs of a ticket.
    */
@@ -84,6 +119,15 @@ export class TicketReadService {
     return mapScanLogs(logs);
   }
 
+  async scanLogsForActor(
+    ticketId: string,
+    actorId: string,
+    allowAny = false,
+  ): Promise<ScanLogPayload[]> {
+    await this.findByIdForActor(ticketId, actorId, allowAny);
+    return this.scanLogs(ticketId);
+  }
+
   /**
    * Find a ticket by device hash. (Fingerprint binding)
    */
@@ -93,7 +137,7 @@ export class TicketReadService {
     });
 
     if (!row) {
-      throw new NotFoundException('Ticket not bound to this device');
+      throw new TicketNotFoundException();
     }
 
     return mapTicket(row);

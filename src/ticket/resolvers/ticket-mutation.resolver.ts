@@ -20,19 +20,26 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { ClientInfo } from '@omnixys/context';
+import type { ClientContext } from '@omnixys/context';
+import { RealmRoleType } from '@omnixys/contracts';
 import {
   CookieAuthGuard,
   CurrentUser,
   CurrentUserData,
+  RoleGuard,
+  Roles,
 } from '@omnixys/security';
-import { ClientContext } from '@omnixys/shared';
+import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 @InputType()
 export class RevokeTicketInput implements RevokeTicketDTO {
   @Field(() => ID)
+  @IsUUID()
   ticketId!: string;
 
   @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
   reason?: string;
 }
 
@@ -56,19 +63,28 @@ export class ScanPayload {
 @InputType()
 export class ScanInput {
   @Field(() => String)
+  @IsString()
+  @IsNotEmpty()
   token!: string;
 
   @Field(() => String)
+  @IsString()
+  @IsNotEmpty()
   signature!: string;
 
   @Field(() => String)
+  @IsString()
+  @IsNotEmpty()
   deviceId!: string;
 
   @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
   gate?: string;
 }
 
 @Resolver(() => TicketMessagePayload)
+@UseGuards(CookieAuthGuard)
 export class TicketMutationResolver {
   constructor(
     private readonly ticketWrite: TicketWriteService,
@@ -78,12 +94,12 @@ export class TicketMutationResolver {
   @Mutation(() => TicketPayload, {
     description: 'Bind a device to a ticket (first activation)',
   })
-  @UseGuards(CookieAuthGuard)
   async activateDevice(
     @Args('input') input: ActivateDeviceInput,
     @ClientInfo() info: ClientContext,
+    @CurrentUser() user: CurrentUserData,
   ): Promise<TicketPayload> {
-    return this.ticketWrite.activateDevice({ ...input, ip: info.ip });
+    return this.ticketWrite.activateDevice({ ...input, ip: info.ip }, user.id);
   }
 
   @Mutation(() => String, {
@@ -92,12 +108,14 @@ export class TicketMutationResolver {
   async generateToken(
     @Args('ticketId', { type: () => ID })
     ticketId: string,
+    @CurrentUser() user: CurrentUserData,
   ): Promise<string> {
-    return this.ticketWrite.generateToken(ticketId);
+    return this.ticketWrite.generateToken(ticketId, user.id);
   }
 
   @Mutation(() => ScanPayload)
-  @UseGuards(CookieAuthGuard)
+  @UseGuards(RoleGuard)
+  @Roles(RealmRoleType.ADMIN)
   async scanToken(
     @Args('input') input: ScanInput,
     @CurrentUser() user: CurrentUserData,
@@ -115,12 +133,13 @@ export class TicketMutationResolver {
     return {
       ticket: mapTicket(result.ticket),
       log: mapScanLog(result.log),
-      verdict: result.verdict as ScanVerdict,
+      verdict: result.verdict,
       message: result.message,
     };
   }
 
-  @UseGuards(CookieAuthGuard)
+  @UseGuards(RoleGuard)
+  @Roles(RealmRoleType.ADMIN)
   @Mutation(() => Boolean, {
     description: 'Delete ticket and all its logs (admin only)',
   })
@@ -134,7 +153,8 @@ export class TicketMutationResolver {
   // ---------------------------------------------------------
   // 4) Revoke a ticket manually
   // ---------------------------------------------------------
-  @UseGuards(CookieAuthGuard)
+  @UseGuards(RoleGuard)
+  @Roles(RealmRoleType.ADMIN)
   @Mutation(() => TicketPayload, {
     description: 'Revoke a ticket (security or admin)',
   })

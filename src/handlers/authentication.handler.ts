@@ -17,6 +17,7 @@
 
 import { TicketWriteService } from '../ticket/service/ticket-write.service.js';
 import { Injectable } from '@nestjs/common';
+import type { UserIdDTO } from '@omnixys/contracts';
 import {
   IKafkaEventContext,
   KAFKA_HEADERS,
@@ -26,7 +27,6 @@ import {
 } from '@omnixys/kafka';
 import { OmnixysLogger } from '@omnixys/logger';
 import { TraceRunner } from '@omnixys/observability';
-import { UserIdDTO } from '@omnixys/shared';
 
 /**
  * Central Kafka Authentication Handler.
@@ -63,7 +63,7 @@ export class AuthenticationHandler {
   ): Promise<void> {
     return TraceRunner.run('[HANDLER] handleDeleteTicketsByGuest', async () => {
       const headers = context.headers;
-      const actorId = headers[KAFKA_HEADERS.ACTOR_ID] ?? 'Unkown';
+      const actorId = headers[KAFKA_HEADERS.ACTOR_ID] ?? 'unknown';
 
       this.logger.debug(
         'handleDeleteTicketsByGuest: %o | actorId=%s',

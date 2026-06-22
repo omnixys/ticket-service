@@ -7,7 +7,7 @@ export const ScanMessages: Record<ScanVerdict, string> = {
   DEVICE_MISMATCH: 'Invalid device',
   INVALID_NONCE: 'Invalid scan',
   REPLAY: 'Scan already used',
-  UNKNOWN: 'Unkown',
+  UNKNOWN: 'Unknown',
   EXPIRED_EVENT: 'Event Expired',
 
   // DEVICE_NOT_ACTIVATED: 'Device not registered',

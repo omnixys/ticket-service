@@ -1,4 +1,5 @@
-import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { TicketTokenInvalidException } from '../errors/ticket-domain.error.js';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { createHash, randomUUID, timingSafeEqual } from 'crypto';
 import * as jose from 'jose';
 
@@ -163,12 +164,12 @@ export class TokenService {
       const header = jose.decodeProtectedHeader(jws);
 
       if (!header.kid) {
-        throw new UnauthorizedException('Missing KID');
+        throw new TypeError('Missing KID');
       }
 
       const key = this.signKeys.get(header.kid);
       if (!key) {
-        throw new UnauthorizedException('Unknown KID');
+        throw new TypeError('Unknown KID');
       }
 
       // Verify JWS
@@ -177,8 +178,8 @@ export class TokenService {
       });
 
       return payload as unknown as QrPayload;
-    } catch {
-      throw new UnauthorizedException('Invalid QR token');
+    } catch (cause) {
+      throw new TicketTokenInvalidException(cause);
     }
   }
 }

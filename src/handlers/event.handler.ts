@@ -17,6 +17,7 @@
 
 import { TicketWriteService } from '../ticket/service/ticket-write.service.js';
 import { Injectable } from '@nestjs/common';
+import type { EventIdsDTO } from '@omnixys/contracts';
 import {
   KafkaEvent,
   KafkaEventHandler,
@@ -26,7 +27,6 @@ import {
 } from '@omnixys/kafka';
 import { OmnixysLogger } from '@omnixys/logger';
 import { TraceRunner } from '@omnixys/observability';
-import { EventIdsDTO } from '@omnixys/shared';
 
 /**
  * Kafka event handler responsible for useristrative commands such as
@@ -63,7 +63,7 @@ export class EventHandler {
       '[HANDLER] handleDeleteTicketsByEventIds',
       async () => {
         const headers = context.headers;
-        const actorId = headers[KAFKA_HEADERS.ACTOR_ID] ?? 'Unkown';
+        const actorId = headers[KAFKA_HEADERS.ACTOR_ID] ?? 'unknown';
 
         this.logger.debug(
           'handleDeleteInvitationsByEventIds: %o | actorId=%s',

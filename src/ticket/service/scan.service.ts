@@ -2,6 +2,10 @@ import { ScanLog, ScanVerdict, Ticket } from '../../prisma/generated/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { VerifyService } from './verify.service.js';
 import { Injectable } from '@nestjs/common';
+import { ContextAccessor } from '@omnixys/context';
+import type { EventMilestoneRecordedDTO } from '@omnixys/contracts';
+import { KafkaProducerService, KafkaTopics } from '@omnixys/kafka';
+import { OmnixysLogger } from '@omnixys/logger';
 
 export interface SecurityScanInput {
   token: string;
@@ -20,11 +24,16 @@ export interface ScanPayloadDTO {
 
 @Injectable()
 export class ScanService {
+  private readonly logger;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly verify: VerifyService,
-    // private readonly kafkaProducer: KafkaProducerService
-  ) {}
+    private readonly producer: KafkaProducerService,
+    logger: OmnixysLogger,
+  ) {
+    this.logger = logger.log(this.constructor.name);
+  }
 
   async scan({
     token,
@@ -52,21 +61,47 @@ export class ScanService {
       },
     });
 
-    // await this.producer.send({
-    //   topic: 'ticket.scanned',
-    //   messages: [
-    //     {
-    //       value: JSON.stringify({
-    //         ticketId: ticket.id,
-    //         eventId: ticket.eventId,
-    //         verdict,
-    //         gate,
-    //         timestamp: Date.now(),
-    //       }),
-    //     },
-    //   ],
-    // });
+    if (verdict === ScanVerdict.OK) {
+      await this.publishMilestone(
+        {
+          eventId: ticket.eventId,
+          milestoneId: `${log.id}:scanned`,
+          type: 'TICKET_SCANNED',
+          label: gate ? `Ticket scanned at ${gate}` : 'Ticket scanned',
+          occurredAt: log.createdAt.toISOString(),
+          referenceId: ticket.id,
+        },
+        actorId,
+      );
+    }
 
     return { ticket, log, verdict, message };
+  }
+
+  private async publishMilestone(
+    payload: EventMilestoneRecordedDTO,
+    actorId: string,
+  ): Promise<void> {
+    const context = ContextAccessor.get();
+    try {
+      await this.producer.send({
+        topic: KafkaTopics.event.milestoneRecorded,
+        payload,
+        meta: {
+          service: 'ticket-service',
+          operation: 'Record Event Milestone',
+          version: '1',
+          type: 'EVENT',
+          actorId,
+          tenantId: context?.tenant?.tenantId ?? context?.principal?.tenantId ?? 'omnixys',
+        },
+      });
+    } catch (error) {
+      this.logger.error('Failed to publish ticket scan milestone', {
+        error,
+        eventId: payload.eventId,
+        ticketId: payload.referenceId,
+      });
+    }
   }
 }

@@ -4,27 +4,26 @@
  * License: GPL-3.0-or-later
  * -------------------------------------------------------------------- */
 
-    import {
-      PresenceState,
-      PrismaClient,
-      ScanVerdict,
-    } from '../src/prisma/generated/client.js';
-    import { PrismaPg } from '@prisma/adapter-pg';
-    import 'dotenv/config';
+import {
+  PresenceState,
+  PrismaClient,
+  ScanVerdict,
+} from '../src/prisma/generated/client.js';
+import { PrismaPg } from '@prisma/adapter-pg';
+import 'dotenv/config';
 
-    const adapter = new PrismaPg({
-      connectionString: process.env.DATABASE_URL!,
-    });
-    const prisma = new PrismaClient({ adapter });
-
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL!,
+});
+const prisma = new PrismaClient({ adapter });
 
 /* ----------------------------------------------------------------------
  * Constants
  * -------------------------------------------------------------------- */
-  const EVENT_ID = '75ebc7b0-33f8-4c24-851e-8ff65c3407f1';
+const EVENT_ID = '6d650ee6-8ed0-4694-afd4-71871c37683a';
 const GUEST_ID = 'ae489d9b-96ce-4942-bcb1-c2e2a0c92e83';
-const SEAT_ID = 'd016a236-7cf3-40ed-949a-0071a6020482';
-const INVITATION_ID = '59e459cf-97d2-43c3-9d0b-f411118a0f37';
+const SEAT_ID = '50d27904-730a-4598-b8b1-6db95fd8125e';
+const INVITATION_ID = '67075629-14df-429d-9834-349e3d45df89';
 
 /* ----------------------------------------------------------------------
  * Seed
@@ -117,7 +116,6 @@ async function main(): Promise<void> {
   console.log('Ticket ID:        ', ticket.id);
   console.log('ShareGuard ID:    ', shareGuard.id);
   console.log('--------------------------------------------------');
-
 }
 
 /* ----------------------------------------------------------------------

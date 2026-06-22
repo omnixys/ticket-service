@@ -16,19 +16,24 @@
  */
 
 import { env } from '../config/env.js';
+import { TicketVerificationTokenException } from '../ticket/errors/ticket-domain.error.js';
 import { TicketWriteService } from '../ticket/service/ticket-write.service.js';
 import { Injectable } from '@nestjs/common';
 import { ValkeyKey, ValkeyService } from '@omnixys/cache';
+import { ContextAccessor } from '@omnixys/context';
+import type {
+  CreateUserWithInvitationIdDTO,
+  GuestTicketKey,
+} from '@omnixys/contracts';
 import {
   KafkaEvent,
   KafkaEventHandler,
   KafkaTopics,
   KafkaProducerService,
-  EventType,
+  type EventType,
 } from '@omnixys/kafka';
 import { OmnixysLogger } from '@omnixys/logger';
 import { TraceRunner } from '@omnixys/observability';
-import { GuestTicketKey, CreateUserWithInvitationIdDTO } from '@omnixys/shared';
 
 const { SERVICE } = env;
 
@@ -82,15 +87,17 @@ export class SeatHandler {
         token,
       );
       if (!raw) {
-        throw new Error('Invalid token');
+        throw new TicketVerificationTokenException('invalid-token');
       }
 
-      const input = JSON.parse(raw) as GuestTicketKey;
+      const input = this.parseGuestTicketKey(raw);
 
       const ticket = input.tickets.find((t) => t.invitationId === invitationId);
 
       if (!ticket) {
-        throw new Error('Ticket mapping not found');
+        throw new TicketVerificationTokenException('mapping-not-found', {
+          invitationId,
+        });
       }
 
       await this.ticketWriteService.createTicket({
@@ -111,7 +118,7 @@ export class SeatHandler {
           invitationId,
           actorId: input.actorId,
         },
-        meta: this.meta(userId, 'link invitation'),
+        meta: this.meta(input.actorId, 'Link invitation to guest'),
       });
     });
   }
@@ -120,14 +127,40 @@ export class SeatHandler {
    * Standard Kafka metadata builder.
    */
   private meta(actorId: string, operation: string): KafkaMeta {
+    const context = ContextAccessor.get();
     const type: EventType = 'EVENT';
     return {
-      actorId,
-      tenantId: 'omnixys',
+      actorId: context?.principal?.actorId ?? actorId,
+      tenantId:
+        context?.tenant?.tenantId ?? context?.principal?.tenantId ?? 'omnixys',
       service: SERVICE,
       operation,
       version: '1',
       type,
     };
+  }
+
+  private parseGuestTicketKey(raw: string): GuestTicketKey {
+    try {
+      const value = JSON.parse(raw) as Partial<GuestTicketKey>;
+      if (
+        typeof value.eventId !== 'string' ||
+        typeof value.actorId !== 'string' ||
+        !Array.isArray(value.tickets) ||
+        value.tickets.some(
+          (ticket) =>
+            typeof ticket?.invitationId !== 'string' ||
+            typeof ticket?.seatId !== 'string',
+        )
+      ) {
+        throw new TypeError('Guest ticket payload has an invalid shape');
+      }
+      return value as GuestTicketKey;
+    } catch (cause) {
+      throw new TicketVerificationTokenException(
+        'invalid-token',
+        cause instanceof Error ? { cause: cause.message } : {},
+      );
+    }
   }
 }

@@ -1,3 +1,0 @@
-invitationUpdated
-ticketScanned
-userSignedUp

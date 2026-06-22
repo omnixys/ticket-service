@@ -21,6 +21,6 @@ import { Module } from '@nestjs/common';
     ShareGuardService,
     VerifyService,
   ],
-  exports: [TicketReadService, TicketWriteService],
+  exports: [TicketReadService, TicketWriteService, TokenService],
 })
 export class TicketModule {}

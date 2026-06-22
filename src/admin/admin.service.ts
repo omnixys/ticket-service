@@ -15,7 +15,6 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-/* eslint-disable no-process-exit */
 import { Injectable } from '@nestjs/common';
 import { OmnixysLogger } from '@omnixys/logger';
 
@@ -31,8 +30,8 @@ export class AdminService {
    * Initiates a controlled application shutdown.
    *
    * @remarks
-   * This method schedules a process exit with code `0` after a short delay,
-   * allowing pending logs or responses to complete before termination.
+   * This method schedules SIGTERM after a short delay so Nest shutdown hooks
+   * can drain package-managed resources before termination.
    *
    * When running inside Docker (with `restart: always` or similar),
    * the container will **not automatically restart** after a graceful shutdown.
@@ -48,16 +47,15 @@ export class AdminService {
    */
   async shutdown(): Promise<void> {
     this.logger.warn('Shutdown signal received — initiating graceful exit...');
-    setTimeout(() => process.exit(0), 1000);
+    setTimeout(() => process.kill(process.pid, 'SIGTERM'), 1000).unref();
   }
 
   /**
    * Initiates a controlled application restart.
    *
    * @remarks
-   * This method schedules a process exit with code `1` after a short delay.
-   * Container supervisors (e.g., Docker, systemd, PM2) interpret this as a failure
-   * and automatically restart the container or process.
+   * This method schedules SIGTERM after a short delay. A configured container
+   * supervisor is responsible for starting a replacement process.
    *
    * The restart logic does **not** manually spawn a new Node.js process,
    * avoiding port conflicts and ensuring consistent runtime state.
@@ -82,7 +80,7 @@ export class AdminService {
    */
   async restart(): Promise<void> {
     this.logger.warn('Restart requested — exiting process so container supervisor restarts it...');
-    setTimeout(() => process.exit(1), 1000);
+    setTimeout(() => process.kill(process.pid, 'SIGTERM'), 1000).unref();
   }
 
   /**

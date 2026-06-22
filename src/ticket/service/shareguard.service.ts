@@ -101,17 +101,15 @@ export class ShareGuardService {
   async applyDecision(ticketId: string, result: RiskResult): Promise<void> {
     const now = new Date();
 
-    let guard = await this.prisma.shareGuard.findUnique({
+    const guard = await this.prisma.shareGuard.upsert({
       where: { ticketId },
-    });
-
-    guard ??= await this.prisma.shareGuard.create({
-      data: { ticketId },
+      update: {},
+      create: { ticketId },
     });
 
     const failCount = guard.failCount + 1;
 
-    if (result.shouldRevoke) {
+    if (result.shouldRevoke || failCount >= this.REVOKE_THRESHOLD) {
       await this.prisma.ticket.update({
         where: { id: ticketId },
         data: {
@@ -125,7 +123,7 @@ export class ShareGuardService {
       return;
     }
 
-    if (result.shouldBlock) {
+    if (result.shouldBlock || failCount >= this.BASE_THRESHOLD) {
       await this.prisma.shareGuard.update({
         where: { ticketId },
         data: {
