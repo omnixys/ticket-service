@@ -3,6 +3,20 @@
 All notable changes in this project will be documented in this file.
 
 
+## [2.0.0](https://github.com/omnixys/ticket-service/compare/v1.0.2...v2.0.0) (2026-06-28)
+
+### Dependencies
+
+* **Dependencies:** update Dependecies ([](https://github.com/omnixys/ticket-service/commit/c46e1c08d1d20e54216ab17a3bda63038660e07f))
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/ticket-service ([](https://github.com/omnixys/ticket-service/commit/82690a9a5e610aeb9b81e89367bb641e32a1703a))
+
+### Ticket
+
+* **Ticket:** secure ticket lifecycle and replay handling ([](https://github.com/omnixys/ticket-service/commit/95b97ffdbe6fdb34193e67e127aa8bce288ef06b))
+
 ## [1.0.2](https://github.com/omnixys/ticket-service/compare/v1.0.1...v1.0.2) (2026-05-25)
 
 ### Docker
