@@ -103,6 +103,29 @@ model ShareGuard {
 }
 
 /// ----------------------------------------------------------------------
+/// EventRoleProjection – local cache of event roles synced via Kafka
+/// ----------------------------------------------------------------------
+model EventRoleProjection {
+  id      String         @id @default(uuid()) @map("id") @db.Uuid
+  eventId String         @map("event_id") @db.Uuid
+  userId  String         @map("user_id") @db.Uuid
+  role    EventRoleType  @map("role")
+  updatedAt DateTime?    @updatedAt @map("updated_at")
+
+  @@unique([eventId, userId], name: "uq_event_role_projection")
+  @@index([eventId], name: "idx_event_role_projection_event")
+  @@map("event_role_projection")
+}
+
+enum EventRoleType {
+  ADMIN
+  SECURITY
+  GUEST
+
+  @@map("event_role_type")
+}
+
+/// ----------------------------------------------------------------------
 /// Enums
 /// ----------------------------------------------------------------------
 enum PresenceState {

@@ -55,6 +55,7 @@ describe('TicketQueryResolver E2E', () => {
   });
 
   it('resolves ticketById', async () => {
+    mocks.ticketRead.findById.mockResolvedValue(ticketPayload);
     mocks.ticketRead.findByIdForActor.mockResolvedValue(ticketPayload);
 
     const res = await graphqlRequest<{ ticketById: { id: string } }>(
@@ -69,10 +70,11 @@ describe('TicketQueryResolver E2E', () => {
 
     expect(res.body.errors).toBeUndefined();
     expect(res.body.data?.ticketById.id).toBe(ids.ticketId);
+    expect(mocks.ticketRead.findById).toHaveBeenCalledWith(ids.ticketId);
     expect(mocks.ticketRead.findByIdForActor).toHaveBeenCalledWith(
       ids.ticketId,
       ids.actorId,
-      false,
+      'ADMIN',
     );
   });
 
@@ -115,7 +117,7 @@ describe('TicketQueryResolver E2E', () => {
   });
 
   it('resolves ticketsByGuest', async () => {
-    mocks.ticketRead.findByGuestForActor.mockResolvedValue([ticketPayload]);
+    mocks.ticketRead.findByGuest.mockResolvedValue([ticketPayload]);
 
     const res = await graphqlRequest<{
       ticketsByGuest: Array<{ guestProfileId: string }>;
@@ -133,14 +135,13 @@ describe('TicketQueryResolver E2E', () => {
     expect(res.body.data?.ticketsByGuest[0]?.guestProfileId).toBe(
       ids.guestProfileId,
     );
-    expect(mocks.ticketRead.findByGuestForActor).toHaveBeenCalledWith(
+    expect(mocks.ticketRead.findByGuest).toHaveBeenCalledWith(
       ids.guestProfileId,
-      ids.actorId,
-      false,
     );
   });
 
   it('resolves ticketByInvitation', async () => {
+    mocks.ticketRead.findByInvitation.mockResolvedValue(ticketPayload);
     mocks.ticketRead.findByInvitationForActor.mockResolvedValue(ticketPayload);
 
     const res = await graphqlRequest<{
@@ -159,14 +160,18 @@ describe('TicketQueryResolver E2E', () => {
     expect(res.body.data?.ticketByInvitation.invitationId).toBe(
       ids.invitationId,
     );
+    expect(mocks.ticketRead.findByInvitation).toHaveBeenCalledWith(
+      ids.invitationId,
+    );
     expect(mocks.ticketRead.findByInvitationForActor).toHaveBeenCalledWith(
       ids.invitationId,
       ids.actorId,
-      false,
+      'ADMIN',
     );
   });
 
   it('resolves scanLogsByTicket', async () => {
+    mocks.ticketRead.findById.mockResolvedValue(ticketPayload);
     mocks.ticketRead.scanLogsForActor.mockResolvedValue([scanLogPayload]);
 
     const res = await graphqlRequest<{
@@ -184,10 +189,11 @@ describe('TicketQueryResolver E2E', () => {
     expect(res.body.errors).toBeUndefined();
     expect(res.body.data?.scanLogsByTicket[0]?.ticketId).toBe(ids.ticketId);
     expect(res.body.data?.scanLogsByTicket[0]?.verdict).toBe('OK');
+    expect(mocks.ticketRead.findById).toHaveBeenCalledWith(ids.ticketId);
     expect(mocks.ticketRead.scanLogsForActor).toHaveBeenCalledWith(
       ids.ticketId,
       ids.actorId,
-      false,
+      'ADMIN',
     );
   });
 

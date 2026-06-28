@@ -6,7 +6,7 @@ import { ShareGuardService } from './shareguard.service.js';
 import { QrPayload, TokenService } from './token.service.js';
 import { Injectable } from '@nestjs/common';
 import { ValkeyKey, ValkeyService } from '@omnixys/cache';
-import { n2u } from '@omnixys/shared';
+import { n2u } from '@omnixys/contracts';
 import { createPublicKey, verify } from 'crypto';
 
 function verifySignature(

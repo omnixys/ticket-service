@@ -34,3 +34,10 @@ export type ScanLog = Prisma.ScanLogModel
  * 
  */
 export type ShareGuard = Prisma.ShareGuardModel
+/**
+ * Model EventRoleProjection
+ * ----------------------------------------------------------------------
+ * EventRoleProjection – local cache of event roles synced via Kafka
+ * ----------------------------------------------------------------------
+ */
+export type EventRoleProjection = Prisma.EventRoleProjectionModel

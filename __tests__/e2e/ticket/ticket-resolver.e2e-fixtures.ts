@@ -27,6 +27,12 @@ const AUTH_USER_ID = '00000000-0000-4000-8000-000000000111';
 
 class MockCookieAuthGuard {}
 class MockRoleGuard {}
+class MockEventRoleGuard {
+  canActivate(): boolean {
+    return true;
+  }
+}
+const MockEventRoleResolver = class EventRoleResolver {};
 class MockTicketReadService {}
 class MockTicketWriteService {}
 class MockScanService {}
@@ -58,8 +64,14 @@ jest.unstable_mockModule('@omnixys/security', () => ({
   CookieAuthGuard: MockCookieAuthGuard,
   CurrentUser: MockCurrentUser,
   CurrentUserData: Object,
+  EventAccessDeniedException: class EventAccessDeniedException extends Error {},
+  EventRoleGuard: MockEventRoleGuard,
+  EventRoleResolver: MockEventRoleResolver,
+  EventRoles: () => () => undefined,
   RoleGuard: MockRoleGuard,
   Roles: () => () => undefined,
+  extractEventId: () => undefined,
+  isOwnerOrEventAdmin: () => true,
 }));
 
 jest.unstable_mockModule('@omnixys/shared', () => ({
@@ -126,12 +138,13 @@ export interface ResolverMocks {
   ticketRead: jest.Mocked<
     Pick<
       TicketReadService,
+      | 'findById'
       | 'findByIdForActor'
+      | 'findByInvitation'
+      | 'findByInvitationForActor'
       | 'findMany'
       | 'findByEvent'
       | 'findByGuest'
-      | 'findByGuestForActor'
-      | 'findByInvitationForActor'
       | 'scanLogsForActor'
     >
   >;
@@ -228,12 +241,13 @@ export async function createResolverTestApp(): Promise<ResolverTestApp> {
 
   const mocks: ResolverMocks = {
     ticketRead: {
+      findById: jest.fn(),
       findByIdForActor: jest.fn(),
+      findByInvitation: jest.fn(),
+      findByInvitationForActor: jest.fn(),
       findMany: jest.fn(),
       findByEvent: jest.fn(),
       findByGuest: jest.fn(),
-      findByGuestForActor: jest.fn(),
-      findByInvitationForActor: jest.fn(),
       scanLogsForActor: jest.fn(),
     },
     ticketWrite: {
@@ -288,11 +302,14 @@ export async function createResolverTestApp(): Promise<ResolverTestApp> {
       { provide: MockTicketReadService, useValue: mocks.ticketRead },
       { provide: MockTicketWriteService, useValue: mocks.ticketWrite },
       { provide: MockScanService, useValue: mocks.scan },
+      { provide: MockEventRoleResolver, useValue: { getRoleForUser: jest.fn().mockResolvedValue('ADMIN') } },
     ],
   })
     .overrideGuard(CookieAuthGuard)
     .useValue(authGuard)
     .overrideGuard(RoleGuard)
+    .useValue(authGuard)
+    .overrideGuard(MockEventRoleGuard)
     .useValue(authGuard)
     .compile();
 

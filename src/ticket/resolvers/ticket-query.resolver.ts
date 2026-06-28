@@ -3,11 +3,14 @@ import { TicketPayload } from '../models/payloads/ticket-payload.js';
 import { TicketReadService } from '../service/ticket-read.service.js';
 import { UseGuards } from '@nestjs/common';
 import { Args, ID, Query, Resolver } from '@nestjs/graphql';
-import { RealmRoleType } from '@omnixys/contracts';
+import { EventRoleType, RealmRoleType } from '@omnixys/contracts';
+import { EventRoleResolver } from '@omnixys/security';
 import {
   CookieAuthGuard,
   CurrentUser,
   CurrentUserData,
+  EventRoleGuard,
+  EventRoles,
   RoleGuard,
   Roles,
 } from '@omnixys/security';
@@ -15,7 +18,10 @@ import {
 @Resolver(() => TicketPayload)
 @UseGuards(CookieAuthGuard)
 export class TicketQueryResolver {
-  constructor(private readonly ticketRead: TicketReadService) {}
+  constructor(
+    private readonly ticketRead: TicketReadService,
+    private readonly eventRoleResolver: EventRoleResolver,
+  ) {}
 
   @Query(() => TicketPayload, {
     description: 'Fetch a single ticket by its cuid',
@@ -24,27 +30,27 @@ export class TicketQueryResolver {
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() user: CurrentUserData,
   ): Promise<TicketPayload> {
-    return this.ticketRead.findByIdForActor(
-      id,
+    const ticket = await this.ticketRead.findById(id);
+    const eventRole = await this.eventRoleResolver.getRoleForUser(
       user.id,
-      user.role === RealmRoleType.ADMIN,
+      ticket.eventId,
     );
+    return this.ticketRead.findByIdForActor(id, user.id, eventRole);
   }
 
-  @UseGuards(RoleGuard)
-  @Roles(RealmRoleType.ADMIN)
+  @UseGuards(RoleGuard, EventRoleGuard)
+  @Roles(RealmRoleType.USER)
+  @EventRoles(EventRoleType.ADMIN)
   @Query(() => [TicketPayload], {
-    description: 'Fetch a single ticket by its cuid',
+    description: 'Fetch all tickets',
   })
   async getAllTickets(): Promise<TicketPayload[]> {
     return this.ticketRead.findMany();
   }
 
-  // ---------------------------------------------------------
-  // 2) Get all tickets for a given event
-  // ---------------------------------------------------------
-  @UseGuards(RoleGuard)
-  @Roles(RealmRoleType.ADMIN)
+  @UseGuards(RoleGuard, EventRoleGuard)
+  @Roles(RealmRoleType.USER)
+  @EventRoles(EventRoleType.ADMIN)
   @Query(() => [TicketPayload], {
     description: 'Fetch all tickets belonging to a specific event',
   })
@@ -54,9 +60,6 @@ export class TicketQueryResolver {
     return this.ticketRead.findByEvent(eventId);
   }
 
-  // ---------------------------------------------------------
-  // 3) Find ticket belonging to a specific guest profile
-  // ---------------------------------------------------------
   @Query(() => [TicketPayload], {
     description: 'Find tickets linked to a specific guestProfileId',
   })
@@ -64,16 +67,12 @@ export class TicketQueryResolver {
     @Args('guestProfileId', { type: () => ID }) guestProfileId: string,
     @CurrentUser() user: CurrentUserData,
   ): Promise<TicketPayload[]> {
-    return this.ticketRead.findByGuestForActor(
-      guestProfileId,
-      user.id,
-      user.role === RealmRoleType.ADMIN,
-    );
+    if (guestProfileId !== user.id) {
+      return [];
+    }
+    return this.ticketRead.findByGuest(guestProfileId);
   }
 
-  // ---------------------------------------------------------
-  // 4) Find ticket by invitationId (1:1 relationship)
-  // ---------------------------------------------------------
   @Query(() => TicketPayload, {
     description: 'Find the ticket created for a specific invitationId',
   })
@@ -81,16 +80,18 @@ export class TicketQueryResolver {
     @Args('invitationId', { type: () => ID }) invitationId: string,
     @CurrentUser() user: CurrentUserData,
   ): Promise<TicketPayload> {
+    const ticket = await this.ticketRead.findByInvitation(invitationId);
+    const eventRole = await this.eventRoleResolver.getRoleForUser(
+      user.id,
+      ticket.eventId,
+    );
     return this.ticketRead.findByInvitationForActor(
       invitationId,
       user.id,
-      user.role === RealmRoleType.ADMIN,
+      eventRole,
     );
   }
 
-  // ---------------------------------------------------------
-  // 5) Load all scan logs for a given ticket
-  // ---------------------------------------------------------
   @Query(() => [ScanLogPayload], {
     description: 'Load all security scan logs of a ticket',
   })
@@ -98,11 +99,12 @@ export class TicketQueryResolver {
     @Args('ticketId', { type: () => ID }) ticketId: string,
     @CurrentUser() user: CurrentUserData,
   ): Promise<ScanLogPayload[]> {
-    return this.ticketRead.scanLogsForActor(
-      ticketId,
+    const ticket = await this.ticketRead.findById(ticketId);
+    const eventRole = await this.eventRoleResolver.getRoleForUser(
       user.id,
-      user.role === RealmRoleType.ADMIN,
+      ticket.eventId,
     );
+    return this.ticketRead.scanLogsForActor(ticketId, user.id, eventRole);
   }
 
   @Query(() => [TicketPayload], {

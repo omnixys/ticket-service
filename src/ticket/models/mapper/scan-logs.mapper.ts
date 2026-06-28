@@ -1,7 +1,7 @@
 // src/ticket/models/mapper/scan-log.mapper.ts
 import type { ScanLog } from '../../../prisma/generated/client.js';
 import type { ScanLogPayload } from '../payloads/scan-log-list.payload.js';
-import { n2u } from '@omnixys/shared';
+import { n2u } from '@omnixys/contracts';
 
 /**
  * Maps a Prisma ScanLog row → GraphQL ScanLog Entity.

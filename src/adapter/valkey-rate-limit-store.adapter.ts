@@ -27,10 +27,10 @@ export class ValkeyRateLimitStore implements RateLimitStore {
   }
 
   async del(key: string): Promise<void> {
-    await this.valkey.client.del(key);
+    await this.valkey.client.del(this.valkey.key(key));
   }
 
   async ttl(key: string): Promise<number> {
-    return this.valkey.client.ttl(key);
+    return this.valkey.ttl(key);
   }
 }

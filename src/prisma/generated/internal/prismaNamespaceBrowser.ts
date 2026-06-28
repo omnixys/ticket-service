@@ -53,7 +53,8 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Ticket: 'Ticket',
   ScanLog: 'ScanLog',
-  ShareGuard: 'ShareGuard'
+  ShareGuard: 'ShareGuard',
+  EventRoleProjection: 'EventRoleProjection'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -123,6 +124,17 @@ export const ShareGuardScalarFieldEnum = {
 } as const
 
 export type ShareGuardScalarFieldEnum = (typeof ShareGuardScalarFieldEnum)[keyof typeof ShareGuardScalarFieldEnum]
+
+
+export const EventRoleProjectionScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  userId: 'userId',
+  role: 'role',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EventRoleProjectionScalarFieldEnum = (typeof EventRoleProjectionScalarFieldEnum)[keyof typeof EventRoleProjectionScalarFieldEnum]
 
 
 export const SortOrder = {

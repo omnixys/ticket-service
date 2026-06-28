@@ -21,11 +21,13 @@ import {
 } from '@nestjs/graphql';
 import { ClientInfo } from '@omnixys/context';
 import type { ClientContext } from '@omnixys/context';
-import { RealmRoleType } from '@omnixys/contracts';
+import { EventRoleType, RealmRoleType } from '@omnixys/contracts';
 import {
   CookieAuthGuard,
   CurrentUser,
   CurrentUserData,
+  EventRoleGuard,
+  EventRoles,
   RoleGuard,
   Roles,
 } from '@omnixys/security';
@@ -114,8 +116,9 @@ export class TicketMutationResolver {
   }
 
   @Mutation(() => ScanPayload)
-  @UseGuards(RoleGuard)
-  @Roles(RealmRoleType.ADMIN)
+  @UseGuards(RoleGuard, EventRoleGuard)
+  @Roles(RealmRoleType.USER)
+  @EventRoles(EventRoleType.ADMIN, EventRoleType.SECURITY)
   async scanToken(
     @Args('input') input: ScanInput,
     @CurrentUser() user: CurrentUserData,
@@ -138,8 +141,9 @@ export class TicketMutationResolver {
     };
   }
 
-  @UseGuards(RoleGuard)
-  @Roles(RealmRoleType.ADMIN)
+  @UseGuards(RoleGuard, EventRoleGuard)
+  @Roles(RealmRoleType.USER)
+  @EventRoles(EventRoleType.ADMIN)
   @Mutation(() => Boolean, {
     description: 'Delete ticket and all its logs (admin only)',
   })
@@ -153,8 +157,9 @@ export class TicketMutationResolver {
   // ---------------------------------------------------------
   // 4) Revoke a ticket manually
   // ---------------------------------------------------------
-  @UseGuards(RoleGuard)
-  @Roles(RealmRoleType.ADMIN)
+  @UseGuards(RoleGuard, EventRoleGuard)
+  @Roles(RealmRoleType.USER)
+  @EventRoles(EventRoleType.ADMIN)
   @Mutation(() => TicketPayload, {
     description: 'Revoke a ticket (security or admin)',
   })
