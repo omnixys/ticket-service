@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [2.0.1](https://github.com/omnixys/ticket-service/compare/v2.0.0...v2.0.1) (2026-06-29)
+
+### Kafka
+
+* **Kafka:** update kafka dependency ([](https://github.com/omnixys/ticket-service/commit/3bbd1ec4ef47b5bb3c5ec4baa00dd308d3994c3a))
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/ticket-service ([](https://github.com/omnixys/ticket-service/commit/76b953643a682418e41c8043a7b1ebc1d1181cac))
+
 ## [2.0.0](https://github.com/omnixys/ticket-service/compare/v1.0.2...v2.0.0) (2026-06-28)
 
 ### Dependencies
