@@ -387,7 +387,8 @@ export const ModelName = {
   Ticket: 'Ticket',
   ScanLog: 'ScanLog',
   ShareGuard: 'ShareGuard',
-  EventRoleProjection: 'EventRoleProjection'
+  EventRoleProjection: 'EventRoleProjection',
+  EventSettingsProjection: 'EventSettingsProjection'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -403,7 +404,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ticket" | "scanLog" | "shareGuard" | "eventRoleProjection"
+    modelProps: "ticket" | "scanLog" | "shareGuard" | "eventRoleProjection" | "eventSettingsProjection"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -703,6 +704,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    EventSettingsProjection: {
+      payload: Prisma.$EventSettingsProjectionPayload<ExtArgs>
+      fields: Prisma.EventSettingsProjectionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EventSettingsProjectionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSettingsProjectionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EventSettingsProjectionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSettingsProjectionPayload>
+        }
+        findFirst: {
+          args: Prisma.EventSettingsProjectionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSettingsProjectionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EventSettingsProjectionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSettingsProjectionPayload>
+        }
+        findMany: {
+          args: Prisma.EventSettingsProjectionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSettingsProjectionPayload>[]
+        }
+        create: {
+          args: Prisma.EventSettingsProjectionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSettingsProjectionPayload>
+        }
+        createMany: {
+          args: Prisma.EventSettingsProjectionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EventSettingsProjectionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSettingsProjectionPayload>[]
+        }
+        delete: {
+          args: Prisma.EventSettingsProjectionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSettingsProjectionPayload>
+        }
+        update: {
+          args: Prisma.EventSettingsProjectionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSettingsProjectionPayload>
+        }
+        deleteMany: {
+          args: Prisma.EventSettingsProjectionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EventSettingsProjectionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EventSettingsProjectionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSettingsProjectionPayload>[]
+        }
+        upsert: {
+          args: Prisma.EventSettingsProjectionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSettingsProjectionPayload>
+        }
+        aggregate: {
+          args: Prisma.EventSettingsProjectionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEventSettingsProjection>
+        }
+        groupBy: {
+          args: Prisma.EventSettingsProjectionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventSettingsProjectionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EventSettingsProjectionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventSettingsProjectionCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -804,6 +879,19 @@ export const EventRoleProjectionScalarFieldEnum = {
 } as const
 
 export type EventRoleProjectionScalarFieldEnum = (typeof EventRoleProjectionScalarFieldEnum)[keyof typeof EventRoleProjectionScalarFieldEnum]
+
+
+export const EventSettingsProjectionScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  name: 'name',
+  endsAt: 'endsAt',
+  startsAt: 'startsAt',
+  ticketReleaseAt: 'ticketReleaseAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EventSettingsProjectionScalarFieldEnum = (typeof EventSettingsProjectionScalarFieldEnum)[keyof typeof EventSettingsProjectionScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1054,6 +1142,7 @@ export type GlobalOmitConfig = {
   scanLog?: Prisma.ScanLogOmit
   shareGuard?: Prisma.ShareGuardOmit
   eventRoleProjection?: Prisma.EventRoleProjectionOmit
+  eventSettingsProjection?: Prisma.EventSettingsProjectionOmit
 }
 
 /* Types for Logging */

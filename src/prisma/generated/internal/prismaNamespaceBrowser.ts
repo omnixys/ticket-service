@@ -54,7 +54,8 @@ export const ModelName = {
   Ticket: 'Ticket',
   ScanLog: 'ScanLog',
   ShareGuard: 'ShareGuard',
-  EventRoleProjection: 'EventRoleProjection'
+  EventRoleProjection: 'EventRoleProjection',
+  EventSettingsProjection: 'EventSettingsProjection'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -135,6 +136,19 @@ export const EventRoleProjectionScalarFieldEnum = {
 } as const
 
 export type EventRoleProjectionScalarFieldEnum = (typeof EventRoleProjectionScalarFieldEnum)[keyof typeof EventRoleProjectionScalarFieldEnum]
+
+
+export const EventSettingsProjectionScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  name: 'name',
+  endsAt: 'endsAt',
+  startsAt: 'startsAt',
+  ticketReleaseAt: 'ticketReleaseAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EventSettingsProjectionScalarFieldEnum = (typeof EventSettingsProjectionScalarFieldEnum)[keyof typeof EventSettingsProjectionScalarFieldEnum]
 
 
 export const SortOrder = {

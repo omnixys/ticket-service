@@ -20,10 +20,10 @@ const prisma = new PrismaClient({ adapter });
 /* ----------------------------------------------------------------------
  * Constants
  * -------------------------------------------------------------------- */
-const EVENT_ID = '959b8321-0c2d-496c-b2a4-4d1ab45c1d67';
+  const EVENT_ID = '70911c35-5ea8-4ce2-bf95-ebcc5c61db26';
 const GUEST_ID = 'ae489d9b-96ce-4942-bcb1-c2e2a0c92e83';
-const SEAT_ID = '5749d4ab-b2a5-45f3-9d2f-1b84ee30736f';
-const INVITATION_ID = 'd9ec1e2a-45be-4b98-af15-658455deb23e';
+const SEAT_ID = '23c7efa1-bcae-4d0c-ab73-956cba5e0227';
+const INVITATION_ID = '6ffb6a85-9265-443a-a33f-3846e30fd91a';
 
 /* ----------------------------------------------------------------------
  * Seed

@@ -65,3 +65,10 @@ export type ShareGuard = Prisma.ShareGuardModel
  * ----------------------------------------------------------------------
  */
 export type EventRoleProjection = Prisma.EventRoleProjectionModel
+/**
+ * Model EventSettingsProjection
+ * ----------------------------------------------------------------------
+ * EventSettingsProjection – local cache of event settings synced via Kafka
+ * ----------------------------------------------------------------------
+ */
+export type EventSettingsProjection = Prisma.EventSettingsProjectionModel

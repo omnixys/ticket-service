@@ -117,6 +117,21 @@ model EventRoleProjection {
   @@map("event_role_projection")
 }
 
+/// ----------------------------------------------------------------------
+/// EventSettingsProjection – local cache of event settings synced via Kafka
+/// ----------------------------------------------------------------------
+model EventSettingsProjection {
+  id        String    @id @default(uuid()) @map("id") @db.Uuid
+  eventId   String    @unique @map("event_id") @db.Uuid
+  name      String?   @map("name")
+  endsAt    DateTime? @map("ends_at")
+  startsAt        DateTime? @map("starts_at")
+  ticketReleaseAt DateTime? @map("ticket_release_at")
+  updatedAt       DateTime? @updatedAt @map("updated_at")
+
+  @@map("event_settings_projection")
+}
+
 enum EventRoleType {
   ADMIN
   SECURITY

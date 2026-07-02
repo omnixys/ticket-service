@@ -160,9 +160,14 @@ export class EventRoleHandler {
     _context: IKafkaEventContext,
   ): Promise<void> {
     return TraceRunner.run('[HANDLER] event.deleted', async () => {
-      await this.prisma.eventRoleProjection.deleteMany({
-        where: { eventId: { in: payload.eventIds } },
-      });
+      await Promise.all([
+        this.prisma.eventRoleProjection.deleteMany({
+          where: { eventId: { in: payload.eventIds } },
+        }),
+        this.prisma.eventSettingsProjection.deleteMany({
+          where: { eventId: { in: payload.eventIds } },
+        }),
+      ]);
     });
   }
 }
