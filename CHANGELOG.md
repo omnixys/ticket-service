@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [2.1.0](https://github.com/omnixys/ticket-service/compare/v2.0.1...v2.1.0) (2026-07-02)
+
+### Deps
+
+* **Deps:** update dependencys ([](https://github.com/omnixys/ticket-service/commit/37ea5c2eaff905f221cf85f990f94613d25b2f4e))
+
 ## [2.0.1](https://github.com/omnixys/ticket-service/compare/v2.0.0...v2.0.1) (2026-06-29)
 
 ### Kafka
