@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.0.0](https://github.com/omnixys/ticket-service/compare/v2.1.0...v3.0.0) (2026-07-16)
+
+### New
+
+* **New:** new service ([](https://github.com/omnixys/ticket-service/commit/78cb5681f88e9fa436f3d29d11aae92758e3e919))
+
 ## [2.1.0](https://github.com/omnixys/ticket-service/compare/v2.0.1...v2.1.0) (2026-07-02)
 
 ### Deps
