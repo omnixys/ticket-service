@@ -16,10 +16,11 @@ import { TicketPayload } from '../models/payloads/ticket-payload.js';
 import { TokenService } from './token.service.js';
 import { Injectable } from '@nestjs/common';
 import { ContextAccessor } from '@omnixys/context';
-import type { EventMilestoneRecordedDTO } from '@omnixys/contracts';
+import { EventPermissionKey, type EventMilestoneRecordedDTO } from '@omnixys/contracts';
 import { KafkaProducerService, KafkaTopics } from '@omnixys/kafka';
 import { OmnixysLogger } from '@omnixys/logger';
 import { TraceRunner } from '@omnixys/observability';
+import { EventAccessDeniedException, EventPermissionResolver } from '@omnixys/security';
 import { createPublicKey } from 'node:crypto';
 
 export interface UpdateTicketInput {
@@ -38,6 +39,7 @@ export class TicketWriteService {
     private readonly loggerService: OmnixysLogger,
     private readonly token: TokenService,
     private readonly producer: KafkaProducerService,
+    private readonly eventPermissionResolver: EventPermissionResolver,
   ) {
     this.logger = this.loggerService.log(this.constructor.name);
   }
@@ -175,8 +177,13 @@ export class TicketWriteService {
     });
   }
 
-  async delete(ticketId: string): Promise<void> {
-    await this.ensureExists(ticketId);
+  async delete(ticketId: string, actorId: string): Promise<void> {
+    const ticket = await this.prisma.ticket.findUnique({ where: { id: ticketId } });
+    if (!ticket) {
+      throw new TicketNotFoundException(ticketId);
+    }
+
+    await this.assertManageTicket(ticket.eventId, actorId);
 
     await this.prisma.$transaction(async (tx) => {
       await tx.scanLog.deleteMany({ where: { ticketId } });
@@ -314,6 +321,8 @@ export class TicketWriteService {
       throw new TicketNotFoundException(ticketId);
     }
 
+    await this.assertManageTicket(ticket.eventId, actorId);
+
     if (ticket.revoked) {
       await this.publishRevokedMilestone(ticket);
       return mapTicket(ticket);
@@ -390,6 +399,20 @@ export class TicketWriteService {
       }
     } catch {
       throw new TicketDeviceKeyInvalidException(ticketId);
+    }
+  }
+
+  private async assertManageTicket(eventId: string, actorId: string): Promise<void> {
+    const permissions = await this.eventPermissionResolver.getPermissionsForUser(actorId, eventId);
+
+    if (!permissions.includes(EventPermissionKey.ManageTickets)) {
+      throw new EventAccessDeniedException({
+        eventId,
+        userId: actorId,
+        reason: 'event-permission-mismatch',
+        actualPermissions: permissions,
+        requiredPermissions: [EventPermissionKey.ManageTickets],
+      });
     }
   }
 }

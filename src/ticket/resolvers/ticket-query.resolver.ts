@@ -3,14 +3,14 @@ import { TicketPayload } from '../models/payloads/ticket-payload.js';
 import { TicketReadService } from '../service/ticket-read.service.js';
 import { UseGuards } from '@nestjs/common';
 import { Args, ID, Query, Resolver } from '@nestjs/graphql';
-import { EventRoleType, RealmRoleType } from '@omnixys/contracts';
+import { EventPermissionKey, RealmRoleType } from '@omnixys/contracts';
 import { EventRoleResolver } from '@omnixys/security';
 import {
   CookieAuthGuard,
   CurrentUser,
   CurrentUserData,
-  EventRoleGuard,
-  EventRoles,
+  EventPermissionGuard,
+  EventPermissions,
   RoleGuard,
   Roles,
 } from '@omnixys/security';
@@ -38,9 +38,9 @@ export class TicketQueryResolver {
     return this.ticketRead.findByIdForActor(id, user.id, eventRole);
   }
 
-  @UseGuards(RoleGuard, EventRoleGuard)
+  @UseGuards(RoleGuard, EventPermissionGuard)
   @Roles(RealmRoleType.USER)
-  @EventRoles(EventRoleType.ADMIN)
+  @EventPermissions(EventPermissionKey.ViewTickets)
   @Query(() => [TicketPayload], {
     description: 'Fetch all tickets',
   })
@@ -48,9 +48,9 @@ export class TicketQueryResolver {
     return this.ticketRead.findMany();
   }
 
-  @UseGuards(RoleGuard, EventRoleGuard)
+  @UseGuards(RoleGuard, EventPermissionGuard)
   @Roles(RealmRoleType.USER)
-  @EventRoles(EventRoleType.ADMIN)
+  @EventPermissions(EventPermissionKey.ViewTickets)
   @Query(() => [TicketPayload], {
     description: 'Fetch all tickets belonging to a specific event',
   })

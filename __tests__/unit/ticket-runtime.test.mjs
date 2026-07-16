@@ -9,9 +9,11 @@ import {
   TicketVerificationTokenException,
 } from '../../dist/ticket/errors/ticket-domain.error.js';
 import { TicketWriteService } from '../../dist/ticket/service/ticket-write.service.js';
+import { TicketEventRoleResolver } from '../../dist/ticket/service/ticket-event-role-resolver.service.js';
 import { TokenService } from '../../dist/ticket/service/token.service.js';
 import { VerifyService } from '../../dist/ticket/service/verify.service.js';
 import { ContextAccessor } from '@omnixys/context';
+import { EventPermissionKey, EventRoleType } from '@omnixys/contracts';
 import { KafkaTopics } from '@omnixys/kafka';
 import assert from 'node:assert/strict';
 import { createSign, generateKeyPairSync, randomBytes } from 'node:crypto';
@@ -177,6 +179,7 @@ test('ticket creation is idempotent and republishes its stable milestone', async
         sent.push(event);
       },
     },
+    { getPermissionsForUser: async () => [] },
   );
 
   const result = await ContextAccessor.run(
@@ -219,6 +222,7 @@ test('device binding rejects a non-owner before changing the ticket', async () =
     logger,
     {},
     {},
+    { getPermissionsForUser: async () => [] },
   );
 
   await ContextAccessor.run({ requestId: 'request-owner' }, async () => {
@@ -239,6 +243,63 @@ test('device binding rejects a non-owner before changing the ticket', async () =
       },
     );
   });
+});
+
+test('ticket permission resolver prefers access projection over legacy roles', async () => {
+  const resolver = new TicketEventRoleResolver({
+    eventAccessProjection: {
+      async findUnique() {
+        return {
+          permissions: [EventPermissionKey.ViewTickets, 'unknown.permission'],
+        };
+      },
+    },
+    eventRoleProjection: {
+      async findUnique() {
+        throw new Error('legacy fallback must not be used when access projection exists');
+      },
+    },
+  });
+
+  assert.deepEqual(await resolver.getPermissionsForUser('user-1', 'event-1'), [
+    EventPermissionKey.ViewTickets,
+  ]);
+});
+
+test('ticket permission resolver treats empty access projection as immediate access removal', async () => {
+  const resolver = new TicketEventRoleResolver({
+    eventAccessProjection: {
+      async findUnique() {
+        return { permissions: [] };
+      },
+    },
+    eventRoleProjection: {
+      async findUnique() {
+        return { role: EventRoleType.ADMIN };
+      },
+    },
+  });
+
+  assert.deepEqual(await resolver.getPermissionsForUser('user-1', 'event-1'), []);
+});
+
+test('ticket permission resolver keeps legacy SUPPORT fallback compatible', async () => {
+  const resolver = new TicketEventRoleResolver({
+    eventAccessProjection: {
+      async findUnique() {
+        return null;
+      },
+    },
+    eventRoleProjection: {
+      async findUnique() {
+        return { role: EventRoleType.SUPPORT };
+      },
+    },
+  });
+
+  const permissions = await resolver.getPermissionsForUser('user-1', 'event-1');
+  assert.ok(permissions.includes(EventPermissionKey.ViewSupport));
+  assert.equal(permissions.includes(EventPermissionKey.ViewTickets), false);
 });
 
 test('ticket creation handler rejects expired guest verification state', async () => {

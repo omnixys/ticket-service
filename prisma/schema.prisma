@@ -117,6 +117,20 @@ model EventRoleProjection {
   @@map("event_role_projection")
 }
 
+model EventAccessProjection {
+  id          String    @id @default(uuid()) @map("id") @db.Uuid
+  eventId     String    @map("event_id") @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  permissions String[]  @default([]) @map("permissions")
+  roles       Json?     @map("roles")
+  occurredAt  DateTime? @map("occurred_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+
+  @@unique([eventId, userId], name: "uq_event_access_projection")
+  @@index([eventId], name: "idx_event_access_projection_event")
+  @@map("event_access_projection")
+}
+
 /// ----------------------------------------------------------------------
 /// EventSettingsProjection – local cache of event settings synced via Kafka
 /// ----------------------------------------------------------------------
@@ -136,6 +150,7 @@ enum EventRoleType {
   ADMIN
   SECURITY
   GUEST
+  SUPPORT
 
   @@map("event_role_type")
 }

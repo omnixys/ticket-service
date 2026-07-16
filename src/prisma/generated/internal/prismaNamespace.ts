@@ -388,6 +388,7 @@ export const ModelName = {
   ScanLog: 'ScanLog',
   ShareGuard: 'ShareGuard',
   EventRoleProjection: 'EventRoleProjection',
+  EventAccessProjection: 'EventAccessProjection',
   EventSettingsProjection: 'EventSettingsProjection'
 } as const
 
@@ -404,7 +405,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ticket" | "scanLog" | "shareGuard" | "eventRoleProjection" | "eventSettingsProjection"
+    modelProps: "ticket" | "scanLog" | "shareGuard" | "eventRoleProjection" | "eventAccessProjection" | "eventSettingsProjection"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -704,6 +705,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    EventAccessProjection: {
+      payload: Prisma.$EventAccessProjectionPayload<ExtArgs>
+      fields: Prisma.EventAccessProjectionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EventAccessProjectionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventAccessProjectionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EventAccessProjectionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventAccessProjectionPayload>
+        }
+        findFirst: {
+          args: Prisma.EventAccessProjectionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventAccessProjectionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EventAccessProjectionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventAccessProjectionPayload>
+        }
+        findMany: {
+          args: Prisma.EventAccessProjectionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventAccessProjectionPayload>[]
+        }
+        create: {
+          args: Prisma.EventAccessProjectionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventAccessProjectionPayload>
+        }
+        createMany: {
+          args: Prisma.EventAccessProjectionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EventAccessProjectionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventAccessProjectionPayload>[]
+        }
+        delete: {
+          args: Prisma.EventAccessProjectionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventAccessProjectionPayload>
+        }
+        update: {
+          args: Prisma.EventAccessProjectionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventAccessProjectionPayload>
+        }
+        deleteMany: {
+          args: Prisma.EventAccessProjectionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EventAccessProjectionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EventAccessProjectionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventAccessProjectionPayload>[]
+        }
+        upsert: {
+          args: Prisma.EventAccessProjectionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventAccessProjectionPayload>
+        }
+        aggregate: {
+          args: Prisma.EventAccessProjectionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEventAccessProjection>
+        }
+        groupBy: {
+          args: Prisma.EventAccessProjectionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventAccessProjectionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EventAccessProjectionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventAccessProjectionCountAggregateOutputType> | number
+        }
+      }
+    }
     EventSettingsProjection: {
       payload: Prisma.$EventSettingsProjectionPayload<ExtArgs>
       fields: Prisma.EventSettingsProjectionFieldRefs
@@ -881,6 +956,19 @@ export const EventRoleProjectionScalarFieldEnum = {
 export type EventRoleProjectionScalarFieldEnum = (typeof EventRoleProjectionScalarFieldEnum)[keyof typeof EventRoleProjectionScalarFieldEnum]
 
 
+export const EventAccessProjectionScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  userId: 'userId',
+  permissions: 'permissions',
+  roles: 'roles',
+  occurredAt: 'occurredAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EventAccessProjectionScalarFieldEnum = (typeof EventAccessProjectionScalarFieldEnum)[keyof typeof EventAccessProjectionScalarFieldEnum]
+
+
 export const EventSettingsProjectionScalarFieldEnum = {
   id: 'id',
   eventId: 'eventId',
@@ -902,6 +990,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -916,6 +1012,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -1012,6 +1117,20 @@ export type EnumEventRoleTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
  * Reference to a field of type 'EventRoleType[]'
  */
 export type ListEnumEventRoleTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EventRoleType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -1142,6 +1261,7 @@ export type GlobalOmitConfig = {
   scanLog?: Prisma.ScanLogOmit
   shareGuard?: Prisma.ShareGuardOmit
   eventRoleProjection?: Prisma.EventRoleProjectionOmit
+  eventAccessProjection?: Prisma.EventAccessProjectionOmit
   eventSettingsProjection?: Prisma.EventSettingsProjectionOmit
 }
 

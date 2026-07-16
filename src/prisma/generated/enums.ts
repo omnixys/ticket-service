@@ -12,7 +12,8 @@
 export const EventRoleType = {
   ADMIN: 'ADMIN',
   SECURITY: 'SECURITY',
-  GUEST: 'GUEST'
+  GUEST: 'GUEST',
+  SUPPORT: 'SUPPORT'
 } as const
 
 export type EventRoleType = (typeof EventRoleType)[keyof typeof EventRoleType]

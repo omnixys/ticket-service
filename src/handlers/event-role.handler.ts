@@ -15,9 +15,14 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
+import {
+  EventRoleType as PrismaEventRoleType,
+  Prisma,
+} from '../prisma/generated/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { Injectable } from '@nestjs/common';
 import type {
+  EventAccessDTO,
   EventIdsDTO,
   EventOwnerChangedDTO,
   EventRoleAssignedDTO,
@@ -44,6 +49,49 @@ export class EventRoleHandler {
     this.logger = this.omnixysLogger.log(this.constructor.name);
   }
 
+  @KafkaEvent(KafkaTopics.event.userAccessChanged)
+  async handleUserAccessChanged(
+    payload: EventAccessDTO,
+    _context: IKafkaEventContext,
+  ): Promise<void> {
+    return TraceRunner.run('[HANDLER] event.userAccessChanged', async () => {
+      const { eventId, userId, permissions, roles, occurredAt } = payload;
+      const occurredAtDate = new Date(occurredAt);
+
+      const existing = await this.prisma.eventAccessProjection.findUnique({
+        where: { uq_event_access_projection: { eventId, userId } },
+        select: { occurredAt: true },
+      });
+
+      if (
+        existing?.occurredAt &&
+        occurredAtDate.getTime() < existing.occurredAt.getTime()
+      ) {
+        this.logger.debug('Skipping stale event.userAccessChanged', {
+          eventId,
+          userId,
+        });
+        return;
+      }
+
+      await this.prisma.eventAccessProjection.upsert({
+        where: { uq_event_access_projection: { eventId, userId } },
+        create: {
+          eventId,
+          userId,
+          permissions,
+          roles: roles as unknown as Prisma.InputJsonValue,
+          occurredAt: occurredAtDate,
+        },
+        update: {
+          permissions,
+          roles: roles as unknown as Prisma.InputJsonValue,
+          occurredAt: occurredAtDate,
+        },
+      });
+    });
+  }
+
   @KafkaEvent(KafkaTopics.event.roleAssigned)
   async handleRoleAssigned(
     payload: EventRoleAssignedDTO,
@@ -51,6 +99,7 @@ export class EventRoleHandler {
   ): Promise<void> {
     return TraceRunner.run('[HANDLER] event.roleAssigned', async () => {
       const { eventId, userId, role, occurredAt } = payload;
+      const projectedRole = role as unknown as PrismaEventRoleType;
 
       const existing = await this.prisma.eventRoleProjection.findUnique({
         where: { uq_event_role_projection: { eventId, userId } },
@@ -70,8 +119,8 @@ export class EventRoleHandler {
 
       await this.prisma.eventRoleProjection.upsert({
         where: { uq_event_role_projection: { eventId, userId } },
-        create: { eventId, userId, role },
-        update: { role },
+        create: { eventId, userId, role: projectedRole },
+        update: { role: projectedRole },
       });
     });
   }
@@ -165,6 +214,9 @@ export class EventRoleHandler {
           where: { eventId: { in: payload.eventIds } },
         }),
         this.prisma.eventSettingsProjection.deleteMany({
+          where: { eventId: { in: payload.eventIds } },
+        }),
+        this.prisma.eventAccessProjection.deleteMany({
           where: { eventId: { in: payload.eventIds } },
         }),
       ]);

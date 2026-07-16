@@ -1,10 +1,15 @@
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { Injectable } from '@nestjs/common';
-import type { EventRoleType } from '@omnixys/contracts';
-import { EventRoleResolver } from '@omnixys/security';
+import {
+  getDefaultPermissionsForEventRole,
+  uniqueEventPermissions,
+  type EventPermissionKey,
+  type EventRoleType,
+} from '@omnixys/contracts';
+import { EventPermissionResolver, EventRoleResolver } from '@omnixys/security';
 
 @Injectable()
-export class TicketEventRoleResolver extends EventRoleResolver {
+export class TicketEventRoleResolver extends EventRoleResolver implements EventPermissionResolver {
   constructor(private readonly prisma: PrismaService) {
     super();
   }
@@ -18,5 +23,24 @@ export class TicketEventRoleResolver extends EventRoleResolver {
     });
 
     return (row?.role as EventRoleType | null) ?? null;
+  }
+
+  async getPermissionsForUser(
+    userId: string,
+    eventId: string,
+  ): Promise<readonly EventPermissionKey[]> {
+    const access = await this.prisma.eventAccessProjection.findUnique({
+      where: {
+        uq_event_access_projection: { eventId, userId },
+      },
+      select: { permissions: true },
+    });
+
+    if (access) {
+      return uniqueEventPermissions(access.permissions);
+    }
+
+    const role = await this.getRoleForUser(userId, eventId);
+    return getDefaultPermissionsForEventRole(role);
   }
 }

@@ -3,9 +3,10 @@ import { PrismaService } from '../../prisma/prisma.service.js';
 import { VerifyService } from './verify.service.js';
 import { Injectable } from '@nestjs/common';
 import { ContextAccessor } from '@omnixys/context';
-import type { EventMilestoneRecordedDTO } from '@omnixys/contracts';
+import { EventPermissionKey, type EventMilestoneRecordedDTO } from '@omnixys/contracts';
 import { KafkaProducerService, KafkaTopics } from '@omnixys/kafka';
 import { OmnixysLogger } from '@omnixys/logger';
+import { EventAccessDeniedException, EventPermissionResolver } from '@omnixys/security';
 
 export interface SecurityScanInput {
   token: string;
@@ -30,6 +31,7 @@ export class ScanService {
     private readonly prisma: PrismaService,
     private readonly verify: VerifyService,
     private readonly producer: KafkaProducerService,
+    private readonly eventPermissionResolver: EventPermissionResolver,
     logger: OmnixysLogger,
   ) {
     this.logger = logger.log(this.constructor.name);
@@ -47,6 +49,21 @@ export class ScanService {
       signature,
       deviceId,
     );
+
+    const permissions = await this.eventPermissionResolver.getPermissionsForUser(
+      actorId,
+      ticket.eventId,
+    );
+
+    if (!permissions.includes(EventPermissionKey.ScanTickets)) {
+      throw new EventAccessDeniedException({
+        eventId: ticket.eventId,
+        userId: actorId,
+        reason: 'event-permission-mismatch',
+        actualPermissions: permissions,
+        requiredPermissions: [EventPermissionKey.ScanTickets],
+      });
+    }
 
     const log = await this.prisma.scanLog.create({
       data: {

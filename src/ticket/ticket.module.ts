@@ -9,7 +9,12 @@ import { TicketWriteService } from './service/ticket-write.service.js';
 import { TokenService } from './service/token.service.js';
 import { VerifyService } from './service/verify.service.js';
 import { Module } from '@nestjs/common';
-import { EventRoleGuard, EventRoleResolver } from '@omnixys/security';
+import {
+  EventPermissionGuard,
+  EventPermissionResolver,
+  EventRoleGuard,
+  EventRoleResolver,
+} from '@omnixys/security';
 
 @Module({
   imports: [PrismaModule],
@@ -23,9 +28,14 @@ import { EventRoleGuard, EventRoleResolver } from '@omnixys/security';
     ShareGuardService,
     VerifyService,
     EventRoleGuard,
+    EventPermissionGuard,
     TicketEventRoleResolver,
     {
       provide: EventRoleResolver,
+      useExisting: TicketEventRoleResolver,
+    },
+    {
+      provide: EventPermissionResolver,
       useExisting: TicketEventRoleResolver,
     },
   ],
