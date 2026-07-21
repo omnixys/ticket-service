@@ -20,7 +20,7 @@
   "private": false,
   "packageManager": "pnpm@10.33.0",
   "engines": {
-    "node": ">=25.8.2",
+    "node": ">=24.10.0",
     "pnpm": ">=10.33.0"
   },
   "scripts": {
@@ -75,7 +75,6 @@
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.1.27",
     "@nestjs/graphql": "^13.4.2",
-    "@nestjs/platform-express": "^11.1.27",
     "@nestjs/platform-fastify": "^11.1.27",
     "@nestjs/terminus": "^11.1.1",
     "@omnixys/cache": "^3.0.0",
@@ -94,11 +93,7 @@
     "class-validator": "^0.14.4",
     "dotenv": "^17.4.2",
     "fastify": "5.8.5",
-    "graphql-subscriptions": "^3.0.0",
     "jose": "^6.2.3",
-    "kafkajs": "^2.2.4",
-    "pino": "^10.3.1",
-    "pino-pretty": "^13.1.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },
@@ -114,8 +109,6 @@
     "@semantic-release/github": "^12.0.8",
     "@semantic-release/npm": "^13.1.5",
     "@semantic-release/release-notes-generator": "^14.1.1",
-    "@swc/cli": "^0.6.0",
-    "@swc/core": "^1.15.43",
     "@tsconfig/node23": "^23.0.4",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.20.0",
