@@ -151,6 +151,8 @@ enum EventRoleType {
   SECURITY
   GUEST
   SUPPORT
+  DRIVER
+  USHER
 
   @@map("event_role_type")
 }
