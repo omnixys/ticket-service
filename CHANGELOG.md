@@ -3,6 +3,22 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.2.0](https://github.com/omnixys/ticket-service/compare/v3.1.0...v3.2.0) (2026-07-28)
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/ticket-service ([](https://github.com/omnixys/ticket-service/commit/6747d0b464f7becaa319e2d2c1f7576754442ff3))
+
+### Prisma
+
+* **Prisma:** add generated prisma files ([](https://github.com/omnixys/ticket-service/commit/14df802f0807c7b8386bd830115b60e61208a88c))
+
+### Ticket
+
+* **Ticket:** add structured logging to token, verify, shareguard, read, and resolvers ([](https://github.com/omnixys/ticket-service/commit/0260acebe3a616f2963adf3617b5c4c28bf73bc2))
+* **Ticket:** add try/catch and structured logging to all 3 Kafka handlers ([](https://github.com/omnixys/ticket-service/commit/e4ba9bafcb5abaf863bda6441fdddbb028b7898a))
+* **Ticket:** resolve lint and build errors in logger usage ([](https://github.com/omnixys/ticket-service/commit/08d34a93063143343ef7b1b49d02237fec157e6e)), closes [#logger](https://github.com/omnixys/ticket-service/issues/logger)
+
 ## [3.1.0](https://github.com/omnixys/ticket-service/compare/v3.0.0...v3.1.0) (2026-07-24)
 
 ### Deps
