@@ -65,13 +65,15 @@ export class EventHandler {
         const headers = context.headers;
         const actorId = headers[KAFKA_HEADERS.ACTOR_ID] ?? 'unknown';
 
-        this.logger.debug(
-          'handleDeleteInvitationsByEventIds: %o | actorId=%s',
-          payload,
-          actorId,
-        );
+        this.logger.info('delete_tickets_by_events_received', { eventIds: payload.eventIds, actorId });
 
-        await this.ticketWriteService.deleteByEventIds(payload.eventIds);
+        try {
+          await this.ticketWriteService.deleteByEventIds(payload.eventIds);
+          this.logger.info('delete_tickets_by_events_success', { eventIds: payload.eventIds });
+        } catch (error) {
+          this.logger.exception(error, 'delete_tickets_by_events_failed', { eventIds: payload.eventIds, actorId });
+          throw error;
+        }
       },
     );
   }

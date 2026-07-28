@@ -79,47 +79,56 @@ export class SeatHandler {
     payload: CreateUserWithInvitationIdDTO,
   ): Promise<void> {
     return TraceRunner.run('[HANDLER] createTicket', async () => {
-      this.logger.debug('create ticket Handler');
       const { token, invitationId, userId } = payload;
+      this.logger.info('create_ticket_received', { invitationId, userId });
 
-      const raw = await this.cache.get(
-        ValkeyKey.guestVerificationTicket,
-        token,
-      );
-      if (!raw) {
-        throw new TicketVerificationTokenException('invalid-token');
-      }
+      try {
+        const raw = await this.cache.get(
+          ValkeyKey.guestVerificationTicket,
+          token,
+        );
+        if (!raw) {
+          this.logger.warning('create_ticket_invalid_token', { token });
+          throw new TicketVerificationTokenException('invalid-token');
+        }
 
-      const input = this.parseGuestTicketKey(raw);
+        const input = this.parseGuestTicketKey(raw);
 
-      const ticket = input.tickets.find((t) => t.invitationId === invitationId);
+        const ticket = input.tickets.find((t) => t.invitationId === invitationId);
 
-      if (!ticket) {
-        throw new TicketVerificationTokenException('mapping-not-found', {
+        if (!ticket) {
+          this.logger.warning('create_ticket_mapping_not_found', { invitationId, eventId: input.eventId });
+          throw new TicketVerificationTokenException('mapping-not-found', {
+            invitationId,
+          });
+        }
+
+        await this.ticketWriteService.createTicket({
+          eventId: input.eventId,
           invitationId,
-        });
-      }
-
-      await this.ticketWriteService.createTicket({
-        eventId: input.eventId,
-        invitationId,
-        userId,
-        seatId: ticket.seatId,
-        actorId: input.actorId,
-      });
-
-      /**
-       * Final link back to invitation
-       */
-      await this.kafkaProducer.send({
-        topic: KafkaTopics.invitation.addGuestId,
-        payload: {
           userId,
-          invitationId,
+          seatId: ticket.seatId,
           actorId: input.actorId,
-        },
-        meta: this.meta(input.actorId, 'Link invitation to guest'),
-      });
+        });
+
+        this.logger.info('create_ticket_success', { invitationId, userId, seatId: ticket.seatId, eventId: input.eventId });
+
+        /**
+         * Final link back to invitation
+         */
+        await this.kafkaProducer.send({
+          topic: KafkaTopics.invitation.addGuestId,
+          payload: {
+            userId,
+            invitationId,
+            actorId: input.actorId,
+          },
+          meta: this.meta(input.actorId, 'Link invitation to guest'),
+        });
+      } catch (error) {
+        this.logger.exception(error, 'create_ticket_failed', { invitationId, userId });
+        throw error;
+      }
     });
   }
 

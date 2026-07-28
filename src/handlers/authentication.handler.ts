@@ -65,13 +65,15 @@ export class AuthenticationHandler {
       const headers = context.headers;
       const actorId = headers[KAFKA_HEADERS.ACTOR_ID] ?? 'unknown';
 
-      this.logger.debug(
-        'handleDeleteTicketsByGuest: %o | actorId=%s',
-        payload,
-        actorId,
-      );
+      this.logger.info('delete_tickets_by_guest_received', { userId: payload.userId, actorId });
 
-      await this.ticketWriteService.deleteByGuestId(payload.userId);
+      try {
+        await this.ticketWriteService.deleteByGuestId(payload.userId);
+        this.logger.info('delete_tickets_by_guest_success', { userId: payload.userId });
+      } catch (error) {
+        this.logger.exception(error, 'delete_tickets_by_guest_failed', { userId: payload.userId, actorId });
+        throw error;
+      }
     });
   }
 }
