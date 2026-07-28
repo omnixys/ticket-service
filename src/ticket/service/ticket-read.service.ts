@@ -9,16 +9,12 @@ import { ScanLogPayload } from '../models/payloads/scan-log-list.payload.js';
 import { TicketPayload } from '../models/payloads/ticket-payload.js';
 import { Injectable } from '@nestjs/common';
 import { EventRoleType } from '@omnixys/contracts';
-import { getLogger } from '@omnixys/logger';
-
 function isAdmin(eventRole: EventRoleType | null): boolean {
   return eventRole === EventRoleType.ADMIN;
 }
 
 @Injectable()
 export class TicketReadService {
-  readonly #logger = getLogger(TicketReadService.name);
-
   constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<TicketPayload> {

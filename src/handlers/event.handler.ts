@@ -25,7 +25,7 @@ import {
   IKafkaEventContext,
   KAFKA_HEADERS,
 } from '@omnixys/kafka';
-import { OmnixysLogger } from '@omnixys/logger';
+import { OmnixysLogger, type ScopedLogger } from '@omnixys/logger';
 import { TraceRunner } from '@omnixys/observability';
 
 /**
@@ -39,7 +39,7 @@ import { TraceRunner } from '@omnixys/observability';
 @KafkaEventHandler('event')
 @Injectable()
 export class EventHandler {
-  private readonly logger;
+  private readonly logger: ScopedLogger;
 
   /**
    * Creates a new instance of {@link EventHandler}.
@@ -65,13 +65,21 @@ export class EventHandler {
         const headers = context.headers;
         const actorId = headers[KAFKA_HEADERS.ACTOR_ID] ?? 'unknown';
 
-        this.logger.info('delete_tickets_by_events_received', { eventIds: payload.eventIds, actorId });
+        this.logger.info('delete_tickets_by_events_received', {
+          eventIds: payload.eventIds,
+          actorId,
+        });
 
         try {
           await this.ticketWriteService.deleteByEventIds(payload.eventIds);
-          this.logger.info('delete_tickets_by_events_success', { eventIds: payload.eventIds });
+          this.logger.info('delete_tickets_by_events_success', {
+            eventIds: payload.eventIds,
+          });
         } catch (error) {
-          this.logger.exception(error, 'delete_tickets_by_events_failed', { eventIds: payload.eventIds, actorId });
+          this.logger.error('delete_tickets_by_events_failed', error, {
+            eventIds: payload.eventIds,
+            actorId,
+          });
           throw error;
         }
       },

@@ -32,7 +32,7 @@ import {
   KafkaProducerService,
   type EventType,
 } from '@omnixys/kafka';
-import { OmnixysLogger } from '@omnixys/logger';
+import { OmnixysLogger, type ScopedLogger } from '@omnixys/logger';
 import { TraceRunner } from '@omnixys/observability';
 
 const { SERVICE } = env;
@@ -57,7 +57,7 @@ interface KafkaMeta {
 @KafkaEventHandler('seat')
 @Injectable()
 export class SeatHandler {
-  private readonly logger;
+  private readonly logger: ScopedLogger;
 
   /**
    * Creates a new instance of {@link SeatHandler}.
@@ -88,16 +88,21 @@ export class SeatHandler {
           token,
         );
         if (!raw) {
-          this.logger.warning('create_ticket_invalid_token', { token });
+          this.logger.warn('create_ticket_invalid_token', { token });
           throw new TicketVerificationTokenException('invalid-token');
         }
 
         const input = this.parseGuestTicketKey(raw);
 
-        const ticket = input.tickets.find((t) => t.invitationId === invitationId);
+        const ticket = input.tickets.find(
+          (t) => t.invitationId === invitationId,
+        );
 
         if (!ticket) {
-          this.logger.warning('create_ticket_mapping_not_found', { invitationId, eventId: input.eventId });
+          this.logger.warn('create_ticket_mapping_not_found', {
+            invitationId,
+            eventId: input.eventId,
+          });
           throw new TicketVerificationTokenException('mapping-not-found', {
             invitationId,
           });
@@ -111,7 +116,12 @@ export class SeatHandler {
           actorId: input.actorId,
         });
 
-        this.logger.info('create_ticket_success', { invitationId, userId, seatId: ticket.seatId, eventId: input.eventId });
+        this.logger.info('create_ticket_success', {
+          invitationId,
+          userId,
+          seatId: ticket.seatId,
+          eventId: input.eventId,
+        });
 
         /**
          * Final link back to invitation
@@ -126,7 +136,10 @@ export class SeatHandler {
           meta: this.meta(input.actorId, 'Link invitation to guest'),
         });
       } catch (error) {
-        this.logger.exception(error, 'create_ticket_failed', { invitationId, userId });
+        this.logger.error('create_ticket_failed', error, {
+          invitationId,
+          userId,
+        });
         throw error;
       }
     });

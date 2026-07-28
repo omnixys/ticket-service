@@ -102,7 +102,10 @@ export class TicketMutationResolver {
     @ClientInfo() info: ClientContext,
     @CurrentUser() user: CurrentUserData,
   ): Promise<TicketPayload> {
-    this.#logger.debug('activate_device', { ticketId: input.ticketId, userId: user.id });
+    this.#logger.debug(
+      { ticketId: input.ticketId, userId: user.id },
+      'activate_device',
+    );
     return this.ticketWrite.activateDevice({ ...input, ip: info.ip }, user.id);
   }
 
@@ -114,7 +117,7 @@ export class TicketMutationResolver {
     ticketId: string,
     @CurrentUser() user: CurrentUserData,
   ): Promise<string> {
-    this.#logger.debug('generate_token', { ticketId, userId: user.id });
+    this.#logger.debug({ ticketId, userId: user.id }, 'generate_token');
     return this.ticketWrite.generateToken(ticketId, user.id);
   }
 
@@ -127,7 +130,7 @@ export class TicketMutationResolver {
   ): Promise<ScanPayload> {
     const { token, signature, deviceId, gate } = input;
 
-    this.#logger.debug('scan_token', { gate, userId: user.id });
+    this.#logger.debug({ gate, userId: user.id }, 'scan_token');
     const result = await this.scan.scan({
       token,
       signature,

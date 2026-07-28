@@ -112,7 +112,10 @@ export class ShareGuardService {
     const failCount = guard.failCount + 1;
 
     if (result.shouldRevoke || failCount >= this.REVOKE_THRESHOLD) {
-      this.#logger.warn('shareguard_ticket_revoked', { ticketId, failCount, reason: result.reason });
+      this.#logger.warn(
+        { ticketId, failCount, reason: result.reason },
+        'shareguard_ticket_revoked',
+      );
       await this.prisma.ticket.update({
         where: { id: ticketId },
         data: {
@@ -127,7 +130,10 @@ export class ShareGuardService {
     }
 
     if (result.shouldBlock || failCount >= this.BASE_THRESHOLD) {
-      this.#logger.warn('shareguard_ticket_blocked', { ticketId, failCount, reason: result.reason });
+      this.#logger.warn(
+        { ticketId, failCount, reason: result.reason },
+        'shareguard_ticket_blocked',
+      );
       await this.prisma.shareGuard.update({
         where: { ticketId },
         data: {
@@ -150,6 +156,9 @@ export class ShareGuardService {
       },
     });
 
-    this.#logger.debug('shareguard_risk_recorded', { ticketId, failCount, reason: result.reason, score: result.score });
+    this.#logger.debug(
+      { ticketId, failCount, reason: result.reason, score: result.score },
+      'shareguard_risk_recorded',
+    );
   }
 }

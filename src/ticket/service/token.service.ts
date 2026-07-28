@@ -1,8 +1,8 @@
 import { TicketTokenInvalidException } from '../errors/ticket-domain.error.js';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { getLogger } from '@omnixys/logger';
 import { createHash, randomUUID, timingSafeEqual } from 'crypto';
 import * as jose from 'jose';
-import { getLogger } from '@omnixys/logger';
 
 export interface QrPayload {
   tid: string;
@@ -171,7 +171,7 @@ export class TokenService {
 
       const key = this.signKeys.get(header.kid);
       if (!key) {
-        this.#logger.warn('token_verify_unknown_kid', { kid: header.kid });
+        this.#logger.warn({ kid: header.kid }, 'token_verify_unknown_kid');
         throw new TypeError('Unknown KID');
       }
 
@@ -180,10 +180,19 @@ export class TokenService {
         algorithms: ['HS256'],
       });
 
-      this.#logger.debug('token_verify_success', { ticketId: (payload as unknown as QrPayload).tid, nonce: (payload as unknown as QrPayload).dn });
+      this.#logger.debug(
+        {
+          ticketId: (payload as unknown as QrPayload).tid,
+          nonce: (payload as unknown as QrPayload).dn,
+        },
+        'token_verify_success',
+      );
       return payload as unknown as QrPayload;
     } catch (cause) {
-      this.#logger.warn('token_verify_failed', { error: cause instanceof Error ? cause.message : String(cause) });
+      this.#logger.warn(
+        { error: cause instanceof Error ? cause.message : String(cause) },
+        'token_verify_failed',
+      );
       throw new TicketTokenInvalidException(cause);
     }
   }
