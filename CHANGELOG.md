@@ -3,6 +3,20 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.1.0](https://github.com/omnixys/ticket-service/compare/v3.0.0...v3.1.0) (2026-07-24)
+
+### Deps
+
+* **Deps:** remove obsolete/redundant dependencies ([](https://github.com/omnixys/ticket-service/commit/02a8683eb2e072b2d3710b02166e6a4e643ec07d))
+
+### Log
+
+* **Log:** remove logstream dep ([](https://github.com/omnixys/ticket-service/commit/78538e4207eab975b3274dfe5424532ee64b4cd7))
+
+### Logger
+
+* **Logger:** remove Kafka log transport config ([](https://github.com/omnixys/ticket-service/commit/145ccbe4f733602741b5a8cb4ca4733635d87eaa))
+
 ## [3.0.0](https://github.com/omnixys/ticket-service/compare/v2.1.0...v3.0.0) (2026-07-16)
 
 ### New
