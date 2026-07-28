@@ -2,6 +2,7 @@ import { TicketTokenInvalidException } from '../errors/ticket-domain.error.js';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { createHash, randomUUID, timingSafeEqual } from 'crypto';
 import * as jose from 'jose';
+import { getLogger } from '@omnixys/logger';
 
 export interface QrPayload {
   tid: string;
@@ -25,6 +26,7 @@ function isStringRecord(value: unknown): value is Record<string, string> {
 
 @Injectable()
 export class TokenService {
+  readonly #logger = getLogger(TokenService.name);
   private readonly encKey: Uint8Array;
   private readonly signKeys: Map<string, Uint8Array>;
   private readonly activeKid: string;
@@ -169,6 +171,7 @@ export class TokenService {
 
       const key = this.signKeys.get(header.kid);
       if (!key) {
+        this.#logger.warn('token_verify_unknown_kid', { kid: header.kid });
         throw new TypeError('Unknown KID');
       }
 
@@ -177,8 +180,10 @@ export class TokenService {
         algorithms: ['HS256'],
       });
 
+      this.#logger.debug('token_verify_success', { ticketId: (payload as unknown as QrPayload).tid, nonce: (payload as unknown as QrPayload).dn });
       return payload as unknown as QrPayload;
     } catch (cause) {
+      this.#logger.warn('token_verify_failed', { error: cause instanceof Error ? cause.message : String(cause) });
       throw new TicketTokenInvalidException(cause);
     }
   }

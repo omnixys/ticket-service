@@ -4,6 +4,7 @@ import { TicketReadService } from '../service/ticket-read.service.js';
 import { UseGuards } from '@nestjs/common';
 import { Args, ID, Query, Resolver } from '@nestjs/graphql';
 import { EventPermissionKey, RealmRoleType } from '@omnixys/contracts';
+import { getLogger } from '@omnixys/logger';
 import { EventRoleResolver } from '@omnixys/security';
 import {
   CookieAuthGuard,
@@ -18,6 +19,8 @@ import {
 @Resolver(() => TicketPayload)
 @UseGuards(CookieAuthGuard)
 export class TicketQueryResolver {
+  readonly #logger = getLogger(TicketQueryResolver.name);
+
   constructor(
     private readonly ticketRead: TicketReadService,
     private readonly eventRoleResolver: EventRoleResolver,

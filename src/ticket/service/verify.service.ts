@@ -7,6 +7,7 @@ import { QrPayload, TokenService } from './token.service.js';
 import { Injectable } from '@nestjs/common';
 import { ValkeyKey, ValkeyService } from '@omnixys/cache';
 import { n2u } from '@omnixys/contracts';
+import { getLogger } from '@omnixys/logger';
 import { createPublicKey, verify } from 'crypto';
 
 function verifySignature(
@@ -34,6 +35,8 @@ function verifySignature(
 
 @Injectable()
 export class VerifyService {
+  readonly #logger = getLogger(VerifyService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly token: TokenService,
@@ -57,6 +60,7 @@ export class VerifyService {
 
     if (ticket.revoked) {
       const verdict = ScanVerdict.REVOKED;
+      this.#logger.warn('verify_ticket_revoked', { ticketId: ticket.id, reason: ticket.revokedReason });
       return {
         ticket,
         payload,
@@ -66,16 +70,19 @@ export class VerifyService {
     }
 
     if (await this.shareGuard.isBlocked(ticket.id)) {
+      this.#logger.warn('verify_ticket_blocked', { ticketId: ticket.id });
       return { ticket, payload, verdict: ScanVerdict.BLOCKED, message: ScanMessages.BLOCKED };
     }
 
     if (!ticket.devicePublicKey) {
+      this.#logger.warn('verify_no_public_key', { ticketId: ticket.id });
       return { ticket, payload, verdict: ScanVerdict.DEVICE_MISMATCH, message: 'No Public Key' };
     }
 
     const message = `${tokenStr}.${deviceId}`;
 
     if (!verifySignature(message, signature, ticket.devicePublicKey)) {
+      this.#logger.warn('verify_signature_invalid', { ticketId: ticket.id });
       await this.shareGuard.applyDecision(
         ticket.id,
         this.shareGuard.calculateRisk({ invalidSignature: true }),
@@ -89,6 +96,7 @@ export class VerifyService {
     }
 
     if (ticket.deviceId !== deviceId) {
+      this.#logger.warn('verify_device_mismatch', { ticketId: ticket.id, expectedDeviceId: ticket.deviceId, actualDeviceId: deviceId });
       await this.shareGuard.applyDecision(
         ticket.id,
         this.shareGuard.calculateRisk({ deviceMismatch: true }),
@@ -102,6 +110,7 @@ export class VerifyService {
     }
 
     if (ticket.lastNonce !== null && payload.dn <= ticket.lastNonce) {
+      this.#logger.warn('verify_replay_detected', { ticketId: ticket.id, lastNonce: ticket.lastNonce, receivedNonce: payload.dn });
       await this.shareGuard.applyDecision(
         ticket.id,
         this.shareGuard.calculateRisk({ replay: true }),
@@ -116,6 +125,7 @@ export class VerifyService {
     }
 
     if (payload.dn !== ticket.nextNonce) {
+      this.#logger.warn('verify_invalid_nonce', { ticketId: ticket.id, expectedNonce: ticket.nextNonce, receivedNonce: payload.dn });
       await this.shareGuard.applyDecision(
         ticket.id,
         this.shareGuard.calculateRisk({ invalidNonce: true }),
@@ -159,6 +169,7 @@ export class VerifyService {
     });
 
     if (updated.count === 0) {
+      this.#logger.warn('verify_nonce_race_condition', { ticketId: ticket.id, nonce: payload.dn });
       return {
         ticket,
         payload,
@@ -166,6 +177,8 @@ export class VerifyService {
         message: 'Nonce race condition detected',
       };
     }
+
+    this.#logger.debug('verify_success', { ticketId: ticket.id, newState: state, nonce: payload.dn });
 
     return {
       ticket: {

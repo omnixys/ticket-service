@@ -22,6 +22,7 @@ import {
 import { ClientInfo } from '@omnixys/context';
 import type { ClientContext } from '@omnixys/context';
 import { RealmRoleType } from '@omnixys/contracts';
+import { getLogger } from '@omnixys/logger';
 import {
   CookieAuthGuard,
   CurrentUser,
@@ -86,6 +87,8 @@ export class ScanInput {
 @Resolver(() => TicketMessagePayload)
 @UseGuards(CookieAuthGuard)
 export class TicketMutationResolver {
+  readonly #logger = getLogger(TicketMutationResolver.name);
+
   constructor(
     private readonly ticketWrite: TicketWriteService,
     private readonly scan: ScanService,
@@ -99,6 +102,7 @@ export class TicketMutationResolver {
     @ClientInfo() info: ClientContext,
     @CurrentUser() user: CurrentUserData,
   ): Promise<TicketPayload> {
+    this.#logger.debug('activate_device', { ticketId: input.ticketId, userId: user.id });
     return this.ticketWrite.activateDevice({ ...input, ip: info.ip }, user.id);
   }
 
@@ -110,6 +114,7 @@ export class TicketMutationResolver {
     ticketId: string,
     @CurrentUser() user: CurrentUserData,
   ): Promise<string> {
+    this.#logger.debug('generate_token', { ticketId, userId: user.id });
     return this.ticketWrite.generateToken(ticketId, user.id);
   }
 
@@ -122,6 +127,7 @@ export class TicketMutationResolver {
   ): Promise<ScanPayload> {
     const { token, signature, deviceId, gate } = input;
 
+    this.#logger.debug('scan_token', { gate, userId: user.id });
     const result = await this.scan.scan({
       token,
       signature,

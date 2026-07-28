@@ -1,6 +1,7 @@
 import { ShareGuard } from '../../prisma/generated/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { Injectable } from '@nestjs/common';
+import { getLogger } from '@omnixys/logger';
 
 interface RiskInput {
   invalidSignature?: boolean;
@@ -19,6 +20,7 @@ export interface RiskResult {
 
 @Injectable()
 export class ShareGuardService {
+  readonly #logger = getLogger(ShareGuardService.name);
   private readonly BASE_THRESHOLD = 3;
   private readonly BLOCK_TTL_MS = 5 * 60 * 1000; // 5 min
   private readonly REVOKE_THRESHOLD = 10;
@@ -110,6 +112,7 @@ export class ShareGuardService {
     const failCount = guard.failCount + 1;
 
     if (result.shouldRevoke || failCount >= this.REVOKE_THRESHOLD) {
+      this.#logger.warn('shareguard_ticket_revoked', { ticketId, failCount, reason: result.reason });
       await this.prisma.ticket.update({
         where: { id: ticketId },
         data: {
@@ -124,6 +127,7 @@ export class ShareGuardService {
     }
 
     if (result.shouldBlock || failCount >= this.BASE_THRESHOLD) {
+      this.#logger.warn('shareguard_ticket_blocked', { ticketId, failCount, reason: result.reason });
       await this.prisma.shareGuard.update({
         where: { ticketId },
         data: {
@@ -145,5 +149,7 @@ export class ShareGuardService {
         reason: result.reason,
       },
     });
+
+    this.#logger.debug('shareguard_risk_recorded', { ticketId, failCount, reason: result.reason, score: result.score });
   }
 }
