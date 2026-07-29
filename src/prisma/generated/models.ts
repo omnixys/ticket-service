@@ -11,6 +11,7 @@
 export type * from './models/Ticket.js'
 export type * from './models/ScanLog.js'
 export type * from './models/ShareGuard.js'
+export type * from './models/AnalyticsOutbox.js'
 export type * from './models/EventRoleProjection.js'
 export type * from './models/EventAccessProjection.js'
 export type * from './models/EventSettingsProjection.js'

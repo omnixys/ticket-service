@@ -205,6 +205,51 @@ test('ticket creation is idempotent and republishes its stable milestone', async
   assert.equal(sent[0].meta.tenantId, 'tenant-1');
 });
 
+test('new ticket and generated fact use the same transaction client', async () => {
+  const created = ticket();
+  const transactionClient = {
+    ticket: {
+      async create() {
+        return created;
+      },
+    },
+  };
+  let factTransaction;
+  const service = new TicketWriteService(
+    {
+      ticket: {
+        async findUnique() {
+          return null;
+        },
+      },
+      async $transaction(work) {
+        return work(transactionClient);
+      },
+    },
+    logger,
+    {},
+    { async send() {} },
+    { getPermissionsForUser: async () => [] },
+    {
+      async enqueue(tx, topic, fact) {
+        factTransaction = tx;
+        assert.equal(topic, 'ticket.generated.v1');
+        assert.equal(fact.eventName, 'TicketGenerated');
+      },
+    },
+  );
+
+  await service.createTicket({
+    eventId: created.eventId,
+    invitationId: created.invitationId,
+    userId: created.guestProfileId,
+    seatId: created.seatId,
+    actorId: 'actor-1',
+  });
+
+  assert.equal(factTransaction, transactionClient);
+});
+
 test('device binding rejects a non-owner before changing the ticket', async () => {
   const existing = ticket();
   const service = new TicketWriteService(

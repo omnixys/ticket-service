@@ -1,4 +1,9 @@
-import { PresenceState, ScanVerdict, Ticket } from '../../prisma/generated/client.js';
+import {
+  PresenceState,
+  ScanVerdict,
+  Ticket,
+  type Prisma,
+} from '../../prisma/generated/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { TicketNotFoundException } from '../errors/ticket-domain.error.js';
 import { ScanMessages } from '../utils/scan-messages.js';
@@ -48,10 +53,11 @@ export class VerifyService {
     tokenStr: string,
     signature: string,
     deviceId: string,
+    database: Prisma.TransactionClient | PrismaService = this.prisma,
   ): Promise<{ ticket: Ticket; payload: QrPayload; verdict: ScanVerdict; message: string }> {
     const payload = await this.token.verify(tokenStr);
 
-    const ticket = await this.prisma.ticket.findUnique({
+    const ticket = await database.ticket.findUnique({
       where: { id: payload.tid },
     });
     if (!ticket) {
@@ -167,7 +173,7 @@ export class VerifyService {
       ticket.currentState === PresenceState.OUTSIDE ? PresenceState.INSIDE : PresenceState.OUTSIDE;
 
     const checkedInAt = state === PresenceState.INSIDE ? new Date() : ticket.checkedInAt;
-    const updated = await this.prisma.ticket.updateMany({
+    const updated = await database.ticket.updateMany({
       where: {
         id: ticket.id,
         nextNonce: payload.dn,

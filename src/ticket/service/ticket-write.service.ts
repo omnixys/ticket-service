@@ -1,6 +1,7 @@
 import { PresenceState } from '../../prisma/generated/client.js';
 import type { ScanLogUncheckedCreateInput } from '../../prisma/generated/models/ScanLog.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { AnalyticsOutboxService } from '../../analytics/analytics-outbox.service.js';
 import {
   TicketAccessDeniedException,
   TicketAlreadyExistsException,
@@ -40,6 +41,7 @@ export class TicketWriteService {
     private readonly token: TokenService,
     private readonly producer: KafkaProducerService,
     private readonly eventPermissionResolver: EventPermissionResolver,
+    private readonly analyticsOutbox: AnalyticsOutboxService,
   ) {
     this.logger = this.loggerService.log(this.constructor.name);
   }
@@ -76,14 +78,28 @@ export class TicketWriteService {
         return mapTicket(existing);
       }
 
-      const created = await this.prisma.ticket.create({
-        data: {
-          eventId: data.eventId,
-          invitationId: data.invitationId,
-          guestProfileId: data.userId ?? null,
-          seatId: data.seatId ?? null,
-          nextNonce: 1,
-        },
+      const created = await this.prisma.$transaction(async (tx) => {
+        const result = await tx.ticket.create({
+          data: {
+            eventId: data.eventId,
+            invitationId: data.invitationId,
+            guestProfileId: data.userId,
+            seatId: data.seatId,
+            nextNonce: 1,
+          },
+        });
+        await this.analyticsOutbox.enqueue(tx, 'ticket.generated.v1', {
+          eventName: 'TicketGenerated',
+          aggregateId: result.id,
+          aggregateType: 'Ticket',
+          subjectId: result.guestProfileId,
+          properties: {
+            ticketId: result.id,
+            eventId: result.eventId,
+            hasSeat: Boolean(result.seatId),
+          },
+        });
+        return result;
       });
 
       await this.publishMilestone({
@@ -328,27 +344,37 @@ export class TicketWriteService {
       return mapTicket(ticket);
     }
 
-    const updated = await this.prisma.ticket.update({
-      where: { id: ticketId },
-      data: {
-        revoked: true,
-        currentState: 'OUTSIDE',
-        revokedAt: now,
-        revokedBy: actorId,
-        revokedReason: reason ?? 'Manual revoke',
-      },
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const result = await tx.ticket.update({
+        where: { id: ticketId },
+        data: {
+          revoked: true,
+          currentState: 'OUTSIDE',
+          revokedAt: now,
+          revokedBy: actorId,
+          revokedReason: reason ?? 'Manual revoke',
+        },
+      });
+      const scanLogData: ScanLogUncheckedCreateInput = {
+        ticketId,
+        eventId: ticket.eventId,
+        direction: PresenceState.OUTSIDE,
+        verdict: ScanVerdict.REVOKED,
+        actorId,
+      };
+      await tx.scanLog.create({ data: scanLogData });
+      await this.analyticsOutbox.enqueue(tx, 'ticket.revoked.v1', {
+        eventName: 'TicketRevoked',
+        aggregateId: ticketId,
+        aggregateType: 'Ticket',
+        subjectId: ticket.guestProfileId,
+        properties: {
+          ticketId,
+          eventId: ticket.eventId,
+        },
+      });
+      return result;
     });
-
-    // optional: write ScanLog "REVOKED"
-    const scanLogData: ScanLogUncheckedCreateInput = {
-      ticketId,
-      eventId: ticket.eventId,
-      direction: PresenceState.OUTSIDE,
-      verdict: ScanVerdict.REVOKED,
-      actorId,
-    };
-
-    await this.prisma.scanLog.create({ data: scanLogData });
 
     await this.publishRevokedMilestone(updated);
 

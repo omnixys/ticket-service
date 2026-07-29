@@ -54,6 +54,7 @@ export const ModelName = {
   Ticket: 'Ticket',
   ScanLog: 'ScanLog',
   ShareGuard: 'ShareGuard',
+  AnalyticsOutbox: 'AnalyticsOutbox',
   EventRoleProjection: 'EventRoleProjection',
   EventAccessProjection: 'EventAccessProjection',
   EventSettingsProjection: 'EventSettingsProjection'
@@ -128,6 +129,26 @@ export const ShareGuardScalarFieldEnum = {
 export type ShareGuardScalarFieldEnum = (typeof ShareGuardScalarFieldEnum)[keyof typeof ShareGuardScalarFieldEnum]
 
 
+export const AnalyticsOutboxScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  topic: 'topic',
+  payload: 'payload',
+  correlationId: 'correlationId',
+  actorId: 'actorId',
+  attempts: 'attempts',
+  nextAttemptAt: 'nextAttemptAt',
+  lockedAt: 'lockedAt',
+  lockedBy: 'lockedBy',
+  publishedAt: 'publishedAt',
+  deadLetteredAt: 'deadLetteredAt',
+  lastError: 'lastError',
+  createdAt: 'createdAt'
+} as const
+
+export type AnalyticsOutboxScalarFieldEnum = (typeof AnalyticsOutboxScalarFieldEnum)[keyof typeof AnalyticsOutboxScalarFieldEnum]
+
+
 export const EventRoleProjectionScalarFieldEnum = {
   id: 'id',
   eventId: 'eventId',
@@ -171,6 +192,13 @@ export const SortOrder = {
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const NullableJsonNullValueInput = {

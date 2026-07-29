@@ -102,15 +102,35 @@ model ShareGuard {
   @@map("share_guard")
 }
 
+model AnalyticsOutbox {
+  id             String    @id @default(uuid()) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  topic          String
+  payload        Json
+  correlationId  String?   @map("correlation_id")
+  actorId        String?   @map("actor_id")
+  attempts       Int       @default(0)
+  nextAttemptAt  DateTime  @default(now()) @map("next_attempt_at")
+  lockedAt       DateTime? @map("locked_at")
+  lockedBy       String?   @map("locked_by")
+  publishedAt    DateTime? @map("published_at")
+  deadLetteredAt DateTime? @map("dead_lettered_at")
+  lastError      String?   @map("last_error")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  @@index([publishedAt, deadLetteredAt, nextAttemptAt])
+  @@map("analytics_outbox")
+}
+
 /// ----------------------------------------------------------------------
 /// EventRoleProjection – local cache of event roles synced via Kafka
 /// ----------------------------------------------------------------------
 model EventRoleProjection {
-  id      String         @id @default(uuid()) @map("id") @db.Uuid
-  eventId String         @map("event_id") @db.Uuid
-  userId  String         @map("user_id") @db.Uuid
-  role    EventRoleType  @map("role")
-  updatedAt DateTime?    @updatedAt @map("updated_at")
+  id        String        @id @default(uuid()) @map("id") @db.Uuid
+  eventId   String        @map("event_id") @db.Uuid
+  userId    String        @map("user_id") @db.Uuid
+  role      EventRoleType @map("role")
+  updatedAt DateTime?     @updatedAt @map("updated_at")
 
   @@unique([eventId, userId], name: "uq_event_role_projection")
   @@index([eventId], name: "idx_event_role_projection_event")
@@ -135,10 +155,10 @@ model EventAccessProjection {
 /// EventSettingsProjection – local cache of event settings synced via Kafka
 /// ----------------------------------------------------------------------
 model EventSettingsProjection {
-  id        String    @id @default(uuid()) @map("id") @db.Uuid
-  eventId   String    @unique @map("event_id") @db.Uuid
-  name      String?   @map("name")
-  endsAt    DateTime? @map("ends_at")
+  id              String    @id @default(uuid()) @map("id") @db.Uuid
+  eventId         String    @unique @map("event_id") @db.Uuid
+  name            String?   @map("name")
+  endsAt          DateTime? @map("ends_at")
   startsAt        DateTime? @map("starts_at")
   ticketReleaseAt DateTime? @map("ticket_release_at")
   updatedAt       DateTime? @updatedAt @map("updated_at")

@@ -400,6 +400,7 @@ export const ModelName = {
   Ticket: 'Ticket',
   ScanLog: 'ScanLog',
   ShareGuard: 'ShareGuard',
+  AnalyticsOutbox: 'AnalyticsOutbox',
   EventRoleProjection: 'EventRoleProjection',
   EventAccessProjection: 'EventAccessProjection',
   EventSettingsProjection: 'EventSettingsProjection'
@@ -418,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ticket" | "scanLog" | "shareGuard" | "eventRoleProjection" | "eventAccessProjection" | "eventSettingsProjection"
+    modelProps: "ticket" | "scanLog" | "shareGuard" | "analyticsOutbox" | "eventRoleProjection" | "eventAccessProjection" | "eventSettingsProjection"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -641,6 +642,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ShareGuardCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ShareGuardCountAggregateOutputType> | number
+        }
+      }
+    }
+    AnalyticsOutbox: {
+      payload: Prisma.$AnalyticsOutboxPayload<ExtArgs>
+      fields: Prisma.AnalyticsOutboxFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AnalyticsOutboxFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOutboxPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AnalyticsOutboxFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOutboxPayload>
+        }
+        findFirst: {
+          args: Prisma.AnalyticsOutboxFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOutboxPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AnalyticsOutboxFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOutboxPayload>
+        }
+        findMany: {
+          args: Prisma.AnalyticsOutboxFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOutboxPayload>[]
+        }
+        create: {
+          args: Prisma.AnalyticsOutboxCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOutboxPayload>
+        }
+        createMany: {
+          args: Prisma.AnalyticsOutboxCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AnalyticsOutboxCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOutboxPayload>[]
+        }
+        delete: {
+          args: Prisma.AnalyticsOutboxDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOutboxPayload>
+        }
+        update: {
+          args: Prisma.AnalyticsOutboxUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOutboxPayload>
+        }
+        deleteMany: {
+          args: Prisma.AnalyticsOutboxDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AnalyticsOutboxUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AnalyticsOutboxUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOutboxPayload>[]
+        }
+        upsert: {
+          args: Prisma.AnalyticsOutboxUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOutboxPayload>
+        }
+        aggregate: {
+          args: Prisma.AnalyticsOutboxAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAnalyticsOutbox>
+        }
+        groupBy: {
+          args: Prisma.AnalyticsOutboxGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AnalyticsOutboxGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AnalyticsOutboxCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AnalyticsOutboxCountAggregateOutputType> | number
         }
       }
     }
@@ -958,6 +1033,26 @@ export const ShareGuardScalarFieldEnum = {
 export type ShareGuardScalarFieldEnum = (typeof ShareGuardScalarFieldEnum)[keyof typeof ShareGuardScalarFieldEnum]
 
 
+export const AnalyticsOutboxScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  topic: 'topic',
+  payload: 'payload',
+  correlationId: 'correlationId',
+  actorId: 'actorId',
+  attempts: 'attempts',
+  nextAttemptAt: 'nextAttemptAt',
+  lockedAt: 'lockedAt',
+  lockedBy: 'lockedBy',
+  publishedAt: 'publishedAt',
+  deadLetteredAt: 'deadLetteredAt',
+  lastError: 'lastError',
+  createdAt: 'createdAt'
+} as const
+
+export type AnalyticsOutboxScalarFieldEnum = (typeof AnalyticsOutboxScalarFieldEnum)[keyof typeof AnalyticsOutboxScalarFieldEnum]
+
+
 export const EventRoleProjectionScalarFieldEnum = {
   id: 'id',
   eventId: 'eventId',
@@ -1001,6 +1096,13 @@ export const SortOrder = {
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const NullableJsonNullValueInput = {
@@ -1120,20 +1222,6 @@ export type ListEnumScanVerdictFieldRefInput<$PrismaModel> = FieldRefInputType<$
 
 
 /**
- * Reference to a field of type 'EventRoleType'
- */
-export type EnumEventRoleTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EventRoleType'>
-    
-
-
-/**
- * Reference to a field of type 'EventRoleType[]'
- */
-export type ListEnumEventRoleTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EventRoleType[]'>
-    
-
-
-/**
  * Reference to a field of type 'Json'
  */
 export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -1144,6 +1232,20 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'EventRoleType'
+ */
+export type EnumEventRoleTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EventRoleType'>
+    
+
+
+/**
+ * Reference to a field of type 'EventRoleType[]'
+ */
+export type ListEnumEventRoleTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EventRoleType[]'>
     
 
 
@@ -1314,6 +1416,7 @@ export type GlobalOmitConfig = {
   ticket?: Prisma.TicketOmit
   scanLog?: Prisma.ScanLogOmit
   shareGuard?: Prisma.ShareGuardOmit
+  analyticsOutbox?: Prisma.AnalyticsOutboxOmit
   eventRoleProjection?: Prisma.EventRoleProjectionOmit
   eventAccessProjection?: Prisma.EventAccessProjectionOmit
   eventSettingsProjection?: Prisma.EventSettingsProjectionOmit

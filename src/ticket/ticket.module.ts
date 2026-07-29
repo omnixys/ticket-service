@@ -17,7 +17,7 @@ import {
 } from '@omnixys/security';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, AnalyticsModule],
   providers: [
     TicketReadService,
     TicketWriteService,
@@ -42,3 +42,4 @@ import {
   exports: [TicketReadService, TicketWriteService, TokenService],
 })
 export class TicketModule {}
+import { AnalyticsModule } from '../analytics/analytics.module.js';

@@ -1,6 +1,7 @@
 import { ScanLog, ScanVerdict, Ticket } from '../../prisma/generated/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { VerifyService } from './verify.service.js';
+import { AnalyticsOutboxService } from '../../analytics/analytics-outbox.service.js';
 import { Injectable } from '@nestjs/common';
 import { ContextAccessor } from '@omnixys/context';
 import { EventPermissionKey, type EventMilestoneRecordedDTO } from '@omnixys/contracts';
@@ -33,6 +34,7 @@ export class ScanService {
     private readonly producer: KafkaProducerService,
     private readonly eventPermissionResolver: EventPermissionResolver,
     logger: OmnixysLogger,
+    private readonly analyticsOutbox: AnalyticsOutboxService,
   ) {
     this.logger = logger.log(this.constructor.name);
   }
@@ -44,39 +46,75 @@ export class ScanService {
     gate,
     actorId,
   }: SecurityScanInput): Promise<ScanPayloadDTO> {
-    const { ticket, payload, verdict, message } = await this.verify.verifyToken(
-      token,
-      signature,
-      deviceId,
-    );
-
-    const permissions = await this.eventPermissionResolver.getPermissionsForUser(
-      actorId,
-      ticket.eventId,
-    );
-
-    if (!permissions.includes(EventPermissionKey.ScanTickets)) {
-      throw new EventAccessDeniedException({
-        eventId: ticket.eventId,
-        userId: actorId,
-        reason: 'event-permission-mismatch',
-        actualPermissions: permissions,
-        requiredPermissions: [EventPermissionKey.ScanTickets],
+    const result = await this.prisma.$transaction(async (tx) => {
+      const { ticket, payload, verdict, message } =
+        await this.verify.verifyToken(token, signature, deviceId, tx);
+      const permissions =
+        await this.eventPermissionResolver.getPermissionsForUser(
+          actorId,
+          ticket.eventId,
+        );
+      if (!permissions.includes(EventPermissionKey.ScanTickets)) {
+        throw new EventAccessDeniedException({
+          eventId: ticket.eventId,
+          userId: actorId,
+          reason: 'event-permission-mismatch',
+          actualPermissions: permissions,
+          requiredPermissions: [EventPermissionKey.ScanTickets],
+        });
+      }
+      const log = await tx.scanLog.create({
+        data: {
+          ticketId: ticket.id,
+          eventId: ticket.eventId,
+          direction: ticket.currentState,
+          verdict,
+          nonce: payload.dn,
+          gate,
+          actorId,
+          deviceId,
+        },
       });
-    }
-
-    const log = await this.prisma.scanLog.create({
-      data: {
-        ticketId: ticket.id,
-        eventId: ticket.eventId,
-        direction: ticket.currentState,
-        verdict,
-        nonce: payload.dn,
-        gate,
-        actorId,
-        deviceId,
-      },
+      await this.analyticsOutbox.enqueue(
+        tx,
+        verdict === ScanVerdict.OK
+          ? 'ticket.scan.succeeded.v1'
+          : 'ticket.scan.rejected.v1',
+        {
+          eventName:
+            verdict === ScanVerdict.OK ? 'QrScanSucceeded' : 'QrScanRejected',
+          aggregateId: ticket.id,
+          aggregateType: 'Ticket',
+          subjectId: ticket.guestProfileId,
+          properties: {
+            ticketId: ticket.id,
+            eventId: ticket.eventId,
+            verdict,
+            direction: ticket.currentState,
+            hasGate: Boolean(gate),
+          },
+        },
+      );
+      if (verdict === ScanVerdict.OK) {
+        const checkedIn = ticket.currentState === 'INSIDE';
+        await this.analyticsOutbox.enqueue(
+          tx,
+          checkedIn ? 'ticket.guest.checked-in.v1' : 'ticket.guest.checked-out.v1',
+          {
+            eventName: checkedIn ? 'GuestCheckedIn' : 'GuestCheckedOut',
+            aggregateId: ticket.id,
+            aggregateType: 'Ticket',
+            subjectId: ticket.guestProfileId,
+            properties: {
+              ticketId: ticket.id,
+              eventId: ticket.eventId,
+            },
+          },
+        );
+      }
+      return { ticket, payload, verdict, message, log };
     });
+    const { ticket, verdict, message, log } = result;
 
     if (verdict === ScanVerdict.OK) {
       await this.publishMilestone(
