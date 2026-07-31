@@ -1,7 +1,8 @@
+import { AnalyticsOutboxService } from '../../analytics/analytics-outbox.service.js';
+import { env } from '../../config/env.js';
 import { PresenceState } from '../../prisma/generated/client.js';
 import type { ScanLogUncheckedCreateInput } from '../../prisma/generated/models/ScanLog.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import { AnalyticsOutboxService } from '../../analytics/analytics-outbox.service.js';
 import {
   TicketAccessDeniedException,
   TicketAlreadyExistsException,
@@ -16,12 +17,12 @@ import { mapTicket } from '../models/mapper/ticket.mapper.js';
 import { TicketPayload } from '../models/payloads/ticket-payload.js';
 import { TokenService } from './token.service.js';
 import { Injectable } from '@nestjs/common';
-import { ContextAccessor } from '@omnixys/context';
-import { EventPermissionKey, type EventMilestoneRecordedDTO } from '@omnixys/contracts';
-import { KafkaProducerService, KafkaTopics } from '@omnixys/kafka';
-import { OmnixysLogger } from '@omnixys/logger';
-import { TraceRunner } from '@omnixys/observability';
-import { EventAccessDeniedException, EventPermissionResolver } from '@omnixys/security';
+import { ContextAccessor } from '@omnixys/context-ts';
+import { EventPermissionKey, type EventMilestoneRecordedDTO } from '@omnixys/contracts-ts';
+import { KafkaProducerService, KafkaTopics } from '@omnixys/kafka-ts';
+import { OmnixysLogger } from '@omnixys/logger-ts';
+import { TraceRunner } from '@omnixys/observability-ts';
+import { EventAccessDeniedException, EventPermissionResolver } from '@omnixys/security-ts';
 import { createPublicKey } from 'node:crypto';
 
 export interface UpdateTicketInput {
@@ -408,7 +409,7 @@ export class TicketWriteService {
         version: '1',
         type: 'EVENT',
         actorId: context?.principal?.actorId ?? '',
-        tenantId: context?.tenant?.tenantId ?? context?.principal?.tenantId ?? 'omnixys',
+        tenantId: context?.tenant?.tenantId ?? context?.principal?.tenantId ?? env.DEFAULT_TENANT_ID,
       },
     });
   }

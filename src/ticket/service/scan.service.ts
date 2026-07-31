@@ -1,13 +1,14 @@
+import { AnalyticsOutboxService } from '../../analytics/analytics-outbox.service.js';
+import { env } from '../../config/env.js';
 import { ScanLog, ScanVerdict, Ticket } from '../../prisma/generated/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { VerifyService } from './verify.service.js';
-import { AnalyticsOutboxService } from '../../analytics/analytics-outbox.service.js';
 import { Injectable } from '@nestjs/common';
-import { ContextAccessor } from '@omnixys/context';
-import { EventPermissionKey, type EventMilestoneRecordedDTO } from '@omnixys/contracts';
-import { KafkaProducerService, KafkaTopics } from '@omnixys/kafka';
-import { OmnixysLogger } from '@omnixys/logger';
-import { EventAccessDeniedException, EventPermissionResolver } from '@omnixys/security';
+import { ContextAccessor } from '@omnixys/context-ts';
+import { EventPermissionKey, type EventMilestoneRecordedDTO } from '@omnixys/contracts-ts';
+import { KafkaProducerService, KafkaTopics } from '@omnixys/kafka-ts';
+import { OmnixysLogger } from '@omnixys/logger-ts';
+import { EventAccessDeniedException, EventPermissionResolver } from '@omnixys/security-ts';
 
 export interface SecurityScanInput {
   token: string;
@@ -47,13 +48,16 @@ export class ScanService {
     actorId,
   }: SecurityScanInput): Promise<ScanPayloadDTO> {
     const result = await this.prisma.$transaction(async (tx) => {
-      const { ticket, payload, verdict, message } =
-        await this.verify.verifyToken(token, signature, deviceId, tx);
-      const permissions =
-        await this.eventPermissionResolver.getPermissionsForUser(
-          actorId,
-          ticket.eventId,
-        );
+      const { ticket, payload, verdict, message } = await this.verify.verifyToken(
+        token,
+        signature,
+        deviceId,
+        tx,
+      );
+      const permissions = await this.eventPermissionResolver.getPermissionsForUser(
+        actorId,
+        ticket.eventId,
+      );
       if (!permissions.includes(EventPermissionKey.ScanTickets)) {
         throw new EventAccessDeniedException({
           eventId: ticket.eventId,
@@ -77,12 +81,9 @@ export class ScanService {
       });
       await this.analyticsOutbox.enqueue(
         tx,
-        verdict === ScanVerdict.OK
-          ? 'ticket.scan.succeeded.v1'
-          : 'ticket.scan.rejected.v1',
+        verdict === ScanVerdict.OK ? 'ticket.scan.succeeded.v1' : 'ticket.scan.rejected.v1',
         {
-          eventName:
-            verdict === ScanVerdict.OK ? 'QrScanSucceeded' : 'QrScanRejected',
+          eventName: verdict === ScanVerdict.OK ? 'QrScanSucceeded' : 'QrScanRejected',
           aggregateId: ticket.id,
           aggregateType: 'Ticket',
           subjectId: ticket.guestProfileId,
@@ -148,7 +149,7 @@ export class ScanService {
           version: '1',
           type: 'EVENT',
           actorId,
-          tenantId: context?.tenant?.tenantId ?? context?.principal?.tenantId ?? 'omnixys',
+          tenantId: context?.tenant?.tenantId ?? context?.principal?.tenantId ?? env.DEFAULT_TENANT_ID,
         },
       });
     } catch (error) {

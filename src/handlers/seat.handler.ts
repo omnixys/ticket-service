@@ -19,21 +19,21 @@ import { env } from '../config/env.js';
 import { TicketVerificationTokenException } from '../ticket/errors/ticket-domain.error.js';
 import { TicketWriteService } from '../ticket/service/ticket-write.service.js';
 import { Injectable } from '@nestjs/common';
-import { ValkeyKey, ValkeyService } from '@omnixys/cache';
-import { ContextAccessor } from '@omnixys/context';
+import { ValkeyKey, ValkeyService } from '@omnixys/cache-ts';
+import { ContextAccessor } from '@omnixys/context-ts';
 import type {
   CreateUserWithInvitationIdDTO,
   GuestTicketKey,
-} from '@omnixys/contracts';
+} from '@omnixys/contracts-ts';
 import {
   KafkaEvent,
   KafkaEventHandler,
   KafkaTopics,
   KafkaProducerService,
   type EventType,
-} from '@omnixys/kafka';
-import { OmnixysLogger, type ScopedLogger } from '@omnixys/logger';
-import { TraceRunner } from '@omnixys/observability';
+} from '@omnixys/kafka-ts';
+import { OmnixysLogger, type ScopedLogger } from '@omnixys/logger-ts';
+import { TraceRunner } from '@omnixys/observability-ts';
 
 const { SERVICE } = env;
 
@@ -154,7 +154,7 @@ export class SeatHandler {
     return {
       actorId: context?.principal?.actorId ?? actorId,
       tenantId:
-        context?.tenant?.tenantId ?? context?.principal?.tenantId ?? 'omnixys',
+        context?.tenant?.tenantId ?? context?.principal?.tenantId ?? env.DEFAULT_TENANT_ID,
       service: SERVICE,
       operation,
       version: '1',
