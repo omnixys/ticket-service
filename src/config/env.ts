@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import process from 'node:process';
+import { isUUID } from 'class-validator';
 
 type EnvValue = string | number | boolean;
 
@@ -38,8 +39,17 @@ function getEnv(
 const toBool = (value: string): boolean => value === 'true';
 const toNumber = (value: string): number => Number(value);
 
+function requiredTenantId(): string {
+  const value = getEnv('DEFAULT_TENANT_ID', '');
+  if (!value || !isUUID(value, '4')) {
+    throw new Error('[ENV] DEFAULT_TENANT_ID must be a valid UUID v4');
+  }
+  return value;
+}
+
 export const env = {
   NODE_ENV: getEnv('NODE_ENV', 'development'),
+  DEFAULT_TENANT_ID: requiredTenantId(),
   SCHEMA_TARGET: getEnv('SCHEMA_TARGET', 'true'),
   ENABLE_DEV_ENDPOINTS: getEnv('ENABLE_DEV_ENDPOINTS', 'false', {
     transform: toBool,
