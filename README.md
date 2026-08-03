@@ -31,7 +31,7 @@ Ticket resolvers/services ----------> PostgreSQL
 Kafka package ----> Invitation linkage / Event milestones
 ```
 
-`@omnixys/context` is the canonical source for request, correlation, actor, tenant, and trace metadata. `@omnixys/logger`, structured errors, Kafka headers, and event metadata consume those same values.
+`@omnixys/context-ts` is the canonical source for request, correlation, actor, tenant, and trace metadata. `@omnixys/logger-ts`, structured errors, Kafka headers, and event metadata consume those same values.
 
 ## Ticket lifecycle
 

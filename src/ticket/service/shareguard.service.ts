@@ -1,7 +1,7 @@
 import { ShareGuard } from '../../prisma/generated/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { Injectable } from '@nestjs/common';
-import { getLogger } from '@omnixys/logger';
+import { getLogger } from '@omnixys/logger-ts';
 
 interface RiskInput {
   invalidSignature?: boolean;

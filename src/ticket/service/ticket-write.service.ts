@@ -25,6 +25,8 @@ import { TraceRunner } from '@omnixys/observability-ts';
 import { EventAccessDeniedException, EventPermissionResolver } from '@omnixys/security-ts';
 import { createPublicKey } from 'node:crypto';
 
+const { DEFAULT_TENANT_ID } = env;
+
 export interface UpdateTicketInput {
   id: string;
   revoked?: boolean;
@@ -409,7 +411,7 @@ export class TicketWriteService {
         version: '1',
         type: 'EVENT',
         actorId: context?.principal?.actorId ?? '',
-        tenantId: context?.tenant?.tenantId ?? context?.principal?.tenantId ?? env.DEFAULT_TENANT_ID,
+        tenantId: context?.tenant?.tenantId ?? context?.principal?.tenantId ?? DEFAULT_TENANT_ID,
       },
     });
   }

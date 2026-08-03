@@ -1,9 +1,9 @@
-import { ContextAccessor } from '@omnixys/context';
+import { ContextAccessor } from '@omnixys/context-ts';
 import {
   FrameworkException,
   TicketNotFoundException as ContractTicketNotFoundException,
   type FrameworkExceptionOptions,
-} from '@omnixys/contracts';
+} from '@omnixys/contracts-ts';
 
 function options(
   metadata: Readonly<Record<string, unknown>> = {},

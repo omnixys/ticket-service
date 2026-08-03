@@ -3,8 +3,8 @@ import { TicketPayload } from '../models/payloads/ticket-payload.js';
 import { TicketReadService } from '../service/ticket-read.service.js';
 import { UseGuards } from '@nestjs/common';
 import { Args, ID, Query, Resolver } from '@nestjs/graphql';
-import { EventPermissionKey, RealmRoleType } from '@omnixys/contracts';
-import { EventRoleResolver } from '@omnixys/security';
+import { EventPermissionKey, RealmRoleType } from '@omnixys/contracts-ts';
+import { EventRoleResolver } from '@omnixys/security-ts';
 import {
   CookieAuthGuard,
   CurrentUser,
@@ -13,7 +13,7 @@ import {
   EventPermissions,
   RoleGuard,
   Roles,
-} from '@omnixys/security';
+} from '@omnixys/security-ts';
 
 @Resolver(() => TicketPayload)
 @UseGuards(CookieAuthGuard)

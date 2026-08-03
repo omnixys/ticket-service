@@ -10,6 +10,8 @@ import { KafkaProducerService, KafkaTopics } from '@omnixys/kafka-ts';
 import { OmnixysLogger } from '@omnixys/logger-ts';
 import { EventAccessDeniedException, EventPermissionResolver } from '@omnixys/security-ts';
 
+const { DEFAULT_TENANT_ID } = env;
+
 export interface SecurityScanInput {
   token: string;
   signature: string;
@@ -149,7 +151,7 @@ export class ScanService {
           version: '1',
           type: 'EVENT',
           actorId,
-          tenantId: context?.tenant?.tenantId ?? context?.principal?.tenantId ?? env.DEFAULT_TENANT_ID,
+          tenantId: context?.tenant?.tenantId ?? context?.principal?.tenantId ?? DEFAULT_TENANT_ID,
         },
       });
     } catch (error) {

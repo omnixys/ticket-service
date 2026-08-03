@@ -35,7 +35,7 @@ import {
 import { OmnixysLogger, type ScopedLogger } from '@omnixys/logger-ts';
 import { TraceRunner } from '@omnixys/observability-ts';
 
-const { SERVICE } = env;
+const { SERVICE, DEFAULT_TENANT_ID } = env;
 
 interface KafkaMeta {
   actorId: string;
@@ -154,7 +154,9 @@ export class SeatHandler {
     return {
       actorId: context?.principal?.actorId ?? actorId,
       tenantId:
-        context?.tenant?.tenantId ?? context?.principal?.tenantId ?? env.DEFAULT_TENANT_ID,
+        context?.tenant?.tenantId ??
+        context?.principal?.tenantId ??
+        DEFAULT_TENANT_ID,
       service: SERVICE,
       operation,
       version: '1',

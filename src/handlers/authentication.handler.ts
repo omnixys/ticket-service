@@ -17,16 +17,16 @@
 
 import { TicketWriteService } from '../ticket/service/ticket-write.service.js';
 import { Injectable } from '@nestjs/common';
-import type { UserIdDTO } from '@omnixys/contracts';
+import type { UserIdDTO } from '@omnixys/contracts-ts';
 import {
   IKafkaEventContext,
   KAFKA_HEADERS,
   KafkaEvent,
   KafkaEventHandler,
   KafkaTopics,
-} from '@omnixys/kafka';
-import { OmnixysLogger, type ScopedLogger } from '@omnixys/logger';
-import { TraceRunner } from '@omnixys/observability';
+} from '@omnixys/kafka-ts';
+import { OmnixysLogger, type ScopedLogger } from '@omnixys/logger-ts';
+import { TraceRunner } from '@omnixys/observability-ts';
 
 /**
  * Central Kafka Authentication Handler.

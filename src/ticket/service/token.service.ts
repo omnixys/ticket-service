@@ -1,8 +1,11 @@
+import { env } from '../../config/env.js';
 import { TicketTokenInvalidException } from '../errors/ticket-domain.error.js';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { getLogger } from '@omnixys/logger';
+import { getLogger } from '@omnixys/logger-ts';
 import { createHash, randomUUID, timingSafeEqual } from 'crypto';
 import * as jose from 'jose';
+
+const { QR_JWE_KEY, QR_JWS_KEYS, QR_ACTIVE_KID } = env;
 
 export interface QrPayload {
   tid: string;
@@ -35,7 +38,7 @@ export class TokenService {
     // ---------------------------------------------------
     // ENCRYPTION KEY (STRICT)
     // ---------------------------------------------------
-    const enc = process.env.QR_JWE_KEY;
+    const enc = QR_JWE_KEY;
     if (!enc) {
       throw new InternalServerErrorException('QR_JWE_KEY not configured');
     }
@@ -49,7 +52,7 @@ export class TokenService {
     // ---------------------------------------------------
     // SIGNING KEYS (STRICT)
     // ---------------------------------------------------
-    const rawKeys = process.env.QR_JWS_KEYS;
+    const rawKeys = QR_JWS_KEYS;
     if (!rawKeys) {
       throw new InternalServerErrorException('QR_JWS_KEYS not configured');
     }
@@ -75,7 +78,7 @@ export class TokenService {
       this.signKeys.set(kid, key);
     }
 
-    this.activeKid = process.env.QR_ACTIVE_KID ?? 'v1';
+    this.activeKid = QR_ACTIVE_KID ?? 'v1';
 
     if (!this.signKeys.has(this.activeKid)) {
       throw new InternalServerErrorException(`Active KID ${this.activeKid} not found`);

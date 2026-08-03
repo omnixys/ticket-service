@@ -8,7 +8,7 @@ import { mapTicket, mapTickets } from '../models/mapper/ticket.mapper.js';
 import { ScanLogPayload } from '../models/payloads/scan-log-list.payload.js';
 import { TicketPayload } from '../models/payloads/ticket-payload.js';
 import { Injectable } from '@nestjs/common';
-import { EventRoleType } from '@omnixys/contracts';
+import { EventRoleType } from '@omnixys/contracts-ts';
 function isAdmin(eventRole: EventRoleType | null): boolean {
   return eventRole === EventRoleType.ADMIN;
 }

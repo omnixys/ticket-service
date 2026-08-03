@@ -19,17 +19,17 @@ import {
   ObjectType,
   Resolver,
 } from '@nestjs/graphql';
-import { ClientInfo } from '@omnixys/context';
-import type { ClientContext } from '@omnixys/context';
-import { RealmRoleType } from '@omnixys/contracts';
-import { getLogger } from '@omnixys/logger';
+import { ClientInfo } from '@omnixys/context-ts';
+import type { ClientContext } from '@omnixys/context-ts';
+import { RealmRoleType } from '@omnixys/contracts-ts';
+import { getLogger } from '@omnixys/logger-ts';
 import {
   CookieAuthGuard,
   CurrentUser,
   CurrentUserData,
   RoleGuard,
   Roles,
-} from '@omnixys/security';
+} from '@omnixys/security-ts';
 import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 @InputType()

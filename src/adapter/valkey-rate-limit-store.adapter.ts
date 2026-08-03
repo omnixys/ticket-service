@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ValkeyService } from '@omnixys/cache';
-import { RateLimitStore } from '@omnixys/security';
+import { ValkeyService } from '@omnixys/cache-ts';
+import { RateLimitStore } from '@omnixys/security-ts';
 
 @Injectable()
 export class ValkeyRateLimitStore implements RateLimitStore {

@@ -1,18 +1,13 @@
-import {
-  PresenceState,
-  ScanVerdict,
-  Ticket,
-  type Prisma,
-} from '../../prisma/generated/client.js';
+import { PresenceState, ScanVerdict, Ticket, type Prisma } from '../../prisma/generated/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { TicketNotFoundException } from '../errors/ticket-domain.error.js';
 import { ScanMessages } from '../utils/scan-messages.js';
 import { ShareGuardService } from './shareguard.service.js';
 import { QrPayload, TokenService } from './token.service.js';
 import { Injectable } from '@nestjs/common';
-import { ValkeyKey, ValkeyService } from '@omnixys/cache';
-import { n2u } from '@omnixys/contracts';
-import { getLogger } from '@omnixys/logger';
+import { ValkeyKey, ValkeyService } from '@omnixys/cache-ts';
+import { n2u } from '@omnixys/contracts-ts';
+import { getLogger } from '@omnixys/logger-ts';
 import { createPublicKey, verify } from 'crypto';
 
 function verifySignature(

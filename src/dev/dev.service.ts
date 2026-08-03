@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import type { QrPayload } from '../ticket/service/token.service.js';
 import { TokenService } from '../ticket/service/token.service.js';
 import { Injectable } from '@nestjs/common';
-import { ValkeyService } from '@omnixys/cache';
+import { ValkeyService } from '@omnixys/cache-ts';
 import { createSign } from 'crypto';
 
 @Injectable()

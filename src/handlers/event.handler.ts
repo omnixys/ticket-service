@@ -17,16 +17,16 @@
 
 import { TicketWriteService } from '../ticket/service/ticket-write.service.js';
 import { Injectable } from '@nestjs/common';
-import type { EventIdsDTO } from '@omnixys/contracts';
+import type { EventIdsDTO } from '@omnixys/contracts-ts';
 import {
   KafkaEvent,
   KafkaEventHandler,
   KafkaTopics,
   IKafkaEventContext,
   KAFKA_HEADERS,
-} from '@omnixys/kafka';
-import { OmnixysLogger, type ScopedLogger } from '@omnixys/logger';
-import { TraceRunner } from '@omnixys/observability';
+} from '@omnixys/kafka-ts';
+import { OmnixysLogger, type ScopedLogger } from '@omnixys/logger-ts';
+import { TraceRunner } from '@omnixys/observability-ts';
 
 /**
  * Kafka event handler responsible for useristrative commands such as

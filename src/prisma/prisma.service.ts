@@ -20,8 +20,8 @@ import 'dotenv/config';
 
 import { env } from '../config/env.js';
 import { PrismaClient } from './generated/client.js';
-import { OmnixysLogger } from '@omnixys/logger';
-import { setupPrismaSpans } from '@omnixys/observability';
+import { OmnixysLogger } from '@omnixys/logger-ts';
+import { setupPrismaSpans } from '@omnixys/observability-ts';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 const { DATABASE_URL } = env;

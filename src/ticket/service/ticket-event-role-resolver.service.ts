@@ -5,8 +5,8 @@ import {
   uniqueEventPermissions,
   type EventPermissionKey,
   type EventRoleType,
-} from '@omnixys/contracts';
-import { EventPermissionResolver, EventRoleResolver } from '@omnixys/security';
+} from '@omnixys/contracts-ts';
+import { EventPermissionResolver, EventRoleResolver } from '@omnixys/security-ts';
 
 @Injectable()
 export class TicketEventRoleResolver extends EventRoleResolver implements EventPermissionResolver {
