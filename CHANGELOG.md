@@ -3,6 +3,25 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.3.0](https://github.com/omnixys/ticket-service/compare/v3.2.0...v3.3.0) (2026-08-03)
+
+### Analytics
+
+* **Analytics:** publish ticket lifecycle facts ([](https://github.com/omnixys/ticket-service/commit/bedd0b276e7718b072aad29a169d2cc4ff011057))
+
+### Config
+
+* **Config:** require and validate DEFAULT_TENANT_ID ([](https://github.com/omnixys/ticket-service/commit/815909bbf97734907cc9f42dc8c3fff1ce865290))
+* **Config:** support trusted proxy address policy ([](https://github.com/omnixys/ticket-service/commit/4b3fee544d77934edc9c6a35006655be4f90d0f7))
+
+### Errors
+
+* **Errors:** adopt secure ticket error handling ([](https://github.com/omnixys/ticket-service/commit/44ae142dc520817162b7eae5d535e9d5f95b2b40))
+
+### Tenant
+
+* **Tenant:** use DEFAULT_TENANT_ID instead of hardcoded 'omnixys' ([](https://github.com/omnixys/ticket-service/commit/9fcbafbb1e13e2a62da2285d8ce201145ce20840))
+
 ## [3.2.0](https://github.com/omnixys/ticket-service/compare/v3.1.0...v3.2.0) (2026-07-28)
 
 ### Other
