@@ -90,8 +90,8 @@ importers:
         specifier: ^3.2.2
         version: 3.2.2(76d7e854a563058f543821b9669a262e)
       '@omnixys/security-ts':
-        specifier: ^4.0.1
-        version: 4.0.1(4e5ad91560b908b58eabfdd97b2ad05a)
+        specifier: ^4.0.2
+        version: 4.0.2(4e5ad91560b908b58eabfdd97b2ad05a)
       '@prisma/adapter-pg':
         specifier: ^7.8.0
         version: 7.9.0
@@ -1704,8 +1704,8 @@ packages:
       fastify:
         optional: true
 
-  '@omnixys/security-ts@4.0.1':
-    resolution: {integrity: sha512-DTlgWIttYfExyqJSlyJ6RnfnUWhRGN9bAcWa0wCPpB4qjgZUY3nUCkPOVx1FNVhTrUYkIGx5Twtvr1+IEwVcAw==, tarball: https://npm.pkg.github.com/download/@omnixys/security-ts/4.0.1/d7b0032c19bf71bfaf16dd42fe2dbc03124ac821}
+  '@omnixys/security-ts@4.0.2':
+    resolution: {integrity: sha512-8qJFIjJHh8NCy79gGl1BxwvpdAQ7MmjgVjN0P6/q+D1o3jaCMQrZsoxXVqrPAznirfNxoIJNlePiSywsXkRRxQ==, tarball: https://npm.pkg.github.com/download/@omnixys/security-ts/4.0.2/100aaee4da3aa777c18d6b932c58b78a128e470f}
     peerDependencies:
       '@fastify/cookie': ^11.0.0
       '@nestjs/common': ^10 || ^11
@@ -8791,7 +8791,7 @@ snapshots:
       - supports-color
       - zone.js
 
-  '@omnixys/security-ts@4.0.1(4e5ad91560b908b58eabfdd97b2ad05a)':
+  '@omnixys/security-ts@4.0.2(4e5ad91560b908b58eabfdd97b2ad05a)':
     dependencies:
       '@fastify/cookie': 11.1.2
       '@grpc/grpc-js': 1.14.4
