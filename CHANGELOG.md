@@ -3,6 +3,20 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.3.1](https://github.com/omnixys/ticket-service/compare/v3.3.0...v3.3.1) (2026-08-19)
+
+### Agent
+
+* **Agent:** add repository development instructions ([](https://github.com/omnixys/ticket-service/commit/bd049c9b67a4305f4c81b27489a7788f125eda9c))
+
+### Ratelimit
+
+* **Ratelimit:** replace deprecated skip option with allowList ([](https://github.com/omnixys/ticket-service/commit/96e40a24024c50d55376f379536a7dba3a9fb895))
+
+### Ticket
+
+* **Ticket:** exclude health endpoints from rate-limit and bump version ([](https://github.com/omnixys/ticket-service/commit/9f0664f14d82559be5531eb96e67f479cf7690ac))
+
 ## [3.3.0](https://github.com/omnixys/ticket-service/compare/v3.2.0...v3.3.0) (2026-08-03)
 
 ### Analytics
