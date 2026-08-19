@@ -1,6 +1,6 @@
 {
   "name": "ticket-service",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "description": "Omnixys Ticket Service",
   "author": {
     "name": "Caleb Gyamfi",
@@ -87,7 +87,7 @@
     "@omnixys/kafka-ts": "^3.2.1",
     "@omnixys/logger-ts": "^3.2.2",
     "@omnixys/observability-ts": "^3.2.2",
-    "@omnixys/security-ts": "^4.0.0",
+    "@omnixys/security-ts": "^4.0.1",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "cfonts": "^3.3.1",
