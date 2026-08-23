@@ -6,3 +6,5 @@ dist
 *.md
 coverage
 __tests__
+tsconfig.build.json
+*.tsbuildinfo
