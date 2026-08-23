@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.3.2](https://github.com/omnixys/ticket-service/compare/v3.3.1...v3.3.2) (2026-08-23)
+
+### Observability
+
+* **Observability:** update dependency ([](https://github.com/omnixys/ticket-service/commit/825cd0d4c24c675fd4ee93d58b5a13ea11ebd310))
+
 ## [3.3.1](https://github.com/omnixys/ticket-service/compare/v3.3.0...v3.3.1) (2026-08-19)
 
 ### Agent
