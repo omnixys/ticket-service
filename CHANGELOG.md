@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.4.4](https://github.com/omnixys/ticket-service/compare/v3.4.3...v3.4.4) (2026-08-26)
+
+### Build
+
+* **Build:** fix build errors ([](https://github.com/omnixys/ticket-service/commit/932bb40e73d934791e2af4152fca283a00bdb6ad))
+
 ## [3.4.3](https://github.com/omnixys/ticket-service/compare/v3.4.2...v3.4.3) (2026-08-26)
 
 ### Build
