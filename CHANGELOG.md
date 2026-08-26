@@ -3,6 +3,13 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.4.1](https://github.com/omnixys/ticket-service/compare/v3.4.0...v3.4.1) (2026-08-26)
+
+### Deps
+
+* **Deps:** update logger to 3.2.6 ([](https://github.com/omnixys/ticket-service/commit/9235d93065bbb9944f0de1d8fb7603f9bd085dbd))
+* **Deps:** update shared TypeScript packages ([](https://github.com/omnixys/ticket-service/commit/1f7594e257cb232cd4876ddf3cdae93d950a1cd8))
+
 ## [3.4.0](https://github.com/omnixys/ticket-service/compare/v3.3.3...v3.4.0) (2026-08-26)
 
 ### Deps
