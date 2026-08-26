@@ -159,5 +159,10 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "pnpm": {
+    "overrides": {
+      "fastify": "5.8.5"
+    }
   }
 }
