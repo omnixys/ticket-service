@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.4.3](https://github.com/omnixys/ticket-service/compare/v3.4.2...v3.4.3) (2026-08-26)
+
+### Build
+
+* **Build:** fix build errors ([](https://github.com/omnixys/ticket-service/commit/ce19053e8c3f714ca207637999e75286888ab644))
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/ticket-service ([](https://github.com/omnixys/ticket-service/commit/c12e47df8ad5e917b08a6455673bd4904b68dc9a))
+
 ## [3.4.2](https://github.com/omnixys/ticket-service/compare/v3.4.1...v3.4.2) (2026-08-26)
 
 ### Build
