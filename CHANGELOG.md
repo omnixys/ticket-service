@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.4.0](https://github.com/omnixys/ticket-service/compare/v3.3.3...v3.4.0) (2026-08-26)
+
+### Deps
+
+* **Deps:** update omnixys ts packages ([](https://github.com/omnixys/ticket-service/commit/b991249d757dc3939bf3b6a0efed08c4ee052410))
+
+### Otel
+
+* **Otel:** add otel logs ([](https://github.com/omnixys/ticket-service/commit/34351e0c38fb592fe0fa5d14cbf8b6e82abc2d80))
+
 ## [3.3.3](https://github.com/omnixys/ticket-service/compare/v3.3.2...v3.3.3) (2026-08-23)
 
 ### Logger
