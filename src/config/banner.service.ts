@@ -71,8 +71,8 @@ export class BannerService implements OnApplicationBootstrap {
     }
 
     for (const section of order) {
-      const entries = groups.get(section)!;
-      if (entries.length === 0) {
+      const entries = groups.get(section);
+      if (entries === undefined || entries.length === 0) {
         continue;
       }
       this.#logger.info(chalk.green(`==============${section}===========`));
