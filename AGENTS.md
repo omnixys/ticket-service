@@ -10,7 +10,7 @@
 Omnixys Ticket Service – tickets, presence/state transitions, admin, analytics.
 
 - Repository path: `services/ticket` (relative to the Omnixys root)
-- Package: `ticket-service` (version: 3.3.0)
+- Package: `ticket-service` (version: 3.4.0)
 - Runtime: Node >=25.8.2 (pnpm >=10.33.0)
 - Kind: Service
 
