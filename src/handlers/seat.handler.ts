@@ -37,6 +37,12 @@ import { TraceRunner } from '@omnixys/observability-ts';
 
 const { SERVICE, DEFAULT_TENANT_ID } = env;
 
+const UUID_V7_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isValidUuidV7(value: string): boolean {
+  return UUID_V7_PATTERN.test(value);
+}
+
 interface KafkaMeta {
   actorId: string;
   tenantId: string;
@@ -151,8 +157,10 @@ export class SeatHandler {
   private meta(actorId: string, operation: string): KafkaMeta {
     const context = ContextAccessor.get();
     const type: EventType = 'EVENT';
+    const principalActorId = context?.principal?.actorId;
+    const resolvedActorId = principalActorId && isValidUuidV7(principalActorId) ? principalActorId : actorId;
     return {
-      actorId: context?.principal?.actorId ?? actorId,
+      actorId: resolvedActorId,
       tenantId:
         context?.tenant?.tenantId ??
         context?.principal?.tenantId ??
@@ -170,6 +178,7 @@ export class SeatHandler {
       if (
         typeof value.eventId !== 'string' ||
         typeof value.actorId !== 'string' ||
+        !isValidUuidV7(value.actorId) ||
         !Array.isArray(value.tickets) ||
         value.tickets.some(
           (ticket) =>
@@ -177,7 +186,7 @@ export class SeatHandler {
             typeof ticket?.seatId !== 'string',
         )
       ) {
-        throw new TypeError('Guest ticket payload has an invalid shape');
+        throw new TypeError('Guest ticket payload has an invalid shape or actorId not UUIDv7');
       }
       return value as GuestTicketKey;
     } catch (cause) {
