@@ -11,7 +11,7 @@ Omnixys Ticket Service – tickets, presence/state transitions, admin, analytics
 
 - Repository path: `services/ticket` (relative to the Omnixys root)
 - Package: `ticket-service` (version: 3.4.0)
-- Runtime: Node >=25.8.2 (pnpm >=10.33.0)
+- Runtime: Node >=26.8.1 (pnpm >=11.24.0)
 - Kind: Service
 
 ## Architecture
@@ -32,7 +32,7 @@ src/adapter, admin, analytics, config, core, dev, handlers, prisma, security, ti
 ## Commands
 
 Commands below are the authoritative validation commands for this repository. Run them
-with the appropriate tooling (observed versions: node 26.6.0, pnpm 11.20.0, uv 0.12.1, java 26.0.2).
+with the appropriate tooling (observed versions: node 26.8.1, pnpm 11.24.0, uv 0.12.8, java 26.0.2).
 
 ### Install
 
