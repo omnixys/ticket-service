@@ -37,7 +37,8 @@ import { TraceRunner } from '@omnixys/observability-ts';
 
 const { SERVICE, DEFAULT_TENANT_ID } = env;
 
-const UUID_V7_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_V7_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function isValidUuidV7(value: string): boolean {
   return UUID_V7_PATTERN.test(value);
@@ -158,7 +159,10 @@ export class SeatHandler {
     const context = ContextAccessor.get();
     const type: EventType = 'EVENT';
     const principalActorId = context?.principal?.actorId;
-    const resolvedActorId = principalActorId && isValidUuidV7(principalActorId) ? principalActorId : actorId;
+    const resolvedActorId =
+      principalActorId && isValidUuidV7(principalActorId)
+        ? principalActorId
+        : actorId;
     return {
       actorId: resolvedActorId,
       tenantId:
@@ -186,7 +190,9 @@ export class SeatHandler {
             typeof ticket?.seatId !== 'string',
         )
       ) {
-        throw new TypeError('Guest ticket payload has an invalid shape or actorId not UUIDv7');
+        throw new TypeError(
+          'Guest ticket payload has an invalid shape or actorId not UUIDv7',
+        );
       }
       return value as GuestTicketKey;
     } catch (cause) {

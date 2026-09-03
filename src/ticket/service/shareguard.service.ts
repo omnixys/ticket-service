@@ -122,7 +122,7 @@ export class ShareGuardService {
           revoked: true,
           currentState: 'OUTSIDE',
           revokedAt: now,
-          revokedBy: "8822d655-e711-7194-bd65-aaa5bf5f254c",
+          revokedBy: '8822d655-e711-7194-bd65-aaa5bf5f254c',
         },
       });
 
