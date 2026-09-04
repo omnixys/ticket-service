@@ -46,7 +46,9 @@ export class EventRoleHandler {
     private readonly omnixysLogger: OmnixysLogger,
     private readonly prisma: PrismaService,
   ) {
-    this.logger = this.omnixysLogger.log(this.constructor.name);
+    this.logger = this.omnixysLogger.log(
+      this.constructor.name,
+    );
   }
 
   @KafkaEvent(KafkaTopics.event.userAccessChanged)
@@ -67,7 +69,7 @@ export class EventRoleHandler {
         existing?.occurredAt &&
         occurredAtDate.getTime() < existing.occurredAt.getTime()
       ) {
-        this.logger.debug('Skipping stale event.userAccessChanged', {
+        this.logger.debug('Skipping stale event.userAccessChanged: %o', {
           eventId,
           userId,
         });
@@ -110,7 +112,7 @@ export class EventRoleHandler {
         existing?.updatedAt &&
         new Date(occurredAt).getTime() < existing.updatedAt.getTime()
       ) {
-        this.logger.debug('Skipping stale event.roleAssigned', {
+        this.logger.debug('Skipping stale event.roleAssigned: %o', {
           eventId,
           userId,
         });
@@ -142,7 +144,7 @@ export class EventRoleHandler {
         existing?.updatedAt &&
         new Date(occurredAt).getTime() < existing.updatedAt.getTime()
       ) {
-        this.logger.debug('Skipping stale event.roleRemoved', {
+        this.logger.debug('Skipping stale event.roleRemoved: %o', {
           eventId,
           userId,
         });
@@ -188,7 +190,7 @@ export class EventRoleHandler {
         existingNew?.updatedAt &&
         new Date(occurredAt).getTime() < existingNew.updatedAt.getTime()
       ) {
-        this.logger.debug('Skipping stale ownerChanged upsert', {
+        this.logger.debug('Skipping stale ownerChanged upsert: %o', {
           eventId,
           userId: newOwnerId,
         });

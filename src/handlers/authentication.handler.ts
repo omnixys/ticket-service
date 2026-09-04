@@ -53,7 +53,9 @@ export class AuthenticationHandler {
     private readonly omnixysLogger: OmnixysLogger,
     private readonly ticketWriteService: TicketWriteService,
   ) {
-    this.logger = this.omnixysLogger.log(this.constructor.name);
+    this.logger = this.omnixysLogger.log(
+      this.constructor.name,
+    );
   }
 
   @KafkaEvent(KafkaTopics.ticket.deleteUserTickets)
@@ -65,18 +67,18 @@ export class AuthenticationHandler {
       const headers = context.headers;
       const actorId = headers[KAFKA_HEADERS.ACTOR_ID] ?? 'unknown';
 
-      this.logger.info('delete_tickets_by_guest_received', {
+      this.logger.info('delete_tickets_by_guest_received: %o', {
         userId: payload.userId,
         actorId,
       });
 
       try {
         await this.ticketWriteService.deleteByGuestId(payload.userId);
-        this.logger.info('delete_tickets_by_guest_success', {
+        this.logger.info('delete_tickets_by_guest_success: %o', {
           userId: payload.userId,
         });
       } catch (error) {
-        this.logger.error('delete_tickets_by_guest_failed', error, {
+        this.logger.error('delete_tickets_by_guest_failed: %o %o', error, {
           userId: payload.userId,
           actorId,
         });

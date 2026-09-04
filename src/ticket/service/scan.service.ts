@@ -155,7 +155,7 @@ export class ScanService {
         },
       });
     } catch (error) {
-      this.logger.error('Failed to publish ticket scan milestone', {
+      this.logger.error('Failed to publish ticket scan milestone: %o', {
         error,
         eventId: payload.eventId,
         ticketId: payload.referenceId,

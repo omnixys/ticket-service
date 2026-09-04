@@ -78,7 +78,9 @@ export class SeatHandler {
     private readonly cache: ValkeyService,
     private readonly kafkaProducer: KafkaProducerService,
   ) {
-    this.logger = this.omnixysLogger.log(this.constructor.name);
+    this.logger = this.omnixysLogger.log(
+      this.constructor.name,
+    );
   }
 
   @KafkaEvent(KafkaTopics.ticket.create)
@@ -87,7 +89,7 @@ export class SeatHandler {
   ): Promise<void> {
     return TraceRunner.run('[HANDLER] createTicket', async () => {
       const { token, invitationId, userId } = payload;
-      this.logger.info('create_ticket_received', { invitationId, userId });
+      this.logger.info('create_ticket_received: %o', { invitationId, userId });
 
       try {
         const raw = await this.cache.get(
@@ -95,7 +97,7 @@ export class SeatHandler {
           token,
         );
         if (!raw) {
-          this.logger.warn('create_ticket_invalid_token', { token });
+          this.logger.warn('create_ticket_invalid_token: %o', { token });
           throw new TicketVerificationTokenException('invalid-token');
         }
 
@@ -106,7 +108,7 @@ export class SeatHandler {
         );
 
         if (!ticket) {
-          this.logger.warn('create_ticket_mapping_not_found', {
+          this.logger.warn('create_ticket_mapping_not_found: %o', {
             invitationId,
             eventId: input.eventId,
           });
@@ -123,7 +125,7 @@ export class SeatHandler {
           actorId: input.actorId,
         });
 
-        this.logger.info('create_ticket_success', {
+        this.logger.info('create_ticket_success: %o', {
           invitationId,
           userId,
           seatId: ticket.seatId,
@@ -143,7 +145,7 @@ export class SeatHandler {
           meta: this.meta(input.actorId, 'Link invitation to guest'),
         });
       } catch (error) {
-        this.logger.error('create_ticket_failed', error, {
+        this.logger.error('create_ticket_failed: %o %o', error, {
           invitationId,
           userId,
         });
