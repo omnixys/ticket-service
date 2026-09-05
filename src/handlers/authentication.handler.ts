@@ -54,6 +54,7 @@ export class AuthenticationHandler {
     private readonly ticketWriteService: TicketWriteService,
   ) {
     this.logger = this.omnixysLogger.log(
+      'service:ticket',
       this.constructor.name,
     );
   }

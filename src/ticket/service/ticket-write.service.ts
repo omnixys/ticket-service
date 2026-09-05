@@ -46,7 +46,7 @@ export class TicketWriteService {
     private readonly eventPermissionResolver: EventPermissionResolver,
     private readonly analyticsOutbox: AnalyticsOutboxService,
   ) {
-    this.logger = this.loggerService.log(this.constructor.name);
+    this.logger = this.loggerService.log(this.constructor.name, 'service:ticket');
   }
 
   async createTicket(data: {

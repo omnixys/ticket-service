@@ -79,6 +79,7 @@ export class SeatHandler {
     private readonly kafkaProducer: KafkaProducerService,
   ) {
     this.logger = this.omnixysLogger.log(
+      'service:ticket',
       this.constructor.name,
     );
   }

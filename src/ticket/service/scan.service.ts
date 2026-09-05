@@ -39,7 +39,7 @@ export class ScanService {
     logger: OmnixysLogger,
     private readonly analyticsOutbox: AnalyticsOutboxService,
   ) {
-    this.logger = logger.log(this.constructor.name);
+    this.logger = logger.log(this.constructor.name, 'service:ticket');
   }
 
   async scan({
