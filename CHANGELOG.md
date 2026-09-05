@@ -3,6 +3,35 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.0.0](https://github.com/omnixys/ticket-service/compare/v3.4.5...v4.0.0) (2026-09-05)
+
+### Deps
+
+* **Deps:** update omnixys deps ([](https://github.com/omnixys/ticket-service/commit/5c1271250686db3610697833a6141eb5d7364b05))
+
+### Identity
+
+* **Identity:** document U/K identity conventions in AGENTS.md ([](https://github.com/omnixys/ticket-service/commit/c3a9d5d5063832b0729cd0700070e3ce6d0099b3))
+* **Identity:** replace 'system' string in UUID column, remove empty-string fallback, UUIDv7 validation in GuestTicketKey parser ([](https://github.com/omnixys/ticket-service/commit/43591727764cf4327546069a3bf3473f8dc0ea51))
+
+### Logging
+
+* **Logging:** add service:ticket provenance source to logger acquisitions ([](https://github.com/omnixys/ticket-service/commit/1d4b662d55e3d7db49b963be5cf11731e0e4843f))
+* **Logging:** add missing format placeholders to structured log calls ([](https://github.com/omnixys/ticket-service/commit/ecbbea062fe0a64b37bbd6f0cb1d6ffec8736d1b))
+
+### Other
+
+* **Other:** Merge pull request #8 from omnixys/migration/uuid-v7 ([](https://github.com/omnixys/ticket-service/commit/817ab9196456a15350f50e3a1efbe55f8d15550f)), closes [#8](https://github.com/omnixys/ticket-service/issues/8)
+
+### Runtime
+
+* **Runtime:** require node 26.8.1 and pnpm 11.24.0 ([](https://github.com/omnixys/ticket-service/commit/d9f31988830275a8148d187bb5e254f98a67ecd7))
+
+### Ticket
+
+* **Ticket:** rewire omnixys service deps to file: ([](https://github.com/omnixys/ticket-service/commit/26504bc594419310fa93115c5eeebce54ad9f144))
+* **Ticket:** type identity reference fields as UUID ([](https://github.com/omnixys/ticket-service/commit/f7f65cadc4aa8221d0ce828f5d802d7848abace6))
+
 ## [3.4.5](https://github.com/omnixys/ticket-service/compare/v3.4.4...v3.4.5) (2026-08-28)
 
 ### Deps
