@@ -275,7 +275,7 @@ export type AnalyticsOutboxWhereInput = {
   topic?: Prisma.StringFilter<"AnalyticsOutbox"> | string
   payload?: Prisma.JsonFilter<"AnalyticsOutbox">
   correlationId?: Prisma.StringNullableFilter<"AnalyticsOutbox"> | string | null
-  actorId?: Prisma.StringNullableFilter<"AnalyticsOutbox"> | string | null
+  actorId?: Prisma.UuidNullableFilter<"AnalyticsOutbox"> | string | null
   attempts?: Prisma.IntFilter<"AnalyticsOutbox"> | number
   nextAttemptAt?: Prisma.DateTimeFilter<"AnalyticsOutbox"> | Date | string
   lockedAt?: Prisma.DateTimeNullableFilter<"AnalyticsOutbox"> | Date | string | null
@@ -312,7 +312,7 @@ export type AnalyticsOutboxWhereUniqueInput = Prisma.AtLeast<{
   topic?: Prisma.StringFilter<"AnalyticsOutbox"> | string
   payload?: Prisma.JsonFilter<"AnalyticsOutbox">
   correlationId?: Prisma.StringNullableFilter<"AnalyticsOutbox"> | string | null
-  actorId?: Prisma.StringNullableFilter<"AnalyticsOutbox"> | string | null
+  actorId?: Prisma.UuidNullableFilter<"AnalyticsOutbox"> | string | null
   attempts?: Prisma.IntFilter<"AnalyticsOutbox"> | number
   nextAttemptAt?: Prisma.DateTimeFilter<"AnalyticsOutbox"> | Date | string
   lockedAt?: Prisma.DateTimeNullableFilter<"AnalyticsOutbox"> | Date | string | null
@@ -354,7 +354,7 @@ export type AnalyticsOutboxScalarWhereWithAggregatesInput = {
   topic?: Prisma.StringWithAggregatesFilter<"AnalyticsOutbox"> | string
   payload?: Prisma.JsonWithAggregatesFilter<"AnalyticsOutbox">
   correlationId?: Prisma.StringNullableWithAggregatesFilter<"AnalyticsOutbox"> | string | null
-  actorId?: Prisma.StringNullableWithAggregatesFilter<"AnalyticsOutbox"> | string | null
+  actorId?: Prisma.UuidNullableWithAggregatesFilter<"AnalyticsOutbox"> | string | null
   attempts?: Prisma.IntWithAggregatesFilter<"AnalyticsOutbox"> | number
   nextAttemptAt?: Prisma.DateTimeWithAggregatesFilter<"AnalyticsOutbox"> | Date | string
   lockedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"AnalyticsOutbox"> | Date | string | null

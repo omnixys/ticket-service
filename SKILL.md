@@ -9,7 +9,7 @@
 
 - Kind: Service
 - Package: `ticket-service` (version: 3.3.0)
-- Runtime: Node >=25.8.2 (pnpm >=10.33.0)
+- Runtime: Node >=26.8.1 (pnpm >=11.24.0)
 - Description: Omnixys Ticket Service – tickets, presence/state transitions, admin, analytics.
 - Architecture: src/adapter, admin, analytics, config, core, dev, handlers, prisma, security, ticket
 - Database: PostgreSQL via Prisma (prisma/schema.prisma); Migrations: Prisma Migrate (prisma:migrate / generate / validate)

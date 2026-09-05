@@ -39,7 +39,7 @@ export class ScanService {
     logger: OmnixysLogger,
     private readonly analyticsOutbox: AnalyticsOutboxService,
   ) {
-    this.logger = logger.log(this.constructor.name);
+    this.logger = logger.log(this.constructor.name, 'service:ticket');
   }
 
   async scan({
@@ -155,7 +155,7 @@ export class ScanService {
         },
       });
     } catch (error) {
-      this.logger.error('Failed to publish ticket scan milestone', {
+      this.logger.error('Failed to publish ticket scan milestone: %o', {
         error,
         eventId: payload.eventId,
         ticketId: payload.referenceId,

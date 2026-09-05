@@ -46,7 +46,7 @@ export class TicketWriteService {
     private readonly eventPermissionResolver: EventPermissionResolver,
     private readonly analyticsOutbox: AnalyticsOutboxService,
   ) {
-    this.logger = this.loggerService.log(this.constructor.name);
+    this.logger = this.loggerService.log(this.constructor.name, 'service:ticket');
   }
 
   async createTicket(data: {
@@ -410,7 +410,7 @@ export class TicketWriteService {
         operation: 'Record Event Milestone',
         version: '1',
         type: 'EVENT',
-        actorId: context?.principal?.actorId ?? '',
+        actorId: context?.principal?.actorId,
         tenantId: context?.tenant?.tenantId ?? context?.principal?.tenantId ?? DEFAULT_TENANT_ID,
       },
     });

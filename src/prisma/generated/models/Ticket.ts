@@ -330,7 +330,7 @@ export type TicketWhereInput = {
   currentState?: Prisma.EnumPresenceStateFilter<"Ticket"> | $Enums.PresenceState
   revoked?: Prisma.BoolFilter<"Ticket"> | boolean
   revokedAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
-  revokedBy?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  revokedBy?: Prisma.UuidNullableFilter<"Ticket"> | string | null
   revokedReason?: Prisma.StringNullableFilter<"Ticket"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Ticket"> | Date | string
   updatedAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
@@ -382,7 +382,7 @@ export type TicketWhereUniqueInput = Prisma.AtLeast<{
   currentState?: Prisma.EnumPresenceStateFilter<"Ticket"> | $Enums.PresenceState
   revoked?: Prisma.BoolFilter<"Ticket"> | boolean
   revokedAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
-  revokedBy?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  revokedBy?: Prisma.UuidNullableFilter<"Ticket"> | string | null
   revokedReason?: Prisma.StringNullableFilter<"Ticket"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Ticket"> | Date | string
   updatedAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
@@ -436,7 +436,7 @@ export type TicketScalarWhereWithAggregatesInput = {
   currentState?: Prisma.EnumPresenceStateWithAggregatesFilter<"Ticket"> | $Enums.PresenceState
   revoked?: Prisma.BoolWithAggregatesFilter<"Ticket"> | boolean
   revokedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
-  revokedBy?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
+  revokedBy?: Prisma.UuidNullableWithAggregatesFilter<"Ticket"> | string | null
   revokedReason?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Ticket"> | Date | string
   updatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null

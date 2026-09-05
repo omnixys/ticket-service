@@ -39,7 +39,7 @@ model Ticket {
 
   revoked       Boolean   @default(false)
   revokedAt     DateTime? @map("revoked_at")
-  revokedBy     String?   @map("revoked_by")
+  revokedBy     String?   @map("revoked_by") @db.Uuid
   revokedReason String?   @map("revoked_reason")
 
   createdAt DateTime  @default(now()) @map("created_at")
@@ -108,7 +108,7 @@ model AnalyticsOutbox {
   topic          String
   payload        Json
   correlationId  String?   @map("correlation_id")
-  actorId        String?   @map("actor_id")
+  actorId        String?   @map("actor_id") @db.Uuid
   attempts       Int       @default(0)
   nextAttemptAt  DateTime  @default(now()) @map("next_attempt_at")
   lockedAt       DateTime? @map("locked_at")
