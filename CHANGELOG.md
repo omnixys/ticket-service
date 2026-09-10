@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.0.1](https://github.com/omnixys/ticket-service/compare/v4.0.0...v4.0.1) (2026-09-10)
+
+### Deps
+
+* **Deps:** update graphql-ts ([](https://github.com/omnixys/ticket-service/commit/5b17e0084a9bc3d6389a778637ebdd81a88a328a))
+
 ## [4.0.0](https://github.com/omnixys/ticket-service/compare/v3.4.5...v4.0.0) (2026-09-05)
 
 ### Deps
