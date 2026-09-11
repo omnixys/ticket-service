@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.0.2](https://github.com/omnixys/ticket-service/compare/v4.0.1...v4.0.2) (2026-09-11)
+
+### Deps
+
+* **Deps:** update omnixys contracts-ts package ([](https://github.com/omnixys/ticket-service/commit/d932802af5a8172c3d9305314f281e24601d3122))
+
 ## [4.0.1](https://github.com/omnixys/ticket-service/compare/v4.0.0...v4.0.1) (2026-09-10)
 
 ### Deps
