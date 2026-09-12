@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.0.3](https://github.com/omnixys/ticket-service/compare/v4.0.2...v4.0.3) (2026-09-12)
+
+### Ticket
+
+* **Ticket:** bump omnixys packages to 4.4.0 ([](https://github.com/omnixys/ticket-service/commit/6523ae3c4dbe9eb0bc80f08ed4469e3069337ef8))
+
 ## [4.0.2](https://github.com/omnixys/ticket-service/compare/v4.0.1...v4.0.2) (2026-09-11)
 
 ### Deps
