@@ -90,7 +90,11 @@ export class SeatHandler {
   ): Promise<void> {
     return TraceRunner.run('[HANDLER] createTicket', async () => {
       const { token, invitationId, userId } = payload;
-      this.logger.info('create_ticket_received: %o', { invitationId, userId });
+      this.logger.info(
+        'Guest provisioning ticket step started: invitationId=%s userId=%s',
+        invitationId,
+        userId,
+      );
 
       try {
         const raw = await this.cache.get(
@@ -126,12 +130,13 @@ export class SeatHandler {
           actorId: input.actorId,
         });
 
-        this.logger.info('create_ticket_success: %o', {
+        this.logger.info(
+          'Guest provisioning ticket created: invitationId=%s userId=%s seatId=%s eventId=%s',
           invitationId,
           userId,
-          seatId: ticket.seatId,
-          eventId: input.eventId,
-        });
+          ticket.seatId,
+          input.eventId,
+        );
 
         /**
          * Final link back to invitation
@@ -145,6 +150,11 @@ export class SeatHandler {
           },
           meta: this.meta(input.actorId, 'Link invitation to guest'),
         });
+        this.logger.info(
+          'Guest provisioning ticket step completed: invitationId=%s userId=%s',
+          invitationId,
+          userId,
+        );
       } catch (error) {
         this.logger.error('create_ticket_failed: %o %o', error, {
           invitationId,

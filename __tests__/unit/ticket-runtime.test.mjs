@@ -387,6 +387,60 @@ test('ticket creation handler rejects expired guest verification state', async (
   });
 });
 
+test('ticket creation handler links the invitation after persisting the ticket', async () => {
+  const sent = [];
+  const created = [];
+  const handler = new SeatHandler(
+    logger,
+    {
+      async createTicket(input) {
+        created.push(input);
+      },
+    },
+    {
+      async get() {
+        return JSON.stringify({
+          eventId: '00000000-0000-7000-8000-000000000002',
+          actorId: '00000000-0000-7000-8000-000000000006',
+          tickets: [
+            {
+              invitationId: '00000000-0000-7000-8000-000000000003',
+              seatId: '00000000-0000-7000-8000-000000000004',
+            },
+          ],
+        });
+      },
+    },
+    {
+      async send(event) {
+        sent.push(event);
+      },
+    },
+  );
+
+  await handler.handleCreateTicket({
+    token: 'ticket-key',
+    invitationId: '00000000-0000-7000-8000-000000000003',
+    userId: '00000000-0000-7000-8000-000000000005',
+  });
+
+  assert.equal(created.length, 1);
+  assert.deepEqual(created[0], {
+    eventId: '00000000-0000-7000-8000-000000000002',
+    invitationId: '00000000-0000-7000-8000-000000000003',
+    userId: '00000000-0000-7000-8000-000000000005',
+    seatId: '00000000-0000-7000-8000-000000000004',
+    actorId: '00000000-0000-7000-8000-000000000006',
+  });
+  assert.equal(sent.length, 1);
+  assert.equal(sent[0].topic, KafkaTopics.invitation.addGuestId);
+  assert.deepEqual(sent[0].payload, {
+    invitationId: '00000000-0000-7000-8000-000000000003',
+    userId: '00000000-0000-7000-8000-000000000005',
+    actorId: '00000000-0000-7000-8000-000000000006',
+  });
+});
+
 /* ------------------------------------------------------------------ */
 /* Gate direction policy                                               */
 /* ------------------------------------------------------------------ */
