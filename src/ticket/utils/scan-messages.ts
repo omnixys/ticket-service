@@ -9,6 +9,8 @@ export const ScanMessages: Record<ScanVerdict, string> = {
   REPLAY: 'Scan already used',
   UNKNOWN: 'Unknown',
   EXPIRED_EVENT: 'Event Expired',
+  ALREADY_INSIDE: 'Already inside',
+  NOT_INSIDE: 'Not inside',
 
   // DEVICE_NOT_ACTIVATED: 'Device not registered',
 

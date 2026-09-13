@@ -1,3 +1,6 @@
+import { PresenceState } from '../../prisma/generated/client.js';
+import { GateDirection } from '../models/enums/gate-direction.enum.js';
+import { PresenceStateGraphQL } from '../models/enums/presence-state.enum.js';
 import { ScanVerdict } from '../models/enums/scan-verdict.enum.js';
 import { ActivateDeviceInput } from '../models/inputs/activate-device.input.js';
 import { mapScanLog } from '../models/mapper/scan-logs.mapper.js';
@@ -82,6 +85,21 @@ export class ScanInput {
   @IsOptional()
   @IsString()
   gate?: string;
+
+  @Field(() => GateDirection)
+  @IsNotEmpty()
+  direction!: GateDirection;
+}
+
+@InputType()
+export class UpdateTicketPresenceInput {
+  @Field(() => ID)
+  @IsUUID()
+  ticketId!: string;
+
+  @Field(() => PresenceStateGraphQL)
+  @IsNotEmpty()
+  state!: PresenceState;
 }
 
 @Resolver(() => TicketMessagePayload)
@@ -128,13 +146,14 @@ export class TicketMutationResolver {
     @Args('input') input: ScanInput,
     @CurrentUser() user: CurrentUserData,
   ): Promise<ScanPayload> {
-    const { token, signature, deviceId, gate } = input;
+    const { token, signature, deviceId, gate, direction } = input;
 
-    this.#logger.debug({ gate, userId: user.id }, 'scan_token');
+    this.#logger.debug({ gate, direction, userId: user.id }, 'scan_token');
     const result = await this.scan.scan({
       token,
       signature,
       deviceId,
+      direction,
       gate,
       actorId: user.id,
     });
@@ -174,5 +193,27 @@ export class TicketMutationResolver {
   ): Promise<TicketPayload> {
     const { ticketId, reason } = input;
     return this.ticketWrite.revoke({ ticketId, reason, actorId: user.id });
+  }
+
+  @UseGuards(RoleGuard)
+  @Roles(RealmRoleType.USER)
+  @Mutation(() => TicketPayload, {
+    description:
+      'Manually override the presence state of a ticket (security staff)',
+  })
+  async updateTicketPresence(
+    @CurrentUser() user: CurrentUserData,
+    @Args('input', { type: () => UpdateTicketPresenceInput })
+    input: UpdateTicketPresenceInput,
+  ): Promise<TicketPayload> {
+    this.#logger.debug(
+      { ticketId: input.ticketId, state: input.state, userId: user.id },
+      'update_ticket_presence',
+    );
+    return this.ticketWrite.updatePresence({
+      ticketId: input.ticketId,
+      state: input.state,
+      actorId: user.id,
+    });
   }
 }

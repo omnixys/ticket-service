@@ -2,6 +2,7 @@ import { AnalyticsOutboxService } from '../../analytics/analytics-outbox.service
 import { env } from '../../config/env.js';
 import { ScanLog, ScanVerdict, Ticket } from '../../prisma/generated/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { GateDirection, intendedState } from '../models/enums/gate-direction.enum.js';
 import { VerifyService } from './verify.service.js';
 import { Injectable } from '@nestjs/common';
 import { ContextAccessor } from '@omnixys/context-ts';
@@ -16,6 +17,7 @@ export interface SecurityScanInput {
   token: string;
   signature: string;
   deviceId: string;
+  direction: GateDirection;
   gate?: string;
   actorId: string;
 }
@@ -46,6 +48,7 @@ export class ScanService {
     token,
     signature,
     deviceId,
+    direction,
     gate,
     actorId,
   }: SecurityScanInput): Promise<ScanPayloadDTO> {
@@ -54,6 +57,7 @@ export class ScanService {
         token,
         signature,
         deviceId,
+        direction,
         tx,
       );
       const permissions = await this.eventPermissionResolver.getPermissionsForUser(
@@ -73,7 +77,7 @@ export class ScanService {
         data: {
           ticketId: ticket.id,
           eventId: ticket.eventId,
-          direction: ticket.currentState,
+          direction: intendedState(direction),
           verdict,
           nonce: payload.dn,
           gate,
@@ -93,7 +97,7 @@ export class ScanService {
             ticketId: ticket.id,
             eventId: ticket.eventId,
             verdict,
-            direction: ticket.currentState,
+            direction: intendedState(direction),
             hasGate: Boolean(gate),
           },
         },

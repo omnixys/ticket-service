@@ -196,6 +196,8 @@ enum ScanVerdict {
   REVOKED // Ticket wurde manuell deaktiviert
   UNKNOWN // Default fallback
   EXPIRED_EVENT
+  ALREADY_INSIDE // ENTRY-Scan eines bereits anwesenden Gastes
+  NOT_INSIDE // EXIT-Scan eines nicht anwesenden Gastes
 
   @@map("scan_verdict")
 }

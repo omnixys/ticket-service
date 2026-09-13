@@ -1,6 +1,7 @@
 import { PresenceState, ScanVerdict, Ticket, type Prisma } from '../../prisma/generated/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { TicketNotFoundException } from '../errors/ticket-domain.error.js';
+import { GateDirection, intendedState } from '../models/enums/gate-direction.enum.js';
 import { ScanMessages } from '../utils/scan-messages.js';
 import { ShareGuardService } from './shareguard.service.js';
 import { QrPayload, TokenService } from './token.service.js';
@@ -48,6 +49,7 @@ export class VerifyService {
     tokenStr: string,
     signature: string,
     deviceId: string,
+    direction: GateDirection,
     database: Prisma.TransactionClient | PrismaService = this.prisma,
   ): Promise<{ ticket: Ticket; payload: QrPayload; verdict: ScanVerdict; message: string }> {
     const payload = await this.token.verify(tokenStr);
@@ -151,6 +153,46 @@ export class VerifyService {
       };
     }
 
+    // ---------------------------------------------------------------
+    // Gate direction policy (after all security checks have passed).
+    // Policy rejections do NOT consume the nonce (the holder must be
+    // able to scan again at the correct gate without a replay error)
+    // and do NOT raise share-guard risk.
+    // ---------------------------------------------------------------
+    const intended = intendedState(direction);
+
+    if (ticket.currentState === intended) {
+      const verdict =
+        intended === PresenceState.INSIDE ? ScanVerdict.ALREADY_INSIDE : ScanVerdict.NOT_INSIDE;
+      this.#logger.info(
+        { ticketId: ticket.id, direction, currentState: ticket.currentState },
+        'verify_direction_rejected',
+      );
+      return { ticket, payload, verdict, message: ScanMessages[verdict] };
+    }
+
+    if (direction === GateDirection.ENTRY) {
+      const eventSettingsProjection = database.eventSettingsProjection;
+      const eventSettings = eventSettingsProjection
+        ? await eventSettingsProjection.findUnique({
+            where: { eventId: ticket.eventId },
+            select: { endsAt: true },
+          })
+        : null;
+      if (eventSettings?.endsAt && eventSettings.endsAt.getTime() < Date.now()) {
+        this.#logger.info(
+          { ticketId: ticket.id, endsAt: eventSettings.endsAt.toISOString() },
+          'verify_event_expired',
+        );
+        return {
+          ticket,
+          payload,
+          verdict: ScanVerdict.EXPIRED_EVENT,
+          message: ScanMessages.EXPIRED_EVENT,
+        };
+      }
+    }
+
     const replayKey = ValkeyKey.qrReply.key(ticket.id, payload.dn);
     const acquired = await this.valkey.rawSetIfAbsent(replayKey, '1', 120);
     if (!acquired) {
@@ -164,9 +206,7 @@ export class VerifyService {
 
     await this.shareGuard.resetShareGuard(ticket.id);
 
-    const state =
-      ticket.currentState === PresenceState.OUTSIDE ? PresenceState.INSIDE : PresenceState.OUTSIDE;
-
+    const state = intended;
     const checkedInAt = state === PresenceState.INSIDE ? new Date() : ticket.checkedInAt;
     const updated = await database.ticket.updateMany({
       where: {

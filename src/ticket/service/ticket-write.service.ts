@@ -384,6 +384,87 @@ export class TicketWriteService {
     return mapTicket(updated);
   }
 
+  async updatePresence({
+    ticketId,
+    state,
+    actorId,
+  }: {
+    ticketId: string;
+    state: PresenceState;
+    actorId: string;
+  }): Promise<TicketPayload> {
+    const ticket = await this.prisma.ticket.findUnique({ where: { id: ticketId } });
+
+    if (!ticket) {
+      throw new TicketNotFoundException(ticketId);
+    }
+
+    const permissions = await this.eventPermissionResolver.getPermissionsForUser(
+      actorId,
+      ticket.eventId,
+    );
+    if (!permissions.includes(EventPermissionKey.ScanTickets)) {
+      throw new EventAccessDeniedException({
+        eventId: ticket.eventId,
+        userId: actorId,
+        reason: 'event-permission-mismatch',
+        actualPermissions: permissions,
+        requiredPermissions: [EventPermissionKey.ScanTickets],
+      });
+    }
+
+    if (ticket.revoked) {
+      throw new TicketAccessDeniedException(ticketId, 'ticket-revoked');
+    }
+
+    if (ticket.currentState === state) {
+      return mapTicket(ticket);
+    }
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const result = await tx.ticket.update({
+        where: { id: ticketId },
+        data: {
+          currentState: state,
+          ...(state === PresenceState.INSIDE && !ticket.checkedInAt
+            ? { checkedInAt: new Date() }
+            : {}),
+        },
+      });
+
+      const scanLogData: ScanLogUncheckedCreateInput = {
+        ticketId,
+        eventId: ticket.eventId,
+        direction: state,
+        verdict: ScanVerdict.OK,
+        gate: 'MANUAL',
+        actorId,
+      };
+      await tx.scanLog.create({ data: scanLogData });
+
+      await this.analyticsOutbox.enqueue(
+        tx,
+        state === PresenceState.INSIDE
+          ? 'ticket.guest.checked-in.v1'
+          : 'ticket.guest.checked-out.v1',
+        {
+          eventName: state === PresenceState.INSIDE ? 'GuestCheckedIn' : 'GuestCheckedOut',
+          aggregateId: ticketId,
+          aggregateType: 'Ticket',
+          subjectId: ticket.guestProfileId,
+          properties: {
+            ticketId,
+            eventId: ticket.eventId,
+          },
+        },
+      );
+
+      return result;
+    });
+
+    return mapTicket(updated);
+  }
+
   private async publishRevokedMilestone(ticket: {
     id: string;
     eventId: string;

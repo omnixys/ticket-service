@@ -37,7 +37,9 @@ export const ScanVerdict = {
   BLOCKED: 'BLOCKED',
   REVOKED: 'REVOKED',
   UNKNOWN: 'UNKNOWN',
-  EXPIRED_EVENT: 'EXPIRED_EVENT'
+  EXPIRED_EVENT: 'EXPIRED_EVENT',
+  ALREADY_INSIDE: 'ALREADY_INSIDE',
+  NOT_INSIDE: 'NOT_INSIDE'
 } as const
 
 export type ScanVerdict = (typeof ScanVerdict)[keyof typeof ScanVerdict]
