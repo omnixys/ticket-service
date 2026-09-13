@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.1.0](https://github.com/omnixys/ticket-service/compare/v4.0.3...v4.1.0) (2026-09-13)
+
+### Deps
+
+* **Deps:** update omnixys packages ([](https://github.com/omnixys/ticket-service/commit/895a5d97c4056f65341cb14fb77c741146fcf9ed))
+
+### Ticket
+
+* **Ticket:** add direction-aware gate scans and manual presence override ([](https://github.com/omnixys/ticket-service/commit/5f1222713d44a2d65a4e8e78a856aec446ef66f3))
+
 ## [4.0.3](https://github.com/omnixys/ticket-service/compare/v4.0.2...v4.0.3) (2026-09-12)
 
 ### Ticket
