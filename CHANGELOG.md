@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.1.1](https://github.com/omnixys/ticket-service/compare/v4.1.0...v4.1.1) (2026-09-13)
+
+### Guest-provisioning
+
+* **Guest-provisioning:** trace ticket completion ([](https://github.com/omnixys/ticket-service/commit/2765bd1d693607bf273dc624f66ecc78805d6ae3))
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/ticket-service ([](https://github.com/omnixys/ticket-service/commit/07198d85e365c7b32bab39595832d58075e5a238))
+
 ## [4.1.0](https://github.com/omnixys/ticket-service/compare/v4.0.3...v4.1.0) (2026-09-13)
 
 ### Deps
