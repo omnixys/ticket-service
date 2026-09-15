@@ -5,6 +5,7 @@ import {
 } from '../../dist/prisma/generated/client.js';
 import {
   TicketAccessDeniedException,
+  TicketDeviceAlreadyBoundException,
   TicketNotFoundException,
   TicketTokenInvalidException,
   TicketVerificationTokenException,
@@ -801,4 +802,226 @@ test('manual presence override for an unknown ticket fails fast', async () => {
       return true;
     },
   );
+});
+
+/* ------------------------------------------------------------------ */
+/* Device binding (activateDevice / resetDeviceBinding)                */
+/* ------------------------------------------------------------------ */
+
+function ecPublicKey(publicKey) {
+  return publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+}
+
+function createDeviceBindingHarness({ initial, permissions = [] }) {
+  let stored = initial;
+  const milestones = [];
+  const logs = [];
+  const unbinds = [];
+  const transactionClient = {
+    ticket: {
+      async findUnique() {
+        return stored;
+      },
+      async update({ data }) {
+        stored = { ...stored, ...data, updatedAt: new Date() };
+        return stored;
+      },
+      async updateMany({ where, data }) {
+        unbinds.push({ where, data });
+        return { count: 1 };
+      },
+    },
+    scanLog: {
+      async create({ data }) {
+        logs.push(data);
+        return { id: 'log-device', createdAt: new Date(), ...data };
+      },
+    },
+  };
+  const service = new TicketWriteService(
+    {
+      ticket: {
+        async findUnique() {
+          return stored;
+        },
+      },
+      async $transaction(work) {
+        return work(transactionClient);
+      },
+    },
+    logger,
+    {},
+    {
+      async send({ payload }) {
+        milestones.push(payload);
+      },
+    },
+    { getPermissionsForUser: async () => permissions },
+    { async enqueue() {} },
+  );
+  return {
+    service,
+    milestones,
+    logs,
+    unbinds,
+    get stored() {
+      return stored;
+    },
+  };
+}
+
+const MANAGE_PERMISSIONS = [EventPermissionKey.ManageTickets];
+
+test('activateDevice binds a fresh ticket to the device', async () => {
+  const { publicKey } = generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
+  const harness = createDeviceBindingHarness({ initial: ticket({}) });
+
+  const result = await harness.service.activateDevice(
+    {
+      ticketId: harness.stored.id,
+      deviceId: 'device-1',
+      publicKey: ecPublicKey(publicKey),
+      ip: '203.0.113.9',
+    },
+    harness.stored.guestProfileId,
+  );
+
+  assert.equal(result.deviceId, 'device-1');
+  assert.equal(harness.stored.deviceId, 'device-1');
+  assert.equal(harness.stored.devicePublicKey, ecPublicKey(publicKey));
+  assert.ok(harness.stored.deviceActivationAt instanceof Date);
+  assert.equal(harness.stored.deviceActivationIP, '203.0.113.9');
+  assert.equal(harness.unbinds.length, 1);
+  assert.deepEqual(harness.unbinds[0].where, {
+    eventId: harness.stored.eventId,
+    deviceId: 'device-1',
+    id: { not: harness.stored.id },
+  });
+});
+
+test('activateDevice rebinds the same device and unbinds sibling tickets for the same event', async () => {
+  const { publicKey: oldKey } = generateKeyPairSync('ec', {
+    namedCurve: 'prime256v1',
+  });
+  const { publicKey: newKey } = generateKeyPairSync('ec', {
+    namedCurve: 'prime256v1',
+  });
+  const harness = createDeviceBindingHarness({
+    initial: ticket({ deviceId: 'device-1', devicePublicKey: ecPublicKey(oldKey) }),
+  });
+
+  const result = await harness.service.activateDevice(
+    {
+      ticketId: harness.stored.id,
+      deviceId: 'device-1',
+      publicKey: ecPublicKey(newKey),
+    },
+    harness.stored.guestProfileId,
+  );
+
+  assert.equal(result.deviceId, 'device-1');
+  assert.equal(harness.stored.devicePublicKey, ecPublicKey(newKey));
+  assert.equal(harness.unbinds.length, 1);
+  assert.deepEqual(harness.unbinds[0].where, {
+    eventId: harness.stored.eventId,
+    deviceId: 'device-1',
+    id: { not: harness.stored.id },
+  });
+  assert.equal(harness.unbinds[0].data.deviceId, null);
+  assert.equal(harness.unbinds[0].data.devicePublicKey, null);
+  assert.equal(harness.unbinds[0].data.deviceActivationAt, null);
+  assert.equal(harness.unbinds[0].data.deviceActivationIP, null);
+});
+
+test('activateDevice rejects a different (foreign) device for an already bound ticket', async () => {
+  const { publicKey } = generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
+  const harness = createDeviceBindingHarness({
+    initial: ticket({ deviceId: 'device-1', devicePublicKey: ecPublicKey(publicKey) }),
+  });
+
+  await assert.rejects(
+    harness.service.activateDevice(
+      {
+        ticketId: harness.stored.id,
+        deviceId: 'device-2',
+        publicKey: ecPublicKey(publicKey),
+      },
+      harness.stored.guestProfileId,
+    ),
+    (error) => {
+      assert.ok(error instanceof TicketDeviceAlreadyBoundException);
+      return true;
+    },
+  );
+  assert.equal(harness.unbinds.length, 0);
+  assert.equal(harness.stored.deviceId, 'device-1');
+});
+
+test('resetDeviceBinding requires the ManageTickets permission', async () => {
+  const { publicKey } = generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
+  const harness = createDeviceBindingHarness({
+    initial: ticket({ deviceId: 'device-1', devicePublicKey: ecPublicKey(publicKey) }),
+    permissions: [EventPermissionKey.ViewTickets],
+  });
+
+  await assert.rejects(
+    harness.service.resetDeviceBinding({
+      ticketId: harness.stored.id,
+      actorId: 'guest-1',
+    }),
+    (error) => {
+      assert.equal(error.name, 'EventAccessDeniedException');
+      return true;
+    },
+  );
+  assert.equal(harness.logs.length, 0);
+  assert.equal(harness.milestones.length, 0);
+  assert.equal(harness.stored.deviceId, 'device-1');
+});
+
+test('resetDeviceBinding clears the binding and audits the unbound device', async () => {
+  const { publicKey } = generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
+  const harness = createDeviceBindingHarness({
+    initial: ticket({
+      deviceId: 'device-1',
+      devicePublicKey: ecPublicKey(publicKey),
+      deviceActivationAt: new Date('2026-09-10T08:00:00.000Z'),
+      deviceActivationIP: '203.0.113.9',
+    }),
+    permissions: MANAGE_PERMISSIONS,
+  });
+
+  const result = await harness.service.resetDeviceBinding({
+    ticketId: harness.stored.id,
+    actorId: 'staff-1',
+  });
+
+  assert.equal(result.deviceId, undefined);
+  assert.equal(result.devicePublicKey, undefined);
+  assert.equal(harness.stored.deviceId, null);
+  assert.equal(harness.stored.devicePublicKey, null);
+  assert.equal(harness.stored.deviceActivationAt, null);
+  assert.equal(harness.stored.deviceActivationIP, null);
+  assert.equal(harness.logs.length, 1);
+  assert.equal(harness.logs[0].verdict, ScanVerdict.UNKNOWN);
+  assert.equal(harness.logs[0].gate, 'MANUAL');
+  assert.equal(harness.logs[0].deviceId, 'device-1');
+  assert.equal(harness.logs[0].actorId, 'staff-1');
+});
+
+test('resetDeviceBinding on an already unbound ticket is a no-op without audit', async () => {
+  const harness = createDeviceBindingHarness({
+    initial: ticket({}),
+    permissions: MANAGE_PERMISSIONS,
+  });
+
+  const result = await harness.service.resetDeviceBinding({
+    ticketId: harness.stored.id,
+    actorId: 'staff-1',
+  });
+
+  assert.equal(result.deviceId, undefined);
+  assert.equal(harness.stored.deviceId, null);
+  assert.equal(harness.logs.length, 0);
+  assert.equal(harness.milestones.length, 0);
 });

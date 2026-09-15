@@ -145,11 +145,8 @@ export class TicketWriteService {
         throw new TicketAccessDeniedException(input.ticketId, 'device-binding-owner-mismatch');
       }
 
-      if (ticket.devicePublicKey) {
-        if (ticket.devicePublicKey !== input.publicKey || ticket.deviceId !== input.deviceId) {
-          throw new TicketDeviceAlreadyBoundException(input.ticketId);
-        }
-        return mapTicket(ticket);
+      if (ticket.deviceId && ticket.devicePublicKey && ticket.deviceId !== input.deviceId) {
+        throw new TicketDeviceAlreadyBoundException(input.ticketId);
       }
 
       this.assertValidDeviceKey(input.ticketId, input.publicKey);
@@ -161,6 +158,20 @@ export class TicketWriteService {
           deviceId: input.deviceId,
           deviceActivationAt: new Date(),
           deviceActivationIP: input.ip,
+        },
+      });
+
+      await tx.ticket.updateMany({
+        where: {
+          eventId: ticket.eventId,
+          deviceId: input.deviceId,
+          id: { not: ticket.id },
+        },
+        data: {
+          devicePublicKey: null,
+          deviceId: null,
+          deviceActivationAt: null,
+          deviceActivationIP: null,
         },
       });
 
@@ -458,6 +469,53 @@ export class TicketWriteService {
           },
         },
       );
+
+      return result;
+    });
+
+    return mapTicket(updated);
+  }
+
+  async resetDeviceBinding({
+    ticketId,
+    actorId,
+  }: {
+    ticketId: string;
+    actorId: string;
+  }): Promise<TicketPayload> {
+    const ticket = await this.prisma.ticket.findUnique({ where: { id: ticketId } });
+
+    if (!ticket) {
+      throw new TicketNotFoundException(ticketId);
+    }
+
+    await this.assertManageTicket(ticket.eventId, actorId);
+
+    if (!ticket.deviceId && !ticket.devicePublicKey) {
+      return mapTicket(ticket);
+    }
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const result = await tx.ticket.update({
+        where: { id: ticketId },
+        data: {
+          devicePublicKey: null,
+          deviceId: null,
+          deviceActivationAt: null,
+          deviceActivationIP: null,
+        },
+      });
+
+      const scanLogData: ScanLogUncheckedCreateInput = {
+        ticketId,
+        eventId: ticket.eventId,
+        direction: PresenceState.OUTSIDE,
+        verdict: ScanVerdict.UNKNOWN,
+        gate: 'MANUAL',
+        deviceId: ticket.deviceId,
+        actorId,
+      };
+      await tx.scanLog.create({ data: scanLogData });
 
       return result;
     });

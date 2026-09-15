@@ -52,6 +52,17 @@ export interface RevokeTicketDTO {
   reason?: string;
 }
 
+@InputType()
+export class ResetDeviceBindingInput {
+  @Field(() => ID)
+  @IsUUID()
+  ticketId!: string;
+}
+
+export interface ResetDeviceBindingDTO {
+  ticketId: string;
+}
+
 @ObjectType()
 export class ScanPayload {
   @Field(() => TicketPayload)
@@ -113,7 +124,8 @@ export class TicketMutationResolver {
   ) {}
 
   @Mutation(() => TicketPayload, {
-    description: 'Bind a device to a ticket (first activation)',
+    description:
+      'Bind a device to a ticket. The same device may re-bind; sibling tickets of the same event are unbound.',
   })
   async activateDevice(
     @Args('input') input: ActivateDeviceInput,
@@ -213,6 +225,27 @@ export class TicketMutationResolver {
     return this.ticketWrite.updatePresence({
       ticketId: input.ticketId,
       state: input.state,
+      actorId: user.id,
+    });
+  }
+
+  @UseGuards(RoleGuard)
+  @Roles(RealmRoleType.USER)
+  @Mutation(() => TicketPayload, {
+    description:
+      'Reset the device binding of a ticket so it can be activated again (staff only)',
+  })
+  async resetDeviceBinding(
+    @CurrentUser() user: CurrentUserData,
+    @Args('input', { type: () => ResetDeviceBindingInput })
+    input: ResetDeviceBindingInput,
+  ): Promise<TicketPayload> {
+    this.#logger.debug(
+      { ticketId: input.ticketId, userId: user.id },
+      'reset_device_binding',
+    );
+    return this.ticketWrite.resetDeviceBinding({
+      ticketId: input.ticketId,
       actorId: user.id,
     });
   }
