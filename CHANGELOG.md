@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.1.2](https://github.com/omnixys/ticket-service/compare/v4.1.1...v4.1.2) (2026-09-15)
+
+### Ticket
+
+* **Ticket:** update ([](https://github.com/omnixys/ticket-service/commit/05964c3d3d9d9bc227b635910ec9d245c2ccb860))
+
 ## [4.1.1](https://github.com/omnixys/ticket-service/compare/v4.1.0...v4.1.1) (2026-09-13)
 
 ### Guest-provisioning
