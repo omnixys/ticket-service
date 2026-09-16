@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.1.4](https://github.com/omnixys/ticket-service/compare/v4.1.3...v4.1.4) (2026-09-16)
+
+### Deps
+
+* **Deps:** update omnixys logger-ts package ([](https://github.com/omnixys/ticket-service/commit/f540ec5d15f16fe510504be6a11cc6c297524b80))
+
 ## [4.1.3](https://github.com/omnixys/ticket-service/compare/v4.1.2...v4.1.3) (2026-09-16)
 
 ### Scan
