@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.1.3](https://github.com/omnixys/ticket-service/compare/v4.1.2...v4.1.3) (2026-09-16)
+
+### Scan
+
+* **Scan:** verify WebCrypto P-256 signatures ([](https://github.com/omnixys/ticket-service/commit/8a1e8a84e025ea77c1786450bb66b358bdd3dbed))
+
 ## [4.1.2](https://github.com/omnixys/ticket-service/compare/v4.1.1...v4.1.2) (2026-09-15)
 
 ### Ticket
