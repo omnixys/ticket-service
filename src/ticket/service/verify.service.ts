@@ -9,7 +9,59 @@ import { Injectable } from '@nestjs/common';
 import { ValkeyKey, ValkeyService } from '@omnixys/cache-ts';
 import { n2u } from '@omnixys/contracts-ts';
 import { getLogger } from '@omnixys/logger-ts';
-import { createPublicKey, verify } from 'crypto';
+import { createHash, createPublicKey, verify } from 'crypto';
+
+const P256_SIGNATURE_LENGTH_BYTES = 64;
+const P256_SIGNATURE_ENCODING = 'ieee-p1363';
+
+export interface SignatureVerificationDiagnostics {
+  signatureLengthBytes: number;
+  signatureFingerprint: string;
+  publicKeySpkiLengthBytes: number;
+  publicKeyFingerprint: string;
+  signedMessageLengthBytes: number;
+  verificationEncoding: typeof P256_SIGNATURE_ENCODING;
+}
+
+function sha256Fingerprint(value: Uint8Array): string {
+  return createHash('sha256').update(value).digest('hex');
+}
+
+export function signatureVerificationDiagnostics(
+  payload: string,
+  signatureBase64: string,
+  publicKeyBase64: string,
+): SignatureVerificationDiagnostics {
+  const signature = Buffer.from(signatureBase64, 'base64');
+  const publicKey = Buffer.from(publicKeyBase64, 'base64');
+  const message = Buffer.from(payload);
+
+  return {
+    signatureLengthBytes: signature.length,
+    signatureFingerprint: sha256Fingerprint(signature),
+    publicKeySpkiLengthBytes: publicKey.length,
+    publicKeyFingerprint: sha256Fingerprint(publicKey),
+    signedMessageLengthBytes: message.length,
+    verificationEncoding: P256_SIGNATURE_ENCODING,
+  };
+}
+
+interface ScanVerificationContext {
+  actorId?: string;
+  gate?: string;
+}
+
+interface RejectedScanLogInput {
+  ticket: Ticket;
+  payload: QrPayload;
+  deviceId: string;
+  direction: GateDirection;
+  context: ScanVerificationContext;
+  verdict: ScanVerdict;
+  reason: string;
+  risk?: ReturnType<ShareGuardService['calculateRisk']>;
+  extra?: Record<string, unknown>;
+}
 
 function verifySignature(
   payload: string,
@@ -26,7 +78,7 @@ function verifySignature(
     return verify(
       'SHA256',
       Buffer.from(payload),
-      publicKey,
+      { key: publicKey, dsaEncoding: P256_SIGNATURE_ENCODING },
       Buffer.from(signatureBase64, 'base64'),
     );
   } catch {
@@ -51,6 +103,7 @@ export class VerifyService {
     deviceId: string,
     direction: GateDirection,
     database: Prisma.TransactionClient | PrismaService = this.prisma,
+    context: ScanVerificationContext = {},
   ): Promise<{ ticket: Ticket; payload: QrPayload; verdict: ScanVerdict; message: string }> {
     const payload = await this.token.verify(tokenStr);
 
@@ -64,7 +117,16 @@ export class VerifyService {
     if (ticket.revoked) {
       const verdict = ScanVerdict.REVOKED;
       this.#logger.warn(
-        { ticketId: ticket.id, reason: ticket.revokedReason },
+        this.rejectedScanLog({
+          ticket,
+          payload,
+          deviceId,
+          direction,
+          context,
+          verdict,
+          reason: 'ticket_revoked',
+          extra: { revokedReason: ticket.revokedReason },
+        }),
         'verify_ticket_revoked',
       );
       return {
@@ -76,22 +138,58 @@ export class VerifyService {
     }
 
     if (await this.shareGuard.isBlocked(ticket.id)) {
-      this.#logger.warn({ ticketId: ticket.id }, 'verify_ticket_blocked');
+      this.#logger.warn(
+        this.rejectedScanLog({
+          ticket,
+          payload,
+          deviceId,
+          direction,
+          context,
+          verdict: ScanVerdict.BLOCKED,
+          reason: 'ticket_blocked',
+        }),
+        'verify_ticket_blocked',
+      );
       return { ticket, payload, verdict: ScanVerdict.BLOCKED, message: ScanMessages.BLOCKED };
     }
 
     if (!ticket.devicePublicKey) {
-      this.#logger.warn({ ticketId: ticket.id }, 'verify_no_public_key');
+      this.#logger.warn(
+        this.rejectedScanLog({
+          ticket,
+          payload,
+          deviceId,
+          direction,
+          context,
+          verdict: ScanVerdict.DEVICE_MISMATCH,
+          reason: 'missing_device_public_key',
+        }),
+        'verify_no_public_key',
+      );
       return { ticket, payload, verdict: ScanVerdict.DEVICE_MISMATCH, message: 'No Public Key' };
     }
 
     const message = `${tokenStr}.${deviceId}`;
 
     if (!verifySignature(message, signature, ticket.devicePublicKey)) {
-      this.#logger.warn({ ticketId: ticket.id }, 'verify_signature_invalid');
-      await this.shareGuard.applyDecision(
-        ticket.id,
-        this.shareGuard.calculateRisk({ invalidSignature: true }),
+      const risk = this.shareGuard.calculateRisk({ invalidSignature: true });
+      await this.shareGuard.applyDecision(ticket.id, risk);
+      this.#logger.warn(
+        this.rejectedScanLog({
+          ticket,
+          payload,
+          deviceId,
+          direction,
+          context,
+          verdict: ScanVerdict.DEVICE_MISMATCH,
+          reason: 'signature_verification_failed',
+          risk,
+          extra: {
+            ...signatureVerificationDiagnostics(message, signature, ticket.devicePublicKey),
+            expectedSignatureLengthBytes: P256_SIGNATURE_LENGTH_BYTES,
+          },
+        }),
+        'verify_signature_invalid',
       );
       return {
         ticket,
@@ -102,13 +200,20 @@ export class VerifyService {
     }
 
     if (ticket.deviceId !== deviceId) {
+      const risk = this.shareGuard.calculateRisk({ deviceMismatch: true });
+      await this.shareGuard.applyDecision(ticket.id, risk);
       this.#logger.warn(
-        { ticketId: ticket.id, expectedDeviceId: ticket.deviceId, actualDeviceId: deviceId },
+        this.rejectedScanLog({
+          ticket,
+          payload,
+          deviceId,
+          direction,
+          context,
+          verdict: ScanVerdict.DEVICE_MISMATCH,
+          reason: 'device_id_mismatch',
+          risk,
+        }),
         'verify_device_mismatch',
-      );
-      await this.shareGuard.applyDecision(
-        ticket.id,
-        this.shareGuard.calculateRisk({ deviceMismatch: true }),
       );
       return {
         ticket,
@@ -119,15 +224,22 @@ export class VerifyService {
     }
 
     if (ticket.lastNonce !== null && payload.dn <= ticket.lastNonce) {
+      const risk = this.shareGuard.calculateRisk({ replay: true });
+      await this.shareGuard.applyDecision(ticket.id, risk);
       this.#logger.warn(
-        { ticketId: ticket.id, lastNonce: ticket.lastNonce, receivedNonce: payload.dn },
+        this.rejectedScanLog({
+          ticket,
+          payload,
+          deviceId,
+          direction,
+          context,
+          verdict: ScanVerdict.REPLAY,
+          reason: 'replayed_or_stale_nonce',
+          risk,
+          extra: { expectedNextNonce: ticket.nextNonce, lastAcceptedNonce: ticket.lastNonce },
+        }),
         'verify_replay_detected',
       );
-      await this.shareGuard.applyDecision(
-        ticket.id,
-        this.shareGuard.calculateRisk({ replay: true }),
-      );
-
       return {
         ticket,
         payload,
@@ -137,13 +249,21 @@ export class VerifyService {
     }
 
     if (payload.dn !== ticket.nextNonce) {
+      const risk = this.shareGuard.calculateRisk({ invalidNonce: true });
+      await this.shareGuard.applyDecision(ticket.id, risk);
       this.#logger.warn(
-        { ticketId: ticket.id, expectedNonce: ticket.nextNonce, receivedNonce: payload.dn },
+        this.rejectedScanLog({
+          ticket,
+          payload,
+          deviceId,
+          direction,
+          context,
+          verdict: ScanVerdict.INVALID_NONCE,
+          reason: 'unexpected_nonce',
+          risk,
+          extra: { expectedNextNonce: ticket.nextNonce, lastAcceptedNonce: ticket.lastNonce },
+        }),
         'verify_invalid_nonce',
-      );
-      await this.shareGuard.applyDecision(
-        ticket.id,
-        this.shareGuard.calculateRisk({ invalidNonce: true }),
       );
       return {
         ticket,
@@ -164,8 +284,17 @@ export class VerifyService {
     if (ticket.currentState === intended) {
       const verdict =
         intended === PresenceState.INSIDE ? ScanVerdict.ALREADY_INSIDE : ScanVerdict.NOT_INSIDE;
-      this.#logger.info(
-        { ticketId: ticket.id, direction, currentState: ticket.currentState },
+      this.#logger.warn(
+        this.rejectedScanLog({
+          ticket,
+          payload,
+          deviceId,
+          direction,
+          context,
+          verdict,
+          reason: 'direction_policy_rejected',
+          extra: { intendedState: intended },
+        }),
         'verify_direction_rejected',
       );
       return { ticket, payload, verdict, message: ScanMessages[verdict] };
@@ -180,8 +309,17 @@ export class VerifyService {
           })
         : null;
       if (eventSettings?.endsAt && eventSettings.endsAt.getTime() < Date.now()) {
-        this.#logger.info(
-          { ticketId: ticket.id, endsAt: eventSettings.endsAt.toISOString() },
+        this.#logger.warn(
+          this.rejectedScanLog({
+            ticket,
+            payload,
+            deviceId,
+            direction,
+            context,
+            verdict: ScanVerdict.EXPIRED_EVENT,
+            reason: 'event_ended',
+            extra: { eventEndsAt: eventSettings.endsAt.toISOString() },
+          }),
           'verify_event_expired',
         );
         return {
@@ -196,9 +334,20 @@ export class VerifyService {
     const replayKey = ValkeyKey.qrReply.key(ticket.id, payload.dn);
     const acquired = await this.valkey.rawSetIfAbsent(replayKey, '1', 120);
     if (!acquired) {
-      await this.shareGuard.applyDecision(
-        ticket.id,
-        this.shareGuard.calculateRisk({ replay: true }),
+      const risk = this.shareGuard.calculateRisk({ replay: true });
+      await this.shareGuard.applyDecision(ticket.id, risk);
+      this.#logger.warn(
+        this.rejectedScanLog({
+          ticket,
+          payload,
+          deviceId,
+          direction,
+          context,
+          verdict: ScanVerdict.REPLAY,
+          reason: 'replay_cache_already_present',
+          risk,
+        }),
+        'verify_replay_cache_detected',
       );
 
       return { ticket, payload, verdict: ScanVerdict.REPLAY, message: ScanMessages.REPLAY };
@@ -222,7 +371,19 @@ export class VerifyService {
     });
 
     if (updated.count === 0) {
-      this.#logger.warn({ ticketId: ticket.id, nonce: payload.dn }, 'verify_nonce_race_condition');
+      this.#logger.warn(
+        this.rejectedScanLog({
+          ticket,
+          payload,
+          deviceId,
+          direction,
+          context,
+          verdict: ScanVerdict.REPLAY,
+          reason: 'nonce_update_race_condition',
+          extra: { expectedNextNonce: ticket.nextNonce },
+        }),
+        'verify_nonce_race_condition',
+      );
       return {
         ticket,
         payload,
@@ -248,6 +409,39 @@ export class VerifyService {
       payload,
       verdict: ScanVerdict.OK,
       message: ScanMessages.OK,
+    };
+  }
+
+  private rejectedScanLog({
+    ticket,
+    payload,
+    deviceId,
+    direction,
+    context,
+    verdict,
+    reason,
+    risk,
+    extra = {},
+  }: RejectedScanLogInput): Record<string, unknown> {
+    return {
+      ticketId: ticket.id,
+      eventId: ticket.eventId,
+      guestProfileId: ticket.guestProfileId,
+      seatId: ticket.seatId,
+      scannerActorId: context.actorId,
+      gate: context.gate,
+      direction,
+      ticketCurrentState: ticket.currentState,
+      ticketDeviceActivationAt: ticket.deviceActivationAt?.toISOString(),
+      expectedDeviceId: ticket.deviceId,
+      receivedDeviceId: deviceId,
+      qrNonce: payload.dn,
+      qrIssuedAt: payload.ts,
+      qrKeyId: payload.kid,
+      verdict,
+      rejectionReason: reason,
+      shareGuardRisk: risk,
+      ...extra,
     };
   }
 }

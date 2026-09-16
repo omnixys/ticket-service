@@ -59,6 +59,7 @@ export class ScanService {
         deviceId,
         direction,
         tx,
+        { actorId, gate },
       );
       const permissions = await this.eventPermissionResolver.getPermissionsForUser(
         actorId,

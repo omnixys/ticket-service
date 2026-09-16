@@ -13,13 +13,16 @@ import {
 import { TicketWriteService } from '../../dist/ticket/service/ticket-write.service.js';
 import { TicketEventRoleResolver } from '../../dist/ticket/service/ticket-event-role-resolver.service.js';
 import { TokenService } from '../../dist/ticket/service/token.service.js';
-import { VerifyService } from '../../dist/ticket/service/verify.service.js';
+import {
+  signatureVerificationDiagnostics,
+  VerifyService,
+} from '../../dist/ticket/service/verify.service.js';
 import { GateDirection } from '../../dist/ticket/models/enums/gate-direction.enum.js';
 import { ContextAccessor } from '@omnixys/context-ts';
 import { EventPermissionKey, EventRoleType } from '@omnixys/contracts-ts';
 import { KafkaTopics } from '@omnixys/kafka-ts';
 import assert from 'node:assert/strict';
-import { createSign, generateKeyPairSync, randomBytes } from 'node:crypto';
+import { createSign, generateKeyPairSync, randomBytes, webcrypto } from 'node:crypto';
 import test from 'node:test';
 
 const logger = {
@@ -92,16 +95,18 @@ test('QR tokens round-trip and invalid values produce structured errors', async 
   });
 });
 
-test('P-256 device signatures pass, rotate nonce, and detect replay', async () => {
+test('WebCrypto P-256 device signatures pass, rotate nonce, and detect replay', async () => {
   const tokenService = createTokenService();
-  const { publicKey, privateKey } = generateKeyPairSync('ec', {
-    namedCurve: 'prime256v1',
-  });
+  const keyPair = await webcrypto.subtle.generateKey(
+    { name: 'ECDSA', namedCurve: 'P-256' },
+    true,
+    ['sign', 'verify'],
+  );
   let stored = ticket({
     deviceId: 'device-1',
-    devicePublicKey: publicKey
-      .export({ type: 'spki', format: 'der' })
-      .toString('base64'),
+    devicePublicKey: Buffer.from(
+      await webcrypto.subtle.exportKey('spki', keyPair.publicKey),
+    ).toString('base64'),
   });
   const token = await tokenService.generate({
     tid: stored.id,
@@ -111,10 +116,13 @@ test('P-256 device signatures pass, rotate nonce, and detect replay', async () =
     dn: 1,
     ts: Date.now(),
   });
-  const signer = createSign('SHA256');
-  signer.update(`${token}.device-1`);
-  signer.end();
-  const signature = signer.sign(privateKey).toString('base64');
+  const signature = Buffer.from(
+    await webcrypto.subtle.sign(
+      { name: 'ECDSA', hash: 'SHA-256' },
+      keyPair.privateKey,
+      new TextEncoder().encode(`${token}.device-1`),
+    ),
+  ).toString('base64');
   const decisions = [];
   let replayAcquired = false;
   const service = new VerifyService(
@@ -172,6 +180,23 @@ test('P-256 device signatures pass, rotate nonce, and detect replay', async () =
   assert.equal(replay.verdict, ScanVerdict.REPLAY);
   assert.equal(decisions.length, 1);
   assert.equal(decisions[0].replay, true);
+});
+
+test('signature diagnostics fingerprint cryptographic inputs without exposing their raw values', () => {
+  const token = 'sensitive-qr-token';
+  const signature = Buffer.from('signature-value').toString('base64');
+  const publicKey = Buffer.from('public-key-value').toString('base64');
+  const diagnostics = signatureVerificationDiagnostics(`${token}.device-1`, signature, publicKey);
+
+  assert.equal(diagnostics.verificationEncoding, 'ieee-p1363');
+  assert.equal(diagnostics.signatureLengthBytes, Buffer.from(signature, 'base64').length);
+  assert.equal(diagnostics.publicKeySpkiLengthBytes, Buffer.from(publicKey, 'base64').length);
+  assert.equal(diagnostics.signedMessageLengthBytes, `${token}.device-1`.length);
+  assert.match(diagnostics.signatureFingerprint, /^[a-f0-9]{64}$/);
+  assert.match(diagnostics.publicKeyFingerprint, /^[a-f0-9]{64}$/);
+  assert.ok(!JSON.stringify(diagnostics).includes(token));
+  assert.ok(!JSON.stringify(diagnostics).includes(signature));
+  assert.ok(!JSON.stringify(diagnostics).includes(publicKey));
 });
 
 test('ticket creation is idempotent and republishes its stable milestone', async () => {
@@ -521,7 +546,10 @@ async function signedToken(harness, dn) {
   const signer = createSign('SHA256');
   signer.update(`${token}.device-gate`);
   signer.end();
-  return { token, signature: signer.sign(privateKey).toString('base64') };
+  return {
+    token,
+    signature: signer.sign({ key: privateKey, dsaEncoding: 'ieee-p1363' }).toString('base64'),
+  };
 }
 
 test('ENTRY scan of an outside guest grants access and sets checkedInAt', async () => {
