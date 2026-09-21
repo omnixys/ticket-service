@@ -3,6 +3,17 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.1.5](https://github.com/omnixys/ticket-service/compare/v4.1.4...v4.1.5) (2026-09-21)
+
+### Config
+
+* **Config:** require critical env vars in development and staging ([](https://github.com/omnixys/ticket-service/commit/50eac29fa4fe5525ed871a996409f84e901ab9f6))
+* **Config:** require critical env vars in production ([](https://github.com/omnixys/ticket-service/commit/2ed2dcf52beaf68cf5e63027f2ed9e913dd5bf72))
+
+### Deps
+
+* **Deps:** update omnixys packages ([](https://github.com/omnixys/ticket-service/commit/f8b4b01bd658e65dd35517f5610d7e73dd53c630))
+
 ## [4.1.4](https://github.com/omnixys/ticket-service/compare/v4.1.3...v4.1.4) (2026-09-16)
 
 ### Deps
