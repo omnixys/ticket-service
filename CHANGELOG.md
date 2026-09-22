@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.1.6](https://github.com/omnixys/ticket-service/compare/v4.1.5...v4.1.6) (2026-09-22)
+
+### Deps
+
+* **Deps:** update omnixys package.json script add migrate deploy ([](https://github.com/omnixys/ticket-service/commit/2de36979d06ac7157014a1bf766afa30f0a4a836))
+
 ## [4.1.5](https://github.com/omnixys/ticket-service/compare/v4.1.4...v4.1.5) (2026-09-21)
 
 ### Config
